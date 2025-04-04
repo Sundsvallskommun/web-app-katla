@@ -1,11 +1,7 @@
-import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
-import NextLink from 'next/link';
-// import { NotificationsBell } from '@common/components/notifications/notifications-bell';
-// import { NotificationsWrapper } from '@common/components/notifications/notifications-wrapper';
 import { CaseDataFilter } from '@components/filtering/errand-filter';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-// import { SupportManagementFilterSidebarStatusSelector } from '@supportmanagement/components/supportmanagement-filtering/components/supportmanagement-filter-sidebarstatus-selector.component';
-// import { CasedataFilterSidebarStatusSelector } from '@casedata/components/casedata-filtering/components/casedata-filter-sidebarstatus-selector.component';
+import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
+import NextLink from 'next/link';
 
 interface SidebarProps {
   open: boolean;

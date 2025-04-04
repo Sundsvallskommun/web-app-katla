@@ -2,11 +2,12 @@
 
 import { CasedataFilterSidebarStatusSelector } from '@components/filtering/errand-filter-sidebarstatus-selector.component';
 import { MainErrandsSidebar } from '@components/main-errands-sidebar/main-errands-sidebar.component';
+import { AppContext } from '@contexts/app-context-interface';
 //import { useUserStore } from '@services/user-service/user-service';
 import { CookieConsent, Link } from '@sk-web-gui/react';
 import NextLink from 'next/link';
 //import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface DefaultLayoutProps {
@@ -40,7 +41,7 @@ export default function DefaultLayout({
 
   const [open, setOpen] = useState(true);
 
-  //const user = useUserStore(useShallow((s) => s.user));
+  const { user } = useContext(AppContext);
 
   return (
     <>
@@ -50,8 +51,8 @@ export default function DefaultLayout({
             open={open}
             setOpen={setOpen}
             user={{
-              firstName: '',
-              lastName: '',
+              firstName: user.firstName,
+              lastName: user.lastName,
             }}
             isLoading={false}
             applicationName={'Färdtjänst'}

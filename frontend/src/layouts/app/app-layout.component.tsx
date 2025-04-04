@@ -1,6 +1,6 @@
 'use client';
 
-//import { useUserStore } from '@services/user-service/user-service';
+import { AppWrapper } from '@contexts/app.context';
 import { ColorSchemeMode, GuiProvider } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
@@ -47,7 +47,11 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
   //   return <LoaderFullScreen />;
   // }
 
-  return <GuiProvider colorScheme={'light' as ColorSchemeMode}>{children}</GuiProvider>; //change to colorScheme
+  return (
+    <GuiProvider colorScheme={'light' as ColorSchemeMode}>
+      <AppWrapper>{children}</AppWrapper>
+    </GuiProvider>
+  ); //change to colorScheme
 };
 
 export default AppLayout;

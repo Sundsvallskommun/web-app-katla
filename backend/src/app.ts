@@ -1,41 +1,42 @@
 import {
+  APP_NAME,
   BASE_URL_PREFIX,
   CREDENTIALS,
   LOG_FORMAT,
   NODE_ENV,
   ORIGIN,
   PORT,
+  SAML_AUDIENCE,
   SAML_CALLBACK_URL,
   SAML_ENTRY_SSO,
   SAML_FAILURE_REDIRECT,
-  SAML_FAILURE_REDIRECT_MESSAGE,
   SAML_IDP_PUBLIC_CERT,
   SAML_ISSUER,
   SAML_LOGOUT_CALLBACK_URL,
-  SAML_LOGOUT_REDIRECT,
   SAML_PRIVATE_KEY,
   SAML_PUBLIC_KEY,
-  SAML_SUCCESS_REDIRECT,
   SECRET_KEY,
   SESSION_MEMORY,
   SWAGGER_ENABLED,
 } from '@config';
 import errorMiddleware from '@middlewares/error.middleware';
-import { PrismaClient } from '@prisma/client';
+import { Strategy, VerifiedCallback } from '@node-saml/passport-saml';
 import { logger, stream } from '@utils/logger';
 import bodyParser from 'body-parser';
 import { defaultMetadataStorage } from 'class-transformer/cjs/storage';
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
+import { existsSync, mkdirSync } from 'fs';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import createMemoryStore from 'memorystore';
 import morgan from 'morgan';
 import passport from 'passport';
-import { Strategy, VerifiedCallback } from '@node-saml/passport-saml';
+import { join } from 'path';
 import 'reflect-metadata';
 import { getMetadataArgsStorage, useExpressServer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
@@ -43,21 +44,21 @@ import createFileStore from 'session-file-store';
 import swaggerUi from 'swagger-ui-express';
 import { HttpException } from './exceptions/HttpException';
 import { Profile } from './interfaces/profile.interface';
-import ApiService from '@services/api.service';
-import { authorizeGroups, getPermissions, getRole } from './services/authorization.service';
-import { existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { User } from './interfaces/users.interface';
 import { additionalConverters } from './utils/custom-validation-classes';
 import { isValidUrl } from './utils/util';
+import { authorizeGroups, getPermissions, getRole } from './services/authorization.service';
+import prisma from './utils/prisma';
+
+const corsWhitelist = ORIGIN.split(',');
 
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
 // NOTE: memory uses ms while file uses seconds
-const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { ttl: sessionTTL, path: './data/sessions' });
+const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { sessionTTL, path: './data/sessions' });
 
-const prisma = new PrismaClient();
-
-const apiService = new ApiService();
+// const prisma = new PrismaClient();
+// const apiService = new ApiService();
 
 passport.serializeUser(function (user, done) {
   done(null, user);
@@ -215,7 +216,7 @@ class App {
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
-    this.app.use(express.json({ limit: '500kb' }));
+    this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
 
@@ -225,15 +226,29 @@ class App {
         resave: false,
         saveUninitialized: false,
         store: sessionStore,
-        cookie: {
-          path: BASE_URL_PREFIX,
-        },
       }),
     );
 
     this.app.use(passport.initialize());
     this.app.use(passport.session());
     passport.use('saml', samlStrategy);
+
+    this.app.use(
+      cors({
+        credentials: CREDENTIALS,
+        origin: function (origin, callback) {
+          if (origin === undefined || corsWhitelist.indexOf(origin) !== -1 || corsWhitelist.indexOf('*') !== -1) {
+            callback(null, true);
+          } else {
+            if (NODE_ENV == 'development') {
+              callback(null, true);
+            } else {
+              callback(new Error('Not allowed by CORS'));
+            }
+          }
+        },
+      }),
+    );
 
     this.app.get(
       `${BASE_URL_PREFIX}/saml/login`,
@@ -261,17 +276,28 @@ class App {
       res.status(200).send(metadata);
     });
 
-    this.app.get(`${BASE_URL_PREFIX}/saml/logout`, bodyParser.urlencoded({ extended: false }), (req, res, next) => {
-      samlStrategy.logout(req as any, () => {
-        req.logout(err => {
-          if (err) {
-            return next(err);
-          }
-          // FIXME: should we redirect here or should client do it?
-          res.redirect(SAML_LOGOUT_REDIRECT);
+    this.app.get(
+      `${BASE_URL_PREFIX}/saml/logout`,
+      (req, res, next) => {
+        if (req.session.returnTo) {
+          req.query.RelayState = req.session.returnTo;
+        } else if (req.query.successRedirect) {
+          req.query.RelayState = req.query.successRedirect;
+        }
+        next();
+      },
+      (req, res, next) => {
+        const successRedirect = req.query.successRedirect;
+        samlStrategy.logout(req as any, () => {
+          req.logout(err => {
+            if (err) {
+              return next(err);
+            }
+            res.redirect(successRedirect as string);
+          });
         });
-      });
-    });
+      },
+    );
 
     this.app.get(`${BASE_URL_PREFIX}/saml/logout/callback`, bodyParser.urlencoded({ extended: false }), (req, res, next) => {
       req.logout(err => {
@@ -354,11 +380,6 @@ class App {
   private initializeRoutes(controllers: Function[]) {
     useExpressServer(this.app, {
       routePrefix: BASE_URL_PREFIX,
-      cors: {
-        origin: ORIGIN,
-        credentials: CREDENTIALS,
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      },
       controllers: controllers,
       defaultErrorHandler: false,
     });
@@ -388,7 +409,7 @@ class App {
         },
       },
       info: {
-        title: `Proxy API`,
+        title: `${APP_NAME} Proxy API`,
         description: '',
         version: '1.0.0',
       },

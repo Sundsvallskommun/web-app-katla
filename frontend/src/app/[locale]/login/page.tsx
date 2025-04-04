@@ -1,13 +1,13 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Button, FormErrorMessage } from '@sk-web-gui/react';
-import EmptyLayout from '@layouts/empty-layout/empty-layout.component';
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
-import { appURL } from '@utils/app-url';
-import { useTranslation } from 'react-i18next';
+import EmptyLayout from '@layouts/empty-layout/empty-layout.component';
+import { Button, FormErrorMessage } from '@sk-web-gui/react';
 import { apiURL } from '@utils/api-url';
+import { appURL } from '@utils/app-url';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { capitalize } from 'underscore.string';
 
 // Turn on/off automatic login

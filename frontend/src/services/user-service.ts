@@ -40,15 +40,6 @@ export const getMe: () => Promise<User> = () => {
     });
 };
 
-// export const saveUserSettings: (settings: any) => Promise<boolean> = (settings) => {
-//   return apiService
-//     .patch('settings', settings)
-//     .then(() => Promise.resolve(true))
-//     .catch((e) => {
-//       return Promise.resolve(false);
-//     });
-// };
-
 export interface AdUser {
   description: string;
   displayName: string;
