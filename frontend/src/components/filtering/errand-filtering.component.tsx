@@ -1,59 +1,19 @@
-// import {
-//     CasePhaseFilter,
-//     CasePhaseValues,
-//     CasedataFilterPhase,
-//   } from '@casedata/components/casedata-filtering/components/casedata-filter-phase.component';
-//   import { isPT } from '@common/services/application-service';
-//   import { Admin } from '@common/services/user-service';
-//   import LucideIcon from '@sk-web-gui/lucide-icon';
-//   import { Button, Checkbox, cx, Link } from '@sk-web-gui/react';
-//   import { SupportAdmin } from '@supportmanagement/services/support-admin-service';
-//   import { useState } from 'react';
-//   import {
-//     CaseAdminsFilter,
-//     CaseAdminsValues,
-//     CasedataFilterAdmins,
-//   } from './components/casedata-filter-admins.component';
-//   import {
-//     CaseTypeFilter,
-//     CaseTypeValues,
-//     CasedataFilterCaseType,
-//   } from './components/casedata-filter-casetype.component';
-//   import { CaseDatesFilter, CaseDatesValues, CasedataFilterDates } from './components/casedata-filter-dates.component';
-//   import {
-//     CasePriorityFilter,
-//     CasePriorityValues,
-//     CasedataFilterPriority,
-//   } from './components/casedata-filter-priority.component';
-//   import {
-//     CasePropertyDesignationFilter,
-//     CasePropertyDesignationValues,
-//     CasedataFilterPropertyDesignation,
-//   } from './components/casedata-filter-propertyDesignation';
-//   import { CaseQueryFilter, CaseQueryValues, CasedataFilterQuery } from './components/casedata-filter-query.component';
-//   import {
-//     CaseStatusFilter,
-//     CaseStatusValues,
-//     CasedataFilterStatus,
-//   } from './components/casedata-filter-status.component';
-//   import { CasedataFilterTags } from './components/casedata-filter-tags.component';
-//   import { useAppContext } from '@contexts/app.context';
-
+import { Admin } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Checkbox, cx, Link } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { CasedataFilterCaseType } from './errand-filter-casetype.component';
 import { CasedataFilterQuery } from './errand-filter-query.component';
+import { CasedataFilterStatus } from './casedata-filter-status.component';
+import { CasedataFilterTags } from './casedata-filter-tags.component';
 
 const CaseDataFiltering: React.FC<{
   ownerFilterHandler: (b: boolean) => void;
   ownerFilter?: boolean;
-  // administrators?: (SupportAdmin | Admin)[];
+  administrators?: Admin[];
   numberOfFilters: number;
 }> = ({ numberOfFilters, ownerFilterHandler = () => false, ownerFilter = false }) => {
   const [show, setShow] = useState<boolean>(true);
-  // const { selectedErrandStatuses } = useAppContext();
-
   return (
     <>
       <div className="flex flex-col w-full gap-16 py-19">
@@ -84,6 +44,9 @@ const CaseDataFiltering: React.FC<{
               <div className="relative max-md:w-full">
                 <CasedataFilterCaseType />
               </div>
+              <div className="relative max-md:w-full">
+                <CasedataFilterStatus />
+              </div>
             </div>
             <div className="min-w-fit">
               <Checkbox
@@ -95,7 +58,9 @@ const CaseDataFiltering: React.FC<{
               </Checkbox>
             </div>
           </div>
-          <div className="mt-16">{/* <CasedataFilterTags administrators={administrators} /> */}</div>
+          <div className="mt-16">
+            <CasedataFilterTags />
+          </div>
         </div>
       </div>
     </>

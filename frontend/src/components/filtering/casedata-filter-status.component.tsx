@@ -1,27 +1,27 @@
-import { getCaseLabels } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, PopupMenu, SearchField } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CaseTypeFilter } from './errand-filter';
+import { CaseStatusFilter } from './errand-filter';
+import { ErrandStatus } from '@interfaces/errand-status';
 
-export const CasedataFilterCaseType: React.FC = () => {
-  const { register } = useFormContext<CaseTypeFilter>();
+export const CasedataFilterStatus: React.FC = () => {
+  const { register } = useFormContext<CaseStatusFilter>();
   const [query, setQuery] = useState<string>('');
 
   return (
     <PopupMenu>
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
-        data-cy="Ärendetyp-filter"
+        data-cy="Status-filter"
         variant="tertiary"
         showBackground={false}
         size="sm"
         className="max-md:w-full"
       >
-        Ärendetyp
+        Status
       </PopupMenu.Button>
-      <PopupMenu.Panel className="max-md:w-full max-h-[70vh] h-auto overflow-hidden overflow-y-scroll">
+      <PopupMenu.Panel className="max-md:w-full">
         <SearchField
           size="md"
           autoFocus
@@ -31,20 +31,14 @@ export const CasedataFilterCaseType: React.FC = () => {
           placeholder="Skriv för att söka"
         />
         <PopupMenu.Items autoFocus={false}>
-          {Object.entries(getCaseLabels())
-            .sort((a, b) => a[1].localeCompare(b[1]))
+          {Object.entries(ErrandStatus)
             .filter(
               (s: [string, string]) =>
                 s[0].toLowerCase().includes(query.toLowerCase()) || s[1].toLowerCase().includes(query.toLowerCase())
             )
             .map((s: [string, string], idx) => (
               <PopupMenu.Item key={`${s[1]}-${idx}`}>
-                <Checkbox
-                  labelPosition="left"
-                  value={s[0]}
-                  {...register('caseType')}
-                  data-cy={`Ärendetyp-filter-${s[0]}`}
-                >
+                <Checkbox labelPosition="left" value={s[0]} {...register('status')} data-cy={`Status-filter-${s[0]}`}>
                   {s[1]}
                 </Checkbox>
               </PopupMenu.Item>

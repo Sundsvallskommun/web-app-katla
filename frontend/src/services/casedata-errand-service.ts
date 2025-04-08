@@ -58,27 +58,16 @@ export const municipalityIds = [
 export const emptyErrandList: ErrandsData = {
   errands: [],
   labels: [],
+  page: 0,
+  size: 0,
+  totalPages: 0,
+  totalElements: 0,
 };
-
-export const ongoingCaseDataErrandLabels = [
-  { label: 'Fast.bet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Senaste aktivitet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Ärendetyp', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Prio', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Handläggare', screenReaderOnly: false, sortable: false, shownForStatus: All.ALL },
-  { label: 'Status', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-];
 
 export const ongoingCaseDataPTErrandLabels = [
   { label: 'Status', screenReaderOnly: false, sortable: false, shownForStatus: All.ALL },
-  { label: 'Senaste aktivitet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Ärendetyp', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Ärendenummer', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Prioritet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Ärendeägare', screenReaderOnly: false, sortable: false, shownForStatus: All.ALL },
   { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Handläggare', screenReaderOnly: false, sortable: false, shownForStatus: All.ALL },
 ];
 
 export const newStatuses = [ErrandStatus.ArendeInkommit];
@@ -97,6 +86,8 @@ export const ongoingStatuses = [
 export const suspendedStatuses = [ErrandStatus.Parkerad];
 export const assignedStatuses = [ErrandStatus.Tilldelat];
 
+export const draftStatuses = [ErrandStatus.Utkast];
+
 export const closedStatuses = [
   ErrandStatus.ArendeAvslutat,
   ErrandStatus.ArendetAvvisas,
@@ -113,13 +104,15 @@ export const getStatusLabel = (statuses: ErrandStatus[]) => {
       return 'Parkerade ärenden';
     } else if (statuses.some((s) => assignedStatuses.includes(s))) {
       return 'Tilldelade ärenden';
+    } else if (statuses.some((s) => draftStatuses.includes(s))) {
+      return 'Utkast';
     } else if (statuses.some((s) => closedStatuses.includes(s))) {
       return 'Avslutade ärenden';
     } else {
       return 'Ärenden';
     }
   }
-  return undefined;
+  return '';
 };
 
 export const findPriorityKeyForPriorityLabel = (key: string) =>
@@ -159,7 +152,6 @@ export const getPriorityColor = (priority: Priority) => {
       return 'text-vattjom-surface-primary';
   }
 };
-//const defaultMunicipality = municipalityIds.find((m) => m.label === 'Sundsvall');
 
 export const emptyErrand: Partial<IErrand> = {
   caseType: '',
@@ -294,7 +286,7 @@ export const getErrands: (
   page = 0,
   size = 8,
   filter = {},
-  sort = { updated: 'desc' },
+  sort = { created: 'desc' },
   extraParameters = {}
 ) => {
   let url = `casedata/${municipalityId}/errands?page=${page}&size=${size}`;
@@ -351,8 +343,7 @@ export const useErrands = (
     setErrands,
     setNewErrands,
     setOngoingErrands,
-    setSuspendedErrands,
-    setAssignedErrands,
+    setDraftErrands,
     setClosedErrands,
     errands,
     newErrands,
@@ -436,40 +427,18 @@ export const useErrands = (
           1,
           {
             ...filter,
-            status: suspendedStatuses.map(findStatusKeyForStatusLabel).join(','),
+            status: draftStatuses.map(findStatusKeyForStatusLabel).join(','),
           },
           sort
         )
           .then((res) => {
-            setSuspendedErrands(res);
+            setDraftErrands(res);
           })
           .catch(() => {
             toastMessage({
               position: 'bottom',
               closeable: false,
-              message: 'Parkerade ärenden kunde inte hämtas',
-              status: 'error',
-            });
-          }),
-
-        getErrands(
-          municipalityId,
-          page,
-          1,
-          {
-            ...filter,
-            status: `Tilldelat`,
-          },
-          sort
-        )
-          .then((res) => {
-            setAssignedErrands(res);
-          })
-          .catch(() => {
-            toastMessage({
-              position: 'bottom',
-              closeable: false,
-              message: 'Tilldelade ärenden kunde inte hämtas',
+              message: 'Utkast kunde inte hämtas',
               status: 'error',
             });
           }),

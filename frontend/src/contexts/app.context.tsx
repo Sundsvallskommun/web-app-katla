@@ -1,5 +1,5 @@
 import { Asset } from '@interfaces/asset';
-import { IErrand } from '@interfaces/errand';
+import { ErrandsData, IErrand } from '@interfaces/errand';
 import { UiPhase } from '@interfaces/errand-phase';
 import { Notification as CaseDataNotification } from '@interfaces/notification';
 import { User } from '@interfaces/user';
@@ -7,6 +7,8 @@ import { MessageNode } from '@services/casedata-message-service';
 import { Admin, emptyUser } from '@services/user-service';
 import { ReactNode, useState } from 'react';
 import { AppContext } from './app-context-interface';
+import { emptyErrandList } from '@services/casedata-errand-service';
+import { ErrandStatus } from '@interfaces/errand-status';
 
 export function AppWrapper({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,17 +16,18 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   const [subPage, setSubPage] = useState('');
   const [user, setUser] = useState<User>(emptyUser);
   const [avatar, setAvatar] = useState<string>('');
-  // const [errands, setErrands] = useState<ErrandsData>(emptyErrandList);
-  // const [newErrands, setNewErrands] = useState<ErrandsData>(emptyErrandList);
-  // const [ongoingErrands, setOngoingErrands] = useState<ErrandsData>(emptyErrandList);
-  // const [suspendedErrands, setSuspendedErrands] = useState<ErrandsData>(emptyErrandList);
-  // const [assignedErrands, setAssignedErrands] = useState<ErrandsData>(emptyErrandList);
-  // const [closedErrands, setClosedErrands] = useState<ErrandsData>(emptyErrandList);
+  const [errands, setErrands] = useState<ErrandsData>(emptyErrandList);
+  const [newErrands, setNewErrands] = useState<ErrandsData>(emptyErrandList);
+  const [ongoingErrands, setOngoingErrands] = useState<ErrandsData>(emptyErrandList);
+  const [suspendedErrands, setSuspendedErrands] = useState<ErrandsData>(emptyErrandList);
+  const [assignedErrands, setAssignedErrands] = useState<ErrandsData>(emptyErrandList);
+  const [draftErrands, setDraftErrands] = useState<ErrandsData>(emptyErrandList);
+  const [closedErrands, setClosedErrands] = useState<ErrandsData>(emptyErrandList);
   const [errand, setErrand] = useState<IErrand>({} as IErrand);
   const [messages, setMessages] = useState<MessageNode[]>([]);
   const [messageTree, setMessageTree] = useState<MessageNode[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [selectedErrandStatuses, setSelectedErrandStatuses] = useState<string[]>(['ArendeInkommit']);
+  const [selectedErrandStatuses, setSelectedErrandStatuses] = useState<ErrandStatus[]>([ErrandStatus.ArendeInkommit]);
   const [municipalityId, setMunicipalityId] = useState<string>('');
   const [sidebarLabel, setSidebarLabel] = useState<string>('');
   const [administrators, setAdministrators] = useState<Admin[]>([]);
@@ -63,29 +66,32 @@ export function AppWrapper({ children }: { children: ReactNode }) {
         setAssets: (assets: Asset[]) => setAssets(assets),
 
         selectedErrandStatuses,
-        setSelectedErrandStatuses: (selectedErrandStatuses: string[]) =>
+        setSelectedErrandStatuses: (selectedErrandStatuses: ErrandStatus[]) =>
           setSelectedErrandStatuses(selectedErrandStatuses),
 
         municipalityId,
         setMunicipalityId: (municipalityId: string) => setMunicipalityId(municipalityId),
 
-        // errands,
-        // setErrands: (errands: ErrandsData) => setErrands(errands),
+        errands,
+        setErrands: (errands: ErrandsData) => setErrands(errands),
 
-        // newErrands,
-        // setNewErrands: (errands: ErrandsData) => setNewErrands(errands),
+        newErrands,
+        setNewErrands: (errands: ErrandsData) => setNewErrands(errands),
 
-        // ongoingErrands,
-        // setOngoingErrands: (errands: ErrandsData) => setOngoingErrands(errands),
+        ongoingErrands,
+        setOngoingErrands: (errands: ErrandsData) => setOngoingErrands(errands),
 
-        // suspendedErrands,
-        // setSuspendedErrands: (errands: ErrandsData) => setSuspendedErrands(errands),
+        suspendedErrands,
+        setSuspendedErrands: (errands: ErrandsData) => setSuspendedErrands(errands),
 
-        // assignedErrands,
-        // setAssignedErrands: (errands: ErrandsData) => setAssignedErrands(errands),
+        assignedErrands,
+        setAssignedErrands: (errands: ErrandsData) => setAssignedErrands(errands),
 
-        // closedErrands,
-        // setClosedErrands: (errands: ErrandsData) => setClosedErrands(errands),
+        draftErrands,
+        setDraftErrands: (errands: ErrandsData) => setDraftErrands(errands),
+
+        closedErrands,
+        setClosedErrands: (errands: ErrandsData) => setClosedErrands(errands),
 
         sidebarLabel,
         setSidebarLabel: (sidebarLabel: string) => setSidebarLabel(sidebarLabel),

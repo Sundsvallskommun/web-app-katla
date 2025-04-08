@@ -111,10 +111,10 @@ export interface IErrand {
 export interface ErrandsData extends Data {
   errands: IErrand[];
   isLoading?: boolean;
-  page?: number;
-  size?: number;
-  totalPages?: number;
-  totalElements?: number;
+  page: number;
+  size: number;
+  totalPages: number;
+  totalElements: number;
   labels: {
     label: string;
     screenReaderOnly: boolean;

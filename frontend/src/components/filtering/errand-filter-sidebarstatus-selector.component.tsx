@@ -1,122 +1,110 @@
-// import { ErrandStatus } from '@casedata/interfaces/errand-status';
-// import {
-//   assignedStatuses,
-//   closedStatuses,
-//   getStatusLabel,
-//   newStatuses,
-//   ongoingStatuses,
-//   setSuspendedErrands,
-//   suspendedStatuses,
-// } from '@casedata/services/casedata-errand-service';
-// import { SidebarButton } from '@common/interfaces/sidebar-button';
-// import { isSuspendEnabled } from '@common/services/feature-flag-service';
-// import { AppContextInterface, useAppContext } from '@contexts/app.context';
-// import LucideIcon from '@sk-web-gui/lucide-icon';
-// import { Badge, Button, Spinner } from '@sk-web-gui/react';
-// import store from '@supportmanagement/services/storage-service';
-// import { useMemo, useState } from 'react';
-// import { useFormContext } from 'react-hook-form';
-// import { CaseStatusFilter } from './casedata-filter-status.component';
-
+import { AppContext } from '@contexts/app-context-interface';
+import { ErrandStatus } from '@interfaces/errand-status';
+import {
+  closedStatuses,
+  draftStatuses,
+  getStatusLabel,
+  newStatuses,
+  ongoingStatuses,
+} from '@services/casedata-errand-service';
+import store from '@services/storage-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Badge, Button } from '@sk-web-gui/react';
 import { IconName } from 'lucide-react/dynamic';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 
 export interface SidebarButton {
   label: string;
-  key: string;
-  statuses: string;
+  key: ErrandStatus;
+  statuses: ErrandStatus[];
   icon: IconName;
   totalStatusErrands: number;
 }
 
 export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean }> = ({ iconButton }) => {
-  //   const { register } = useFormContext<CaseTypeFilter>();
-  // const [query, setQuery] = useState<string>('');
+  const {
+    isLoading,
+    setSelectedErrandStatuses,
+    selectedErrandStatuses,
+    setSidebarLabel,
+    newErrands,
+    ongoingErrands,
+    draftErrands,
+    closedErrands,
+  } = useContext(AppContext);
 
-  //   const {
-  //     isLoading,
-  //     setSelectedErrandStatuses,
-  //     selectedErrandStatuses,
-  //     setSidebarLabel,
-  //     newErrands,
-  //     ongoingErrands,
-  //     assignedErrands,
-  //     suspendedErrands,
-  //     closedErrands,
-  //   }: AppContextInterface = useAppContext();
-
-  //   const updateStatusFilter = (ss: ErrandStatus[]) => {
-  //     try {
-  //       const labelsToKeys = {};
-  //       Object.entries(ErrandStatus).forEach(([k, v]) => {
-  //         labelsToKeys[v] = k;
-  //       });
-  //       const statusKeys = ss.map((s) => labelsToKeys[s]);
-  //       const storedFilter = store.get('filter');
-  //       const jsonparsedstatus = JSON.parse(storedFilter);
-  //       const status = statusKeys.join(',');
-  //       jsonparsedstatus.status = status;
-  //       const stringified = JSON.stringify(jsonparsedstatus);
-  //       store.set('filter', stringified);
-  //       setSelectedErrandStatuses(statusKeys as ErrandStatus[]);
-  //     } catch (error) {
-  //       console.error('Error updating status filter');
-  //     }
-  //   };
+  const updateStatusFilter = (ss: ErrandStatus[]) => {
+    try {
+      const labelsToKeys: Record<string, string> = {};
+      Object.entries(ErrandStatus).forEach(([k, v]) => {
+        labelsToKeys[v] = k;
+      });
+      const statusKeys = ss.map((s) => labelsToKeys[s]);
+      const storedFilter = store.get('filter');
+      const jsonparsedstatus = JSON.parse(storedFilter as string);
+      const status = statusKeys.join(',');
+      jsonparsedstatus.status = status;
+      const stringified = JSON.stringify(jsonparsedstatus);
+      store.set('filter', stringified);
+      setSelectedErrandStatuses(statusKeys as ErrandStatus[]);
+    } catch (error) {
+      console.error('Error updating status filter', error);
+    }
+  };
 
   const casedataSidebarButtons: SidebarButton[] = useMemo(
     () => [
       {
-        label: 'Nya ärenden',
-        key: 'newStatuses',
-        statuses: 'newStatuses',
+        label: getStatusLabel(newStatuses),
+        key: newStatuses[0],
+        statuses: newStatuses,
         icon: 'inbox',
-        totalStatusErrands: 1,
+        totalStatusErrands: newErrands.totalElements,
       },
       {
-        label: 'Öppna ärenden',
-        key: 'ongoingStatuses',
-        statuses: 'ongoingStatuses',
+        label: getStatusLabel(ongoingStatuses),
+        key: ongoingStatuses[0],
+        statuses: ongoingStatuses,
         icon: 'clipboard-pen',
-        totalStatusErrands: 2,
+        totalStatusErrands: ongoingErrands.totalElements,
       },
       {
-        label: 'Utkast',
-        key: 'draftStatuses',
-        statuses: 'draftStatuses',
-        icon: 'file-plus',
-        totalStatusErrands: 3,
+        label: getStatusLabel(draftStatuses),
+        key: draftStatuses[0],
+        statuses: draftStatuses,
+        icon: 'square-pen',
+        totalStatusErrands: draftErrands.totalElements,
       },
       {
-        label: 'Avslutade ärenden',
-        key: 'closedStatuses',
-        statuses: 'closedStatuses',
+        label: getStatusLabel(closedStatuses),
+        key: closedStatuses[0],
+        statuses: closedStatuses,
         icon: 'circle-check-big',
-        totalStatusErrands: 4,
+        totalStatusErrands: closedErrands.totalElements,
       },
     ],
-    []
+    [newErrands, ongoingErrands, draftErrands, closedErrands]
   );
 
   return (
     <>
       {casedataSidebarButtons?.map((button) => {
-        const buttonIsActive = button.statuses === 'newStatuses';
-        // const buttonIsActive = button.statuses.some((s) => {
-        //   return selectedErrandStatuses.map((s) => ErrandStatus[s]).includes(s);
-        // });
+        const buttonIsActive = button.statuses.some((s) => {
+          const selectedStatusValues = selectedErrandStatuses.map(
+            (status) => ErrandStatus[status as keyof typeof ErrandStatus]
+          );
+          return selectedStatusValues.includes(s as ErrandStatus);
+        });
         return (
           <Button
             onClick={() => {
-              //   updateStatusFilter(button.statuses as ErrandStatus[]);
-              //   setSidebarLabel(button.label);
+              updateStatusFilter(button.statuses as unknown as ErrandStatus[]);
+              setSidebarLabel(button.label);
             }}
             aria-label={`status-button-${button.key}`}
             variant={buttonIsActive ? 'primary' : 'ghost'}
             className={`${!iconButton && 'justify-start'} ${!buttonIsActive && 'hover:bg-dark-ghost'}`}
-            leftIcon={<LucideIcon name={button.icon} />}
+            leftIcon={<LucideIcon name={button.icon as IconName} />}
             key={button.key}
             iconButton={iconButton}
           >
@@ -127,9 +115,12 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
                   className="min-w-fit px-4"
                   inverted={!buttonIsActive}
                   color={buttonIsActive ? 'tertiary' : 'vattjom'}
-                  //   counter={
-                  //     // isLoading ? '-' : button.totalStatusErrands > 999 ? '999+' : button.totalStatusErrands || '0'
-                  //   }
+                  counter={
+                    isLoading ? '-'
+                    : button.totalStatusErrands > 999 ?
+                      '999+'
+                    : button.totalStatusErrands || '0'
+                  }
                 />
               </span>
             )}
