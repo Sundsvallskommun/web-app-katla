@@ -10,6 +10,7 @@ export enum ErrandStatus {
   BeslutOverklagat = 'Beslut överklagat',
   ArendeAvslutat = 'Ärende avslutat',
   Tilldelat = 'Tilldelat',
+  Utkast = 'Utkast',
   HanterasIAnnatSystem = 'Hanteras i annat system',
   ArendetAvvisas = 'Ärendet avvisas',
   Parkerad = 'Parkerad',

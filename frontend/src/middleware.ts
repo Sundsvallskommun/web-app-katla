@@ -9,10 +9,6 @@ export async function middleware(req: NextRequest) {
     nextUrl: { pathname, origin },
   } = req;
 
-  if (pathname === '/admin') {
-    return NextResponse.redirect(new URL(process.env.ADMIN_URL as string));
-  }
-
   if (protectedRoutes.includes(pathname)) {
     const cookiName = 'connect.sid';
     const token = req.cookies.get(cookiName)?.value || '';

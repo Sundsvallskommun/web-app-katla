@@ -1,6 +1,6 @@
 'use client';
 
-import { OngoingErrands } from '@components/ongoing-errands/ongoing-errands.component';
+import { OngoingCaseDataErrands } from '@components/ongoing-errands/ongoing-casedata-errands.component';
 import { AppContext } from '@contexts/app-context-interface';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import { getMe } from '@services/user-service';
@@ -20,7 +20,7 @@ const Oversikt: React.FC = () => {
 
   return (
     <DefaultLayout>
-      <OngoingErrands></OngoingErrands>
+      <OngoingCaseDataErrands></OngoingCaseDataErrands>
     </DefaultLayout>
   );
 };

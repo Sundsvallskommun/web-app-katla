@@ -1,121 +1,125 @@
-// import { IErrand } from '@casedata/interfaces/errand';
-// import { Priority } from '@casedata/interfaces/priority';
-// import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@casedata/services/casedata-errand-service';
-// import { getErrandPropertyDesignations } from '@casedata/services/casedata-facilities-service';
-// import { isMEX, isPT } from '@common/services/application-service';
-// import { useAppContext } from '@contexts/app.context';
-// import { useMediaQuery } from '@mui/material';
-// import LucideIcon from '@sk-web-gui/lucide-icon';
-// import { Callout } from '@sk-web-gui/react';
-// import { Badge, Button, Input, Label, Pagination, Select, Spinner, Table, cx, useGui } from '@sk-web-gui/react';
-// import { SortMode } from '@sk-web-gui/table';
 import NextLink from 'next/link';
-// import { useState } from 'react';
-// import { useFormContext } from 'react-hook-form';
-// import { TableForm } from '../ongoing-casedata-errands.component';
-// import { CasedataStatusLabelComponent } from './casedata-status-label.component';
-// import dayjs from 'dayjs';
-// import { globalAcknowledgeCasedataNotification } from '@casedata/services/casedata-notification-service';
-// import { sortBy } from '@common/services/helper-service';
-
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Input, Pagination, Select, Table } from '@sk-web-gui/react';
-import { useState } from 'react';
+import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
+import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { TableForm } from '../ongoing-errands.component';
+import { TableForm } from '../ongoing-casedata-errands.component';
+import { AppContext } from '@contexts/app-context-interface';
+import { IErrand } from '@interfaces/errand';
+import { CasedataStatusLabelComponent } from './casedata-status-label.component';
+import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
 
 export const ErrandsTable: React.FC = () => {
   const { watch, setValue, register } = useFormContext<TableForm>();
-  //   const { municipalityId, errands: data } = useAppContext();
+  const { municipalityId, errands: data } = useContext(AppContext);
   const [rowHeight, setRowHeight] = useState<string>('normal');
-  //  const sortOrder = watch('sortOrder');
-  //  const sortColumn = watch('sortColumn');
+  const sortOrder = watch('sortOrder');
+  const sortColumn = watch('sortColumn');
   const totalPages = watch('totalPages');
   const page = watch('page');
 
-  // const { theme } = useGui();
-  //   // const isMobile = useMediaQuery(`screen and (max-width: ${theme.screens.md})`);
-
-  // const sortOrders: { [key: string]: 'ascending' | 'descending' } = {
-  //   asc: 'ascending',
-  //   desc: 'descending',
-  // }
-
-  // const handleSort = (index: number) => {
-  //     if (sortColumn === serverSideSortableColsMEX[index]) {
-  //       setValue('sortOrder', sortOrder === 'desc' ? 'asc' : 'desc');
-  //     } else {
-  //       setValue('sortColumn', serverSideSortableColsMEX[index]);
-  //     }
-  //   };
-
-  const handleClick = async () => {
-    //window.open(`${process.env.NEXT_PUBLIC_BASEPATH}/arende/${municipalityId}/${errand.errandNumber}`, '_blank');
+  const serverSideSortableColsPT: { [key: number]: string } = {
+    0: 'status.statusType',
+    1: 'caseType',
+    2: 'created',
   };
 
-  //   const findLatestNotification = (errand: IErrand) => {
-  //     return sortBy(errand?.notifications, 'created').reverse()[0];
-  //   };
-
-  const headers = () => {
-    return (
-      <Table.HeaderColumn key={`header-${1}`} sticky={undefined}>
-        <Table.SortButton isActive={true} sortOrder={null} onClick={undefined}></Table.SortButton>
-      </Table.HeaderColumn>
-    );
+  const sortOrders: { [key: string]: 'ascending' | 'descending' } = {
+    asc: 'ascending',
+    desc: 'descending',
   };
 
-  const rows = () => {
-    // const notification = findLatestNotification(errand);
+  const handleSort = (index: number) => {
+    if (sortColumn === serverSideSortableColsPT[index]) {
+      setValue('sortOrder', sortOrder === 'desc' ? 'asc' : 'desc');
+    } else {
+      setValue('sortColumn', serverSideSortableColsPT[index]);
+    }
+  };
+
+  const handleClick = async (errand: IErrand) => {
+    window.open(`${process.env.NEXT_PUBLIC_BASEPATH}/arende/${municipalityId}/${errand.errandNumber}`, '_blank');
+  };
+
+  const headers = data.labels.map((header, index) => (
+    <Table.HeaderColumn key={`header-${index}`} sticky={header.sticky}>
+      {header.screenReaderOnly ?
+        <span className="sr-only">{header.label}</span>
+      : header.sortable ?
+        <Table.SortButton
+          isActive={sortColumn === serverSideSortableColsPT[index]}
+          sortOrder={sortOrders[sortOrder] as SortMode}
+          onClick={() => handleSort(index)}
+        >
+          {header.label}
+        </Table.SortButton>
+      : header.label}
+    </Table.HeaderColumn>
+  ));
+
+  const rows = (data.errands || []).map((errand: IErrand, index) => {
     return (
       <Table.Row
-        key={`row-${2}`}
-        aria-label={`Ärende ${123}, öppna ärende i ny flik`}
-        onClick={() => handleClick()}
+        key={`row-${index}`}
+        aria-label={`Ärende ${errand.errandNumber}, öppna ärende i ny flik`}
+        onClick={() => handleClick(errand)}
         className="cursor-pointer"
       >
-        <Table.HeaderColumn
-          scope="row"
-          className={'w-[200px] whitespace-nowrap text-ellipsis table-caption'}
-        ></Table.HeaderColumn>
-        <Table.Column></Table.Column>
-        <Table.Column
-          scope="row"
-          className={'font-bold max-w-[190px] whitespace-nowrap overflow-x-hidden'}
-        ></Table.Column>
-        <Table.Column>{123}</Table.Column>
-        <Table.Column></Table.Column>
-
-        <Table.Column></Table.Column>
+        <Table.HeaderColumn scope="row" className="w-[200px] whitespace-nowrap text-ellipsis table-caption">
+          <CasedataStatusLabelComponent
+            status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string}
+          />
+        </Table.HeaderColumn>
+        <Table.Column scope="row" className={'font-bold max-w-[190px] whitespace-nowrap overflow-x-hidden'}>
+          <>
+            {(
+              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
+              'Nytt parkeringstillstånd'
+            ) ?
+              'Nytt p-tillstånd'
+            : (
+              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
+              'Borttappat parkeringstillstånd'
+            ) ?
+              'Borttappat p-tillstånd'
+            : (
+              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
+              'Förnyat parkeringstillstånd'
+            ) ?
+              'Förnyelse av p-tillstånd'
+            : (
+              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
+              'Överklagan'
+            ) ?
+              'Överklagan av p-tillstånd'
+            : ''}
+          </>
+        </Table.Column>
 
         <Table.Column>
-          <time dateTime={'123'}>{123}</time>
+          <time dateTime={errand.created}>{errand.created}</time>
         </Table.Column>
-        <Table.Column></Table.Column>
-
-        <Table.Column></Table.Column>
-
         <Table.Column sticky>
           <div className="w-full flex justify-end">
             <NextLink
-              href={`/arende/${2281}/${1}`}
+              href={`/arende/${municipalityId}/${errand.errandNumber}`}
               onClick={(e) => e.stopPropagation()}
               target="_blank"
-              data-icon={undefined}
-              title={undefined}
+              title={'Visa ärende'}
+              className={cx(
+                'no-underline sk-btn max-lg:sk-btn-icon sk-btn-sm bg-primary text-light-primary w-full hover:text-dark-secondary',
+                rowHeight === 'normal' ? 'sk-btn-md' : 'sk-btn-sm',
+                isErrandClosed(errand) ? 'sk-btn-secondary' : 'sk-btn-tertiary'
+              )}
             >
-              <Button.Content rightIcon={<LucideIcon name="external-link" />}>
-                <>
-                  <span className="hidden md:inline">Hantera</span>
-                  <LucideIcon className="inline md:hidden" name="pencil" />
-                </>
+              <Button.Content>
+                <span className="hidden md:inline">Öppna</span>
               </Button.Content>
             </NextLink>
           </div>
         </Table.Column>
       </Table.Row>
     );
-  };
+  });
 
   return (
     <div className="max-w-full overflow-x-hidden">
@@ -128,12 +132,12 @@ export const ErrandsTable: React.FC = () => {
       <Table data-cy="main-casedata-table" dense={rowHeight === 'dense'} aria-describedby="errandTableCaption">
         <>
           <Table.Header>
-            {headers()}
+            {headers}
             <Table.HeaderColumn sticky>
               <span className="sr-only">Hantera</span>
             </Table.HeaderColumn>
           </Table.Header>
-          <Table.Body>{rows()}</Table.Body>
+          <Table.Body>{rows}</Table.Body>
         </>
 
         <Table.Footer>

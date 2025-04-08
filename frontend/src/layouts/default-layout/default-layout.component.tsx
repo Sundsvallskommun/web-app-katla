@@ -1,13 +1,13 @@
 'use client';
 
+import { CaseDataFilter, CaseStatusValues } from '@components/filtering/errand-filter';
 import { CasedataFilterSidebarStatusSelector } from '@components/filtering/errand-filter-sidebarstatus-selector.component';
 import { MainErrandsSidebar } from '@components/main-errands-sidebar/main-errands-sidebar.component';
 import { AppContext } from '@contexts/app-context-interface';
-//import { useUserStore } from '@services/user-service/user-service';
 import { CookieConsent, Link } from '@sk-web-gui/react';
 import NextLink from 'next/link';
-//import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 interface DefaultLayoutProps {
@@ -19,29 +19,13 @@ interface DefaultLayoutProps {
   logoLinkHref?: string;
 }
 
-export default function DefaultLayout({
-  //headerTitle,
-  //headerSubtitle,
-  children,
-  //preContent = undefined,
-  //postContent = undefined,
-  //logoLinkHref = '/',
-}: DefaultLayoutProps) {
-  //const router = useRouter();
+export default function DefaultLayout({ children }: DefaultLayoutProps) {
   const { t } = useTranslation();
-
-  // const setFocusToMain = () => {
-  //   const contentElement = document.getElementById('content');
-  //   contentElement?.focus();
-  // };
-
-  // const handleLogoClick = () => {
-  //   router.push(logoLinkHref);
-  // };
 
   const [open, setOpen] = useState(true);
 
   const { user } = useContext(AppContext);
+  const casedataFilterForm = useForm<CaseDataFilter>({ defaultValues: CaseStatusValues });
 
   return (
     <>
@@ -58,12 +42,13 @@ export default function DefaultLayout({
             applicationName={'Färdtjänst'}
             applicationEnvironment={''}
             isNotificationEnabled={false}
-            // casedataFilterForm={undefined}
             onFilterChange={function (): void {
               throw new Error('Function not implemented.');
             }}
           >
-            <CasedataFilterSidebarStatusSelector iconButton={!open} />
+            <FormProvider {...casedataFilterForm}>
+              <CasedataFilterSidebarStatusSelector iconButton={!open} />
+            </FormProvider>
           </MainErrandsSidebar>
           <div className={`w-full grow flex ${open ? 'pl-[32rem]' : 'pl-[5.6rem]'} transition-all`}>{children}</div>
         </div>
