@@ -4,7 +4,6 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Disclosure } from '@headlessui/react';
 import { getStatusLabel, useErrands } from '@services/casedata-errand-service';
 import store from '@services/storage-service';
-//import { getMe } from '@services/user-service';
 import { useDebounceEffect } from '@utils/useDebounceEffect';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -30,7 +29,6 @@ export const OngoingCaseDataErrands: React.FC = () => {
 
   const {
     municipalityId,
-    //setAdministrators,
     administrators,
     selectedErrandStatuses,
     setSelectedErrandStatuses,
@@ -38,37 +36,18 @@ export const OngoingCaseDataErrands: React.FC = () => {
     sidebarLabel,
     closedErrands,
     user,
-    //setUser,
   } = useContext(AppContext);
 
-  // const startdate = watchFilter('startdate');
-  // const enddate = watchFilter('enddate');
-  // const queryFilter = watchFilter('query');
   const [ownerFilter, setOwnerFilter] = useState(false);
-  // const administratorFilter = watchFilter('admins');
-  // const priorityFilter = watchFilter('priority');
   const caseTypeFilter = watchFilter('caseType');
   const statusFilter = watchFilter('status');
-  // const propertyDesignation = watchFilter('propertyDesignation');
-  // const phaseFilter = watchFilter('phase');
   const sortObject = useMemo(() => ({ [sortColumn]: sortOrder }), [sortColumn, sortOrder]);
   const [filterObject, setFilterObject] = useState<{ [key: string]: string | boolean }>();
-  //const [extraFilter, setExtraFilter] = useState<{ [key: string]: string }>();
   const errands = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
-  // const initialFocus = useRef(null);
-
-  // const setInitialFocus = () => {
-  //   setTimeout(() => {
-  //     initialFocus.current && initialFocus.current.focus();
-  //   });
-  // };
-
   useEffect(() => {
     setValue('status', selectedErrandStatuses);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedErrandStatuses]);
-
-  //const router = useRouter();
 
   useEffect(() => {
     const filterdata = store.get('filter');
@@ -127,17 +106,6 @@ export const OngoingCaseDataErrands: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterObject, sortColumn, sortOrder, pageSize]);
 
-  // useEffect(() => {
-  //   // NOTE: If we set focus on the next button
-  //   //       the browser will automatically scroll
-  //   //       down to the button.
-  //   //setInitialFocus();
-  //   getMe().then((user) => {
-  //     setUser(user);
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
   useEffect(() => {
     if (errands) {
       setTableValue('page', errands.page);
@@ -147,13 +115,6 @@ export const OngoingCaseDataErrands: React.FC = () => {
     }
     //eslint-disable-next-line
   }, [errands]);
-
-  // useEffect(() => {
-  //   getAdminUsers().then((data) => {
-  //     setAdministrators(data);
-  //   });
-  //   //eslint-disable-next-line
-  // }, []);
 
   useDebounceEffect(
     () => {

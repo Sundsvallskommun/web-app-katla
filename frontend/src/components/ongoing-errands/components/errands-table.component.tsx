@@ -17,9 +17,6 @@ export const ErrandsTable: React.FC = () => {
   const totalPages = watch('totalPages');
   const page = watch('page');
 
-  // const { theme } = useGui();
-  //const isMobile = useMediaQuery(`screen and (max-width: ${theme.screens.md})`);
-
   const serverSideSortableColsPT: { [key: number]: string } = {
     0: 'status.statusType',
     1: 'caseType',
@@ -42,10 +39,6 @@ export const ErrandsTable: React.FC = () => {
   const handleClick = async (errand: IErrand) => {
     window.open(`${process.env.NEXT_PUBLIC_BASEPATH}/arende/${municipalityId}/${errand.errandNumber}`, '_blank');
   };
-
-  //   const findLatestNotification = (errand: IErrand) => {
-  //     return sortBy(errand?.notifications, 'created').reverse()[0];
-  //   };
 
   const headers = data.labels.map((header, index) => (
     <Table.HeaderColumn key={`header-${index}`} sticky={header.sticky}>

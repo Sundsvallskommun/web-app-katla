@@ -34,18 +34,19 @@ export const CasedataFilterCaseType: React.FC = () => {
           {Object.entries(getCaseLabels())
             .sort((a, b) => a[1].localeCompare(b[1]))
             .filter(
-              (s: [string, string]) =>
-                s[0].toLowerCase().includes(query.toLowerCase()) || s[1].toLowerCase().includes(query.toLowerCase())
+              ([caseType, label]) =>
+                caseType.toLowerCase().includes(query.toLowerCase()) ||
+                label.toLowerCase().includes(query.toLowerCase())
             )
-            .map((s: [string, string], idx) => (
-              <PopupMenu.Item key={`${s[1]}-${idx}`}>
+            .map(([caseType, label], idx) => (
+              <PopupMenu.Item key={`${label}-${idx}`}>
                 <Checkbox
                   labelPosition="left"
-                  value={s[0]}
+                  value={caseType}
                   {...register('caseType')}
-                  data-cy={`Ärendetyp-filter-${s[0]}`}
+                  data-cy={`Ärendetyp-filter-${caseType}`}
                 >
-                  {s[1]}
+                  {label}
                 </Checkbox>
               </PopupMenu.Item>
             ))}

@@ -41,7 +41,7 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
       });
       const statusKeys = ss.map((s) => labelsToKeys[s]);
       const storedFilter = store.get('filter');
-      const jsonparsedstatus = JSON.parse(storedFilter as string);
+      const jsonparsedstatus = JSON.parse(storedFilter);
       const status = statusKeys.join(',');
       jsonparsedstatus.status = status;
       const stringified = JSON.stringify(jsonparsedstatus);
@@ -98,7 +98,7 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
         return (
           <Button
             onClick={() => {
-              updateStatusFilter(button.statuses as unknown as ErrandStatus[]);
+              updateStatusFilter(button.statuses);
               setSidebarLabel(button.label);
             }}
             aria-label={`status-button-${button.key}`}
