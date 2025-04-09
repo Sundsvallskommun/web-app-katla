@@ -2,7 +2,7 @@ export interface Notification {
   id?: string;
   municipalityId?: string;
   namespace?: string;
-  created?: string;
+  created: string;
   modified?: string;
   ownerFullName?: string;
   ownerId: string;

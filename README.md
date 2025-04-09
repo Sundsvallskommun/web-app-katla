@@ -24,7 +24,7 @@ Dessa APIer används i projektet, applikationsanvändaren i WSO2 måste prenumer
 1. Klona ner repot.
 
 ```
-git clone
+git clone git@github.com:Sundsvallskommun/web-app-katla.git
 ```
 
 2. Installera dependencies för både `backend` och `frontend`
@@ -36,8 +36,6 @@ yarn install
 cd backend
 yarn install
 ```
-
-Om du behöver ett administrationsgränssnitt, se [Dokumentation om Admin](./admin/README.md).
 
 3. Skapa .env-fil för `frontend`
 
@@ -70,50 +68,3 @@ cd backend
 yarn prisma:generate
 yarn prisma:migrate
 ```
-
-6. Synca datamodeller för api:er
-
-   Se till att README och /backend/src/config/api-config.ts matchar och justera utefter de api:er som önskas användas.
-
-   - För backend, i /backend kör `yarn generate:contracts` för att få ned de senaste datamodellerna för samtliga api:er
-     -- Justera om så behövs utifrån de uppdaterade modellerna
-
-   - För frontend, se till att backend är igång (`yarn dev`), i /frontend kör `yarn generate:contracts` för att synca backend med frontend
-     -- Justera om så behövs utifrån de uppdaterade modellerna
-
-### Språkstöd
-
-För språkstöd används [next-i18next](https://github.com/i18next/next-i18next).
-
-Placera dina språkfiler i `frontend/public/locales/<locale>/<namespace>.json`.
-
-För ytterligare information om språkstöd i `admin` se [Dokumentation om Admin](./admin/README.md)
-
-För att det ska fungera med **Next.js** och **SSR** måste du skicka med språkdatat till ServerSideProps.
-Det gör du genom att lägga till följande till dina page-komponenter (behövs ej i subkomponenter).
-
-```
-export const getServerSideProps = async ({ locale }) => ({
-  props: {
-    ...(await serverSideTranslations(locale, [<namespaces>])),
-  },
-});
-```
-
-För att lägga till ett ytterligare spåk, skapa en mapp med språkets namn, och lägg sedan till språket i `next-i18next.config.js`.
-
-**Exempel för tyska:**
-Skapa `frontend/public/locales/de/common.json`.
-Ändra next-i18next.config.js:
-
-```
-module.exports = {
-  i18n: {
-    defaultLocale: 'sv',
-    locales: ['sv', 'de'],
-  },
- ...
-};
-```
-
-Som hjälp i VSCode rekommenderas [i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally).

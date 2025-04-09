@@ -1,7 +1,10 @@
 import { CaseDataFilter } from '@components/filtering/errand-filter';
+import { NotificationsBell } from '@components/notifications/notifications-bell';
+import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
 import NextLink from 'next/link';
+import { useState } from 'react';
 
 interface SidebarProps {
   open: boolean;
@@ -25,12 +28,8 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
   setOpen,
   children,
   user,
-  // isLoading,
   applicationName,
   applicationEnvironment,
-  // isNotificationEnabled,
-  // casedataFilterForm,
-  // onFilterChange,
 }) => {
   const MainTitle = (open: boolean) => (
     <NextLink href="/" className="no-underline" aria-label={`Go to homepage`}>
@@ -42,6 +41,8 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
       />
     </NextLink>
   );
+
+  const [showNotifications, setShowNotifications] = useState(false);
 
   return (
     <aside
@@ -75,9 +76,8 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
               </span>
             </div>
           )}
-          {/* {isNotificationEnabled && (
-            <NotificationsBell toggleShow={() => {}} />
-          )} */}
+
+          <NotificationsBell toggleShow={() => setShowNotifications(!showNotifications)} />
         </div>
         <Divider className={cx(open ? '' : 'w-[4rem] mx-auto')} />
         <div className={cx('flex flex-col gap-8', open ? 'py-24' : 'items-center justify-center py-15')}>
@@ -98,7 +98,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* {isNotificationEnabled && <NotificationsWrapper show={false} setShow={() => {}} />} */}
+      <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} />
     </aside>
   );
 };
