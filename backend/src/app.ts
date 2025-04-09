@@ -45,7 +45,7 @@ import swaggerUi from 'swagger-ui-express';
 import { HttpException } from './exceptions/HttpException';
 import { Profile } from './interfaces/profile.interface';
 import ApiService from './services/api.service';
-import { getPermissions, getRole } from './services/authorization.service';
+import { authorizeGroups, getPermissions, getRole } from './services/authorization.service';
 import { additionalConverters } from './utils/custom-validation-classes';
 import { isValidUrl } from './utils/util';
 
@@ -90,45 +90,35 @@ const samlStrategy = new Strategy(
         message: 'Missing SAML profile',
       });
     }
-    const { givenName, surname, citizenIdentifier, username, sn, email, groups } = profile;
+    const { givenName, surname, username, email, groups } = profile;
 
-    if (!givenName || !surname || !citizenIdentifier) {
+    if (!givenName || !surname || !email || !groups || !username) {
+      logger.error(
+        'Could not extract necessary profile data fields from the IDP profile. Does the Profile interface match the IDP profile response? The profile response may differ, for example Onegate vs ADFS.',
+      );
       return done({
         name: 'SAML_MISSING_ATTRIBUTES',
         message: 'Missing profile attributes',
       });
     }
 
-    //   const groupList: ADRole[] =
-    //   groups !== undefined
-    //     ? (groups
-    //         .split(',')
-    //         .map(x => x.toLowerCase())
-    //         .filter(x => x.includes('sg_appl_app_')) as ADRole[])
-    //     : [];
+    if (!authorizeGroups(groups)) {
+      logger.error('Group authorization failed. Is the user a member of the authorized groups?');
+      return done(null, null, {
+        name: 'SAML_MISSING_GROUP',
+        message: 'SAML_MISSING_GROUP',
+      });
+    }
 
-    // const appGroups: ADRole[] = groupList.length > 0 ? groupList : groupList.concat('sg_appl_app_read');
+    const groupList: string[] = groups && typeof groups === 'string' ? groups.split(',').map(x => x.toLowerCase()) : [];
+
+    const appGroups: string[] = groupList.length > 0 ? groupList : [];
 
     try {
-      // const personNumber = profile.citizenIdentifier;
-      // const citizenResult = await apiService.get<any>({ url: `citizen/2.0/${personNumber}/guid` });
-      // const { data: personId } = citizenResult;
-
-      // if (!personId) {
-      //   return done({
-      //     name: 'SAML_CITIZEN_FAILED',
-      //     message: 'Failed to fetch user from Citizen API',
-      //   });
-      // }
-
-      const groupList: string[] = groups && typeof groups === 'string' ? groups.split(',').map(x => x.toLowerCase()) : [];
-
-      const appGroups: string[] = groupList.length > 0 ? groupList : [];
-
       const findUser = {
-        name: `${givenName} ${sn}`,
+        name: `${givenName} ${surname}`,
         firstName: givenName,
-        lastName: sn,
+        lastName: surname,
         username: username,
         email: email,
         groups: appGroups,
@@ -136,10 +126,26 @@ const samlStrategy = new Strategy(
         permissions: getPermissions(appGroups),
       };
 
+      logger.info('Found user:', findUser);
+
+      const userSettings = await prisma.userSettings.findFirst({ where: { username: findUser.username } });
+      // Create user settings for new users
+      const data = {
+        username: findUser.username,
+        readNotificationsClearedDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+      };
+      if (!userSettings) {
+        await prisma.userSettings.create({
+          data,
+        });
+      }
+
       done(null, findUser);
     } catch (err) {
       if (err instanceof HttpException && err?.status === 404) {
         // Handle missing person form Citizen
+        logger.error('Error when calling Citizen:');
+        logger.error(err);
       }
       done(err);
     }
