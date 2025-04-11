@@ -23,14 +23,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 module.exports = withBundleAnalyzer({
+  basePath: process.env.NEXT_PUBLIC_BASEPATH || '',
   output: 'standalone',
-  images: {
-    domains: [process.env.DOMAIN_NAME],
-    formats: ['image/avif', 'image/webp'],
-  },
-  basePath: process.env.BASE_PATH,
   sassOptions: {
-    prependData: `$basePath: '${process.env.BASE_PATH}';`,
+    prependData: `$basePath: '${process.env.NEXT_PUBLIC_BASEPATH || ''}';`,
   },
   transpilePackages: ['lucide-react'],
   experimental: {
@@ -38,5 +34,15 @@ module.exports = withBundleAnalyzer({
   },
   async rewrites() {
     return [{ source: '/napi/:path*', destination: '/api/:path*' }];
+  },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: `${process.env.NEXT_PUBLIC_BASEPATH || ''}/oversikt`,
+        basePath: false,
+        permanent: false,
+      },
+    ];
   },
 });
