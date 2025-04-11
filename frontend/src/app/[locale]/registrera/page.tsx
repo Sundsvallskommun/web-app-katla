@@ -9,8 +9,14 @@ import { OtherParties } from '@components/errandinformation/other-parties.compon
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import { PageHeader } from '@components/page-header.component';
 import { RegisterErrandButton } from '@components/register-errand-button.component';
+import { AppContext } from '@contexts/app-context-interface';
+import { IErrand } from '@interfaces/errand';
+import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { getMe } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, FileUpload, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
+import { useContext, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 
 const menuGroups: MenuItemGroup[] = [
   {
@@ -57,8 +63,22 @@ const SingleErrandTitle = () => (
 );
 
 const Registrera: React.FC = () => {
+  const method = useForm<IErrand>();
+  const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
+  const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
+  const { setMunicipalityId, setUser } = useContext(AppContext);
+
+  useEffect(() => {
+    setMunicipalityId(process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '');
+    //getAdminUsers().then(setAdministrators);
+    getMe().then((user) => {
+      setUser(user);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <>
+    <FormProvider {...method}>
       <PageHeader
         logo={<SingleErrandTitle />}
         userMenu={
@@ -106,7 +126,7 @@ const Registrera: React.FC = () => {
                     <Button variant="primary" onClick={() => console.log('Not implemented')}>
                       Spara utkast
                     </Button>
-                    <RegisterErrandButton />
+                    <RegisterErrandButton owners={applicants.concat(otherParties)} />
                   </div>
                 </header>
 
@@ -116,17 +136,17 @@ const Registrera: React.FC = () => {
                       <div className="w-full py-[1.5rem] px-32">
                         <h2>Grundinformation</h2>
                       </div>
+
                       <AboutErrand />
                       <HealthCareStaff />
-                      <Applicant />
-                      <OtherParties />
+                      <Applicant owners={applicants} setOwners={setApplicants} />
+                      <OtherParties owners={otherParties} setOwners={setOtherParties} />
                       <div className="w-full pb-[2rem] pt-[5rem] px-32">
                         <h2>Ärendeuppgifter</h2>
                       </div>
                       <ExternalCircumstances />
                       <PersonalInformation />
                       <MedicalOpinion />
-
                       <div className="w-full pb-[2rem] pt-[5rem] px-32 ">
                         <div className="flex justify-between">
                           <div className="flex">
@@ -164,7 +184,7 @@ const Registrera: React.FC = () => {
           </div>
         </div>
       </div>
-    </>
+    </FormProvider>
   );
 };
 

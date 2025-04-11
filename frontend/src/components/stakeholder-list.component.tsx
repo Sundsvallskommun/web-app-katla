@@ -4,32 +4,15 @@ import { Button, FormLabel, Input, Select } from '@sk-web-gui/react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { DisplayCard } from './display-card.component';
-
-export interface Stakeholder {
-  personId?: string;
-  firstName: string;
-  lastName: string;
-  street: string;
-  careof: string;
-  zip: string;
-  city: string;
-  emails: {
-    value: string;
-  }[];
-  personalNumber: string;
-  phoneNumbers: {
-    value: string;
-  }[];
-  role: string;
-  ssn: string;
-}
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
+import { Role } from '@interfaces/role';
 
 export interface CardProps {
   role: string;
   firstName: string;
   lastName: string;
   ssn: string;
-  mail: string;
+  emails: string;
   street: string;
   city: string;
   zip: string;
@@ -39,13 +22,18 @@ export interface CardProps {
   personalNumber: string;
 }
 
-export const StakeholderList: React.FC<{ roles: string[] }> = ({ roles }) => {
+// React.FC<{ setOwners: React.Dispatch<React.SetStateAction<Stakeholder[]>> }> = ({ setOwners }) => {
+export const StakeholderList: React.FC<{
+  owners: CasedataOwnerOrContact[];
+  setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
+  roles: string[];
+}> = ({ owners, setOwners, roles }) => {
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState(false);
   const [searchResult, setSearchResult] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
-  const { register, watch, setValue, getValues, clearErrors, reset } = useForm<Stakeholder>({
+  const { register, watch, setValue, getValues, clearErrors, reset } = useForm<CasedataOwnerOrContact>({
     mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
   });
 
@@ -60,15 +48,30 @@ export const StakeholderList: React.FC<{ roles: string[] }> = ({ roles }) => {
   const phoneNumbers = watch(`phoneNumbers`);
   const personalNumber = watch(`personalNumber`);
 
-  const [owners, setOwners] = useState<Stakeholder[]>([]);
+  const updateOwner = (index: number, updatedData: { newEmail?: string; newPhoneNumber?: string }) => {
+    setOwners((prevOwners) =>
+      prevOwners.map((owner, i) => {
+        if (i === index) {
+          const updatedOwner = { ...owner, ...updatedData };
 
-  const updateOwner = (index: number, updatedData: { mail?: string; phonenumber?: string }) => {
-    setOwners((prevOwners) => prevOwners.map((owner, i) => (i === index ? { ...owner, ...updatedData } : owner)));
+          if (updatedData.newEmail) {
+            updatedOwner.emails = [{ value: updatedData.newEmail }];
+          }
+
+          if (updatedData.newPhoneNumber) {
+            updatedOwner.phoneNumbers = [{ value: updatedData.newPhoneNumber }];
+          }
+
+          return updatedOwner;
+        }
+
+        return owner;
+      })
+    );
   };
 
   const doSearch = () => {
-    //const search: () => Promise<AddressResult>;
-    const search = () => searchPerson(personalNumber);
+    const search = () => searchPerson(personalNumber as string);
     setSearching(true);
     setSearchResult(false);
     setNotFound(false);
@@ -97,10 +100,12 @@ export const StakeholderList: React.FC<{ roles: string[] }> = ({ roles }) => {
   const addStakeholder: () => void = () => {
     const email = [{ value: getValues(`emails.0.value`) }];
     const phone = [{ value: getValues(`phoneNumbers.0.value`) }];
-    const role = getValues(`role`);
+    const role = getValues(`roles`).toString() === 'Sökande' ? Role.APPLICANT : ''; //TODO: Better mapping of roles
+
     if (email && phone && role) {
       setError(false);
-      const updatedOwner = {
+      console.log('role', role);
+      const updatedOwner: CasedataOwnerOrContact = {
         personId,
         firstName,
         lastName,
@@ -108,14 +113,17 @@ export const StakeholderList: React.FC<{ roles: string[] }> = ({ roles }) => {
         careof,
         zip,
         city,
-        emails,
-        mail: email[0].value,
+        emails: email,
         personalNumber,
-        phoneNumbers,
-        phoneNumber: phone[0].value,
-        role: role,
-        ssn: personalNumber,
+        phoneNumbers: phone,
+        newPhoneNumber: phone[0].value,
+        roles: [role],
+        id: '',
+        stakeholderType: 'PERSON',
+        newRole: role,
+        newEmail: email[0].value,
       };
+      console.log('updatedowner', updatedOwner);
       setOwners((prevOwners) => [...prevOwners, updatedOwner]);
       reset();
       setSearchResult(false);
@@ -200,7 +208,7 @@ export const StakeholderList: React.FC<{ roles: string[] }> = ({ roles }) => {
               </div>
               <div className="flex flex-col py-10">
                 <FormLabel>Personens roll*</FormLabel>
-                <Select className="w-full" {...register('role', { required: true })}>
+                <Select className="w-full" {...register('roles', { required: true })}>
                   {roles.map((role, index) => (
                     <Select.Option key={index} value={role}>
                       {role}
@@ -218,7 +226,7 @@ export const StakeholderList: React.FC<{ roles: string[] }> = ({ roles }) => {
         </div>
       : null}
 
-      {owners.map((owner, index) => (
+      {owners?.map((owner, index) => (
         <DisplayCard
           isEditable={true}
           key={index}

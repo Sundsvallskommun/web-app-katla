@@ -1,32 +1,33 @@
+import { Role } from '@interfaces/role';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, FormLabel, Input, Modal } from '@sk-web-gui/react';
 import { useState } from 'react';
 
 export const DisplayCard: React.FC<{
   isEditable: boolean;
-  role: string;
+  roles: Role[];
   userName?: string;
   firstName: string;
   lastName: string;
-  ssn: string;
+  personalNumber?: string;
   street: string;
-  mail?: string;
-  phoneNumber?: string;
+  newEmail?: string;
+  newPhoneNumber?: string;
   careof?: string;
   zip?: string;
   city: string;
   onRemove?: () => void;
-  onUpdate?: (updatedData: { mail?: string; phoneNumber?: string }) => void;
+  onUpdate?: (updatedData: { newEmail?: string; newPhoneNumber?: string }) => void;
 }> = ({
   isEditable,
-  role,
+  roles,
   userName,
   firstName,
   lastName,
-  ssn,
+  personalNumber,
   street,
-  mail,
-  phoneNumber,
+  newEmail,
+  newPhoneNumber,
   careof,
   zip,
   city,
@@ -40,11 +41,11 @@ export const DisplayCard: React.FC<{
   };
 
   const [formData, setFormData] = useState({
-    ssn,
+    personalNumber,
     firstName,
     lastName,
-    mail,
-    phoneNumber,
+    newEmail,
+    newPhoneNumber,
     street,
     careof,
     zip,
@@ -58,7 +59,7 @@ export const DisplayCard: React.FC<{
 
   const handleUpdate = () => {
     if (onUpdate) {
-      onUpdate({ mail: formData.mail, phoneNumber: formData.phoneNumber });
+      onUpdate({ newEmail: formData.newEmail, newPhoneNumber: formData.newPhoneNumber });
     }
     openHandler();
   };
@@ -66,7 +67,7 @@ export const DisplayCard: React.FC<{
   return (
     <div className="border-1 rounded-12 bg-background-content w-[52.5rem] my-15">
       <div className="rounded-t-12 bg-vattjom-background-200 h-[4rem] flex items-center mb-[1.5rem]">
-        <strong className="px-[1rem]">{role}</strong>
+        <strong className="px-[1rem]">{roles}</strong>
       </div>
       <div className="px-[1rem]">
         <p className="text-[1.6rem] font-semibold">{firstName + ' ' + lastName}</p>
@@ -76,14 +77,14 @@ export const DisplayCard: React.FC<{
           : null}
 
           <div className="flex flex-col mr-10">
-            <div>{ssn}</div>
+            <div>{personalNumber}</div>
             <div>
               {street}, {city}
             </div>
           </div>
           <div className="flex flex-col">
-            <div>{mail}</div>
-            <div>{phoneNumber}</div>
+            <div>{newEmail}</div>
+            <div>{newPhoneNumber}</div>
           </div>
         </div>
         {isEditable ?
@@ -109,10 +110,10 @@ export const DisplayCard: React.FC<{
           </div>
         : null}
 
-        <Modal className="w-[48rem]" show={isOpen} onClose={openHandler} label={role}>
+        <Modal className="w-[48rem]" show={isOpen} onClose={openHandler} label={'Redigera uppgifter'}>
           <Modal.Content>
             <FormLabel>Personnummer*</FormLabel>
-            <Input name="ssn" value={formData.ssn} onChange={handleInputChange} readOnly={isEditable} />
+            <Input name="ssn" value={formData.personalNumber} onChange={handleInputChange} readOnly={isEditable} />
             <div className="flex gap-8">
               <div className="flex flex-col">
                 <FormLabel>Förnamn*</FormLabel>
@@ -138,13 +139,13 @@ export const DisplayCard: React.FC<{
             <div className="flex gap-8">
               <div className="flex flex-col">
                 <FormLabel>E-postadress*</FormLabel>
-                <Input name="mail" value={formData.mail} onChange={handleInputChange} className="w-full" />
+                <Input name="newEmail" value={formData.newEmail} onChange={handleInputChange} className="w-full" />
               </div>
               <div className="flex flex-col">
                 <FormLabel>Telefonnummer*</FormLabel>
                 <Input
-                  name="phonenumber"
-                  value={formData.phoneNumber}
+                  name="newPhoneNumber"
+                  value={formData.newPhoneNumber}
                   onChange={handleInputChange}
                   className="w-full"
                 />

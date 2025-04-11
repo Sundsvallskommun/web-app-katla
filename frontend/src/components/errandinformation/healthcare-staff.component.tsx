@@ -1,10 +1,13 @@
 import { DisplayCard } from '@components/display-card.component';
+import { AppContext } from '@contexts/app-context-interface';
+import { Role } from '@interfaces/role';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, Disclosure } from '@sk-web-gui/react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 export const HealthCareStaff: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
+  const { user } = useContext(AppContext);
   return (
     <Disclosure
       icon={<LucideIcon name="user" />}
@@ -19,15 +22,15 @@ export const HealthCareStaff: React.FC = () => {
         <p>Vårdpersonal är den person som initierat ärendet och vår primära kontakt när ärendet handläggs.</p>
         <DisplayCard
           isEditable={true}
-          userName="abc01abc"
-          ssn={'20000000-0000'}
+          userName={user?.username}
+          personalNumber={'yyyymmdd-xxxx'}
           street={'Adress 1'}
           city={'Sundsvall'}
-          mail={'mail@example.com'}
+          mail={user?.email}
           phoneNumber={'070-000 00 00'}
-          role={'Vårdpersonal'}
-          firstName={'Förnamn'}
-          lastName={'Efternamn'}
+          roles={[Role.DOCTOR]}
+          firstName={user?.firstName}
+          lastName={user?.lastName}
         />
       </div>
       <div className="mt-24">

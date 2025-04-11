@@ -4,9 +4,3 @@ export enum PTCaseLabel {
   LOST_PARKING_PERMIT = 'Borttappat parkeringstillstånd',
   APPEAL = 'Överklagan',
 }
-
-// export const CaseLabels = {
-//   PT: PTCaseLabel,
-//   MEX: MEXCaseLabel,
-//   ALL: { ...PTCaseLabel, ...MEXCaseLabel },
-// };

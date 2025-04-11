@@ -1,14 +1,52 @@
+import { AppContext } from '@contexts/app-context-interface';
+import { IErrand } from '@interfaces/errand';
+import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Dialog } from '@sk-web-gui/react';
-import { useState } from 'react';
+import { Button, Dialog, useSnackbar } from '@sk-web-gui/react';
+import { useContext, useState } from 'react';
+import { useFormContext, UseFormReturn } from 'react-hook-form';
 
-export const RegisterErrandButton: React.FC = () => {
+export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const toastMessage = useSnackbar();
+
+  const { administrators, user, municipalityId, setErrand } = useContext(AppContext);
+
+  const {
+    getValues,
+    formState,
+    formState: { errors },
+  }: UseFormReturn<IErrand, any, undefined> = useFormContext();
 
   const openHandler = () => {
     setIsOpen(!isOpen);
   };
 
+  const onSubmit = () => {
+    const data: IErrand = getValues();
+    data.stakeholders = owners;
+    return saveErrand(data, municipalityId).then(async (res) => {
+      if (!res.errandSuccessful) {
+        throw new Error('Errand could not be registered');
+      }
+
+      if (res.errandId) {
+        const e = await getErrand(municipalityId, res.errandId);
+        if (e.errand) {
+          setErrand(e.errand);
+        }
+        toastMessage({
+          position: 'bottom',
+          closeable: false,
+          message: 'Ärendet sparades',
+          status: 'success',
+        });
+      }
+      openHandler();
+      return true;
+    });
+  };
   return (
     <>
       <Button variant="primary" color="vattjom" onClick={openHandler}>
@@ -28,7 +66,7 @@ export const RegisterErrandButton: React.FC = () => {
           <Button className="w-[12.8rem]" variant="secondary" onClick={openHandler}>
             Nej
           </Button>
-          <Button className="w-[12.8rem]" variant="primary" onClick={() => console.log('Not implemented')}>
+          <Button className="w-[12.8rem]" variant="primary" onClick={() => onSubmit()}>
             Ja
           </Button>
         </Dialog.Buttons>

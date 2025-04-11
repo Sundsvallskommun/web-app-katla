@@ -534,8 +534,9 @@ interface SaveErrandResponse {
   noteSuccessful: boolean;
 }
 
-export const saveErrand: (data: Partial<IErrand> & { municipalityId: string }) => Promise<SaveErrandResponse> = (
-  data
+export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Promise<SaveErrandResponse> = (
+  data,
+  municipalityId: string
 ) => {
   const result: SaveErrandResponse = {
     errandSuccessful: false,
@@ -547,7 +548,7 @@ export const saveErrand: (data: Partial<IErrand> & { municipalityId: string }) =
   return errandData.id ?
       apiService
         .patch<ApiResponse<ApiErrand>, Partial<RegisterErrandData>>(
-          `casedata/${data.municipalityId}/errands/${errandData.id}`,
+          `casedata/${municipalityId}/errands/${errandData.id}`,
           errandData
         )
         .then(async () => {
@@ -560,10 +561,7 @@ export const saveErrand: (data: Partial<IErrand> & { municipalityId: string }) =
           return result;
         })
     : apiService
-        .post<ApiResponse<ApiErrand>, Partial<RegisterErrandData>>(
-          `casedata/${data.municipalityId}/errands`,
-          errandData
-        )
+        .post<ApiResponse<ApiErrand>, Partial<RegisterErrandData>>(`casedata/${municipalityId}/errands`, errandData)
         .then(async (res) => {
           result.errandSuccessful = true;
           result.errandId = res.data.data.id.toString();
