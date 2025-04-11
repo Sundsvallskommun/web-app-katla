@@ -26,8 +26,8 @@ export const HealthCareStaff: React.FC = () => {
           personalNumber={'yyyymmdd-xxxx'}
           street={'Adress 1'}
           city={'Sundsvall'}
-          mail={user?.email}
-          phoneNumber={'070-000 00 00'}
+          newEmail={user?.email}
+          newPhoneNumber={'070-000 00 00'}
           roles={[Role.DOCTOR]}
           firstName={user?.firstName}
           lastName={user?.lastName}
