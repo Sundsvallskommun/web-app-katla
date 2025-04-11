@@ -1,6 +1,6 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Dialog, useSnackbar } from '@sk-web-gui/react';
@@ -11,13 +11,9 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toastMessage = useSnackbar();
 
-  const { administrators, user, municipalityId, setErrand } = useContext(AppContext);
+  const { municipalityId, setErrand } = useContext(AppContext);
 
-  const {
-    getValues,
-    formState,
-    formState: { errors },
-  }: UseFormReturn<IErrand, any, undefined> = useFormContext();
+  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const openHandler = () => {
     setIsOpen(!isOpen);

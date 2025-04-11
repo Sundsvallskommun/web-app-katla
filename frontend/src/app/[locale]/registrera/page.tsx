@@ -11,7 +11,7 @@ import { PageHeader } from '@components/page-header.component';
 import { RegisterErrandButton } from '@components/register-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getMe } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, FileUpload, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';

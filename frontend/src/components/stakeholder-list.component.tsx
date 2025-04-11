@@ -44,8 +44,6 @@ export const StakeholderList: React.FC<{
   const careof = watch(`careof`);
   const zip = watch(`zip`);
   const city = watch(`city`);
-  const emails = watch(`emails`);
-  const phoneNumbers = watch(`phoneNumbers`);
   const personalNumber = watch(`personalNumber`);
 
   const updateOwner = (index: number, updatedData: { newEmail?: string; newPhoneNumber?: string }) => {
