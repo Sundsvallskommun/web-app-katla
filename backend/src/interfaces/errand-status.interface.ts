@@ -1,5 +1,5 @@
 import { Status as IStatusDTO } from '@/data-contracts/case-data/data-contracts';
-import { IsOptional, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export enum ErrandStatus {
   ArendeInkommit = 'Ärende inkommit',
@@ -17,6 +17,7 @@ export enum ErrandStatus {
   BeslutOverklagat = 'Beslut överklagat',
   ArendeAvslutat = 'Ärende avslutat',
   Tilldelat = 'Tilldelat',
+  Utkast = 'Utkast',
   HanterasIAnnatSystem = 'Hanteras i annat system',
   ArendetAvvisas = 'Ärendet avvisas',
   Parkerad = 'Parkerad',

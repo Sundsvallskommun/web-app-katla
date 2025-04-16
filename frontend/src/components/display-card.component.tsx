@@ -1,7 +1,9 @@
+import { AppContext } from '@contexts/app-context-interface';
 import { Role } from '@interfaces/role';
+import { editStakeholder } from '@services/casedata-stakeholder-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, FormLabel, Input, Modal } from '@sk-web-gui/react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 export const DisplayCard: React.FC<{
   isEditable: boolean;
@@ -35,6 +37,8 @@ export const DisplayCard: React.FC<{
   onUpdate,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const { municipalityId, errand } = useContext(AppContext);
 
   const openHandler = () => {
     setIsOpen(!isOpen);

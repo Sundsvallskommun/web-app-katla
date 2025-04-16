@@ -1,11 +1,13 @@
 import { searchPerson } from '@services/adress-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, FormLabel, Input, Select } from '@sk-web-gui/react';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { DisplayCard } from './display-card.component';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { Role } from '@interfaces/role';
+import { editStakeholder, removeStakeholder, addStakeholder } from '@services/casedata-stakeholder-service';
+import { AppContext } from '@contexts/app-context-interface';
 
 export interface CardProps {
   role: string;
@@ -22,7 +24,6 @@ export interface CardProps {
   personalNumber: string;
 }
 
-// React.FC<{ setOwners: React.Dispatch<React.SetStateAction<Stakeholder[]>> }> = ({ setOwners }) => {
 export const StakeholderList: React.FC<{
   owners: CasedataOwnerOrContact[];
   setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
@@ -32,6 +33,8 @@ export const StakeholderList: React.FC<{
   const [error, setError] = useState(false);
   const [searchResult, setSearchResult] = useState(false);
   const [notFound, setNotFound] = useState(false);
+
+  const { municipalityId, errand } = useContext(AppContext);
 
   const { register, watch, setValue, getValues, clearErrors, reset } = useForm<CasedataOwnerOrContact>({
     mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
@@ -62,6 +65,9 @@ export const StakeholderList: React.FC<{
             updatedOwner.phoneNumbers = [{ value: updatedData.newPhoneNumber }];
           }
 
+          if (errand?.id) {
+            editStakeholder(municipalityId, errand.id, updatedOwner);
+          }
           return updatedOwner;
         }
 
@@ -97,14 +103,13 @@ export const StakeholderList: React.FC<{
       });
   };
 
-  const addStakeholder: () => void = () => {
+  const addStakeholderToErrand: () => void = () => {
     const email = [{ value: getValues(`emails.0.value`) }];
     const phone = [{ value: getValues(`phoneNumbers.0.value`) }];
     const role = getValues(`roles`).toString() === 'Sökande' ? Role.APPLICANT : ''; //TODO: Better mapping of roles
 
     if (email && phone && role) {
       setError(false);
-      console.log('role', role);
       const updatedOwner: CasedataOwnerOrContact = {
         personId,
         firstName,
@@ -123,7 +128,9 @@ export const StakeholderList: React.FC<{
         newRole: role,
         newEmail: email[0].value,
       };
-      console.log('updatedowner', updatedOwner);
+      if (errand?.id) {
+        addStakeholder(municipalityId, errand.id, updatedOwner);
+      }
       setOwners((prevOwners) => [...prevOwners, updatedOwner]);
       reset();
       setSearchResult(false);
@@ -217,7 +224,11 @@ export const StakeholderList: React.FC<{
                 </Select>
               </div>
               <div className="py-10">
-                <Button leftIcon={<LucideIcon name="plus" size={16} />} variant="primary" onClick={addStakeholder}>
+                <Button
+                  leftIcon={<LucideIcon name="plus" size={16} />}
+                  variant="primary"
+                  onClick={addStakeholderToErrand}
+                >
                   Lägg till person
                 </Button>
               </div>
@@ -232,9 +243,14 @@ export const StakeholderList: React.FC<{
           key={index}
           {...owner}
           onRemove={() => {
+            if (errand?.id) {
+              removeStakeholder(municipalityId, errand.id, owner.id);
+            }
             setOwners((prevOwners) => prevOwners.filter((_, i) => i !== index));
           }}
-          onUpdate={(updatedData) => updateOwner(index, updatedData)}
+          onUpdate={(updatedData) => {
+            updateOwner(index, updatedData);
+          }}
         />
       ))}
     </div>

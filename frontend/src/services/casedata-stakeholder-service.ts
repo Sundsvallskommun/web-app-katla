@@ -140,7 +140,7 @@ export const makeStakeholdersList: (data: Partial<IErrand>) => Partial<CreateSta
   return stakeholders;
 };
 
-export const editStakeholder = (municipalityId: string, errandId: string, contact: CasedataOwnerOrContact) => {
+export const editStakeholder = (municipalityId: string, errandId: number, contact: CasedataOwnerOrContact) => {
   const stakeholder = makeStakeholder(contact, contact.newRole);
   if (!stakeholder.id) {
     console.error('No id found, cannot update stakeholder.');
@@ -161,7 +161,7 @@ export const editStakeholder = (municipalityId: string, errandId: string, contac
     });
 };
 
-export const addStakeholder = (municipalityId: string, errandId: string, contact: CasedataOwnerOrContact) => {
+export const addStakeholder = (municipalityId: string, errandId: number, contact: CasedataOwnerOrContact) => {
   const stakeholder = makeStakeholder(contact, contact.newRole);
 
   return apiService
@@ -173,7 +173,7 @@ export const addStakeholder = (municipalityId: string, errandId: string, contact
       return res;
     })
     .catch((e) => {
-      console.error('Something went wrong when creating stakeholder ', stakeholder);
+      console.error('Something went wrong when creating stakeholder', stakeholder);
       throw e;
     });
 };
@@ -198,7 +198,7 @@ export const setAdministrator = async (municipalityId: string, errand: IErrand, 
   });
 };
 
-export const removeStakeholder = (municipalityId: string, errandId: string, stakeholderId: string) => {
+export const removeStakeholder = (municipalityId: string, errandId: number, stakeholderId: string) => {
   if (!stakeholderId) {
     console.error('No id found, cannot continue.');
     return;

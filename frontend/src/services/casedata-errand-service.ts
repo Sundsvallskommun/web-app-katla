@@ -258,7 +258,7 @@ export const getErrandByErrandNumber: (
     .get<ApiResponse<ApiErrand>>(url)
     .then(async (res) => {
       const errand = mapErrandToIErrand(res.data.data, municipalityId);
-      let error: string | undefined = undefined;
+      let error: string = '';
       let errandAttachments;
       if (errand) {
         errandAttachments = await fetchErrandAttachments(municipalityId, errand.id);
@@ -348,8 +348,8 @@ export const useErrands = (
     errands,
     newErrands,
     ongoingErrands,
+    draftErrands,
     closedErrands,
-    suspendedErrands,
   } = useContext(AppContext);
 
   const fetchErrands = useCallback(
@@ -472,12 +472,13 @@ export const useErrands = (
       setErrands,
       setNewErrands,
       setOngoingErrands,
+      setDraftErrands,
       setClosedErrands,
       errands,
       newErrands,
       ongoingErrands,
+      draftErrands,
       closedErrands,
-      suspendedErrands,
       size,
       filter,
       sort,

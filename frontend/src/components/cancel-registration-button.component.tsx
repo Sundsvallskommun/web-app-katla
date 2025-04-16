@@ -1,9 +1,11 @@
+import { AppContext } from '@contexts/app-context-interface';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Dialog } from '@sk-web-gui/react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 export const CancelRegistrationButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { isLoading } = useContext(AppContext);
 
   const openHandler = () => {
     setIsOpen(!isOpen);
@@ -11,7 +13,7 @@ export const CancelRegistrationButton: React.FC = () => {
 
   return (
     <>
-      <Button variant="secondary" onClick={openHandler}>
+      <Button variant="secondary" color="vattjom" disabled={isLoading} onClick={openHandler}>
         Avbryt
       </Button>
       <Dialog className="max-w-[36rem]" show={isOpen}>

@@ -1,21 +1,22 @@
+'use client';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Dialog, useSnackbar } from '@sk-web-gui/react';
+import { Button, Dialog, Spinner, useSnackbar } from '@sk-web-gui/react';
+import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 
 export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toastMessage = useSnackbar();
-
-  const { administrators, user, municipalityId, setErrand } = useContext(AppContext);
+  const router = useRouter();
+  const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
   const {
     getValues,
-    formState,
     formState: { errors },
   }: UseFormReturn<IErrand, any, undefined> = useFormContext();
 
@@ -24,6 +25,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
   };
 
   const onSubmit = () => {
+    setIsLoading(true);
     const data: IErrand = getValues();
     data.stakeholders = owners;
     return saveErrand(data, municipalityId).then(async (res) => {
@@ -35,6 +37,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
         const e = await getErrand(municipalityId, res.errandId);
         if (e.errand) {
           setErrand(e.errand);
+          router.push(`/arende/${municipalityId}/${e.errand.errandNumber}`);
         }
         toastMessage({
           position: 'bottom',
@@ -43,6 +46,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
           status: 'success',
         });
       }
+      setIsLoading(false);
       openHandler();
       return true;
     });
@@ -66,7 +70,13 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
           <Button className="w-[12.8rem]" variant="secondary" onClick={openHandler}>
             Nej
           </Button>
-          <Button className="w-[12.8rem]" variant="primary" onClick={() => onSubmit()}>
+          <Button
+            className="w-[12.8rem]"
+            variant="primary"
+            onClick={() => onSubmit()}
+            disabled={isLoading}
+            rightIcon={isLoading ? <Spinner size={2} /> : undefined}
+          >
             Ja
           </Button>
         </Dialog.Buttons>

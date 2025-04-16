@@ -9,13 +9,16 @@ import { OtherParties } from '@components/errandinformation/other-parties.compon
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import { PageHeader } from '@components/page-header.component';
 import { RegisterErrandButton } from '@components/register-errand-button.component';
-import { DraftErrandButton } from '@components/save-draft-errand-button.component';
+import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
+import { Role } from '@interfaces/role';
+import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, FileUpload, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -53,35 +56,67 @@ const menuGroups: MenuItemGroup[] = [
   },
 ];
 
-const SingleErrandTitle = () => (
+const SingleErrandTitle: React.FC<{ errandNumber: string }> = ({ errandNumber }) => (
   <div className="flex items-center gap-24 py-10">
     <a href={`${process.env.NEXT_PUBLIC_BASEPATH}`} title={`Draken - Färdtjänst. Gå till startsidan.`}>
       <Logo variant="symbol" className="h-40" />
     </a>
-    <strong className="text-large">Nytt ärende</strong>
-    {/* <span className="text-small"></span> */}
+    <strong className="text-large">Ärende</strong>
+    <span className="text-small">{errandNumber ? errandNumber : ''}</span>
   </div>
 );
 
-const Registrera: React.FC = () => {
+const Arende: React.FC = () => {
   const method = useForm<IErrand>();
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
-  const { setMunicipalityId, user, setUser } = useContext(AppContext);
+  const { municipalityId, setMunicipalityId, user, setUser, errand, setErrand, isLoading, setIsLoading } =
+    useContext(AppContext);
+
+  const router = useRouter();
+  const pathName = usePathname();
+
+  const errandNumber = pathName.split('/')[3];
 
   useEffect(() => {
-    setMunicipalityId(process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '');
-    //getAdminUsers().then(setAdministrators);
-    getMe().then((user) => {
-      setUser(user);
-    });
+    const initializeData = async () => {
+      try {
+        setIsLoading(true);
+        const municipality = process.env.NEXT_PUBLIC_MUNICIPALITY_ID || pathName.split('/')[2];
+        setMunicipalityId(municipality);
+
+        const user = await getMe();
+        setUser(user);
+
+        const res = await getErrandByErrandNumber(municipality, errandNumber);
+        if (res.errand) {
+          setErrand(res.errand);
+          method.reset(res.errand);
+          setApplicants(
+            res.errand.stakeholders
+              .filter((s) => s.roles.includes(Role.APPLICANT))
+              .map((applicant) => ({
+                ...applicant,
+                newEmail: applicant.emails[0]?.value,
+                newPhoneNumber: applicant.phoneNumbers[0]?.value,
+              }))
+          );
+        }
+      } catch (err) {
+        console.error('Error initializing data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <FormProvider {...method}>
       <PageHeader
-        logo={<SingleErrandTitle />}
+        logo={<SingleErrandTitle errandNumber={errand.errandNumber} />}
         userMenu={
           <div className="flex items-center h-fit">
             <span data-cy="usermenu">
@@ -97,9 +132,10 @@ const Registrera: React.FC = () => {
             <Divider orientation="vertical" className="mx-24" />
 
             <Link
-              href={`${process.env.NEXT_PUBLIC_BASEPATH}/registrera`}
+              href="#"
               target="_blank"
               data-cy="register-new-errand-button"
+              onClick={() => router.push('/registrera')}
             >
               <Button
                 color={'primary'}
@@ -120,12 +156,12 @@ const Registrera: React.FC = () => {
               <section className="w-full">
                 <header className="flex justify-between mt-md w-full pt-8">
                   <div className="flex-grow">
-                    <h1 className="text-h3-sm md:text-h3-md xl:text-h2-lg mb-0 break-words">Nytt ärende</h1>
+                    <h1 className="text-h3-sm md:text-h3-md xl:text-h2-lg mb-0 break-words">
+                      Ärende {errand.errandNumber}
+                    </h1>
                   </div>
                   <div className="flex gap-md">
-                    <CancelRegistrationButton />
-                    <DraftErrandButton owners={applicants.concat(otherParties)} />
-                    <RegisterErrandButton owners={applicants.concat(otherParties)} />
+                    <SaveErrandButton owners={applicants.concat(otherParties)} />
                   </div>
                 </header>
 
@@ -187,4 +223,4 @@ const Registrera: React.FC = () => {
   );
 };
 
-export default Registrera;
+export default Arende;
