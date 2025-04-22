@@ -15,10 +15,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const {
-    getValues,
-    formState: { errors },
-  }: UseFormReturn<IErrand, any, undefined> = useFormContext();
+  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const openHandler = () => {
     setIsOpen(!isOpen);
