@@ -9,8 +9,6 @@ export const CasedataFilterQuery: React.FC = () => {
   const [query, setQuery] = useState<string>(value);
   //const gui = useGui();
 
-  //   const isMobile = useMediaQuery(`screen and (max-width: ${gui.theme.screens.md})`);
-
   //   useDebounceEffect(
   //     () => {
   //       if (query !== value) {

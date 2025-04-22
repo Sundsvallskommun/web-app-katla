@@ -2,11 +2,11 @@ import NextLink from 'next/link';
 import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { TableForm } from '../ongoing-casedata-errands.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { CasedataStatusLabelComponent } from './casedata-status-label.component';
 import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
+import { TableForm } from '@utils/useOngoingCaseDataErrands';
 
 export const ErrandsTable: React.FC = () => {
   const { watch, setValue, register } = useFormContext<TableForm>();

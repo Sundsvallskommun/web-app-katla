@@ -14,7 +14,6 @@ export const NotificationsBell = (props: { toggleShow: () => void }) => {
       onClick={() => {
         props.toggleShow();
       }}
-      className="mx-md"
       variant="tertiary"
       iconButton
       leftIcon={

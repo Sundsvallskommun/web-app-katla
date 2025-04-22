@@ -17,7 +17,7 @@ const CaseDataFiltering: React.FC<{
   return (
     <>
       <div className="flex flex-col w-full gap-16 py-19">
-        <div className="w-full flex flex-wrap items-start md:items-center justify-between md:flex-row gap-16">
+        <div className="w-full flex-wrap items-start md:items-center justify-between md:visible hidden md:flex-row gap-16">
           <CasedataFilterQuery />
           <div className="flex gap-16">
             <Button
