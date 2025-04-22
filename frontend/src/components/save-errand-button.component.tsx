@@ -11,17 +11,14 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const {
-    getValues,
-    formState: { errors },
-  }: UseFormReturn<IErrand, any, undefined> = useFormContext();
+  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const onSubmit = () => {
     setIsLoading(true);
     const data: IErrand = getValues();
     data.stakeholders = owners;
-    delete (data as any).errandNumber;
-    delete (data as any).channel;
+    delete (data as Partial<IErrand>).errandNumber;
+    delete (data as Partial<IErrand>).channel;
 
     return saveErrand(data, municipalityId).then(async (res) => {
       if (!res.errandSuccessful) {
