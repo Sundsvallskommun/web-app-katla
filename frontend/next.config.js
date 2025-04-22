@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const envalid = require('envalid');
+const nodeSass = require('sass');
 
 const authDependent = envalid.makeValidator((x) => {
   const authEnabled = process.env.HEALTH_AUTH === 'true';
@@ -28,9 +29,16 @@ module.exports = withBundleAnalyzer({
     domains: [process.env.DOMAIN_NAME],
     formats: ['image/avif', 'image/webp'],
   },
-  basePath: process.env.BASE_PATH,
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
   sassOptions: {
-    prependData: `$basePath: '${process.env.BASE_PATH}';`,
+    functions: {
+      'env($variable)': (variable) => {
+        const value = variable.getValue();
+        const envValue = process.env[value];
+        const sassValue = new nodeSass.SassString(envValue);
+        return sassValue;
+      },
+    },
   },
   transpilePackages: ['lucide-react'],
   experimental: {
