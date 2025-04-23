@@ -12,15 +12,15 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const { getValues }: UseFormReturn<IErrand, Record<string, unknown>, undefined> = useFormContext();
+  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const onSubmit = async () => {
     setIsLoading(true);
     const data = getValues() as IErrand & { attachments: UploadFile[] };
 
     data.stakeholders = owners;
-    delete data.errandNumber;
-    delete data.channel;
+    delete (data as Partial<IErrand>).errandNumber;
+    delete (data as Partial<IErrand>).channel;
 
     const newAttachments = (data.attachments || [])
       .filter((attachment: UploadFile) => !attachment.id)

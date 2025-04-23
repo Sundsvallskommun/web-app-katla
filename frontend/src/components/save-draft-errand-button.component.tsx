@@ -14,7 +14,7 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const { getValues }: UseFormReturn<IErrand, undefined> = useFormContext();
+  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const onSubmit = () => {
     setIsLoading(true);
@@ -22,8 +22,8 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
     data.stakeholders = owners;
     data.status = data.status || {};
     data.status.statusType = ErrandStatus.Utkast;
-    delete data.errandNumber;
-    delete data.channel;
+    delete (data as Partial<IErrand>).errandNumber;
+    delete (data as Partial<IErrand>).channel;
 
     return saveErrand(data, municipalityId).then(async (res) => {
       if (!res.errandSuccessful) {

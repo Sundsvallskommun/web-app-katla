@@ -1,5 +1,4 @@
 import { Data } from '@services/api-service';
-import { Admin } from '@services/user-service';
 import { Attachment } from './attachment';
 import { Channels } from './channels';
 import { Decision } from './decision';
@@ -11,7 +10,6 @@ import { FacilityDTO } from './facilities';
 import { Notification } from './notification';
 import { All, Priority } from './priority';
 import { CasedataOwnerOrContact, CreateStakeholderDto, Stakeholder } from './stakeholder';
-
 export interface ApiErrand {
   id: number;
   errandNumber: string;
@@ -84,7 +82,7 @@ export interface IErrand {
   caseType: string;
   label: string;
   description: string;
-  administrator?: Admin;
+  administrator?: Stakeholder;
   administratorName: string;
   priority: string;
   status: ApiErrandStatus;
