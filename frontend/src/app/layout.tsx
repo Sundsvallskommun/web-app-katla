@@ -11,7 +11,7 @@ interface RootLayoutProps {
 
 export const generateStaticParams = () => i18nConfig.locales.map((locale) => ({ locale }));
 
-const RootLayout = async ({ children, params }: RootLayoutProps) => {
+const RootLayout = async ({ children }: RootLayoutProps) => {
   const headerList = await headers();
   const path = headerList.get('x-path') ?? '';
 

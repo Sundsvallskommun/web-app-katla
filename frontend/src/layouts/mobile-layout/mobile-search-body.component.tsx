@@ -9,7 +9,7 @@ interface MobileSearchBodyProps {
   onResetList?: () => void;
 }
 
-export const MobileSearchBody: React.FC<MobileSearchBodyProps> = ({ children, onSearch, onDone, onResetList }) => {
+export const MobileSearchBody: React.FC<MobileSearchBodyProps> = ({ onSearch, onDone, onResetList }) => {
   const [query, setQuery] = useState<string>('');
   const { setValue } = useFormContext<{ query: string }>();
 

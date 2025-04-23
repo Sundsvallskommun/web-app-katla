@@ -4,7 +4,7 @@ import { AppContext } from '@contexts/app-context-interface';
 import store from '@services/storage-service';
 
 export const useFilterTags = () => {
-  const { selectedErrandStatuses, setSelectedErrandStatuses, setSidebarLabel } = useContext(AppContext);
+  const { setSelectedErrandStatuses, setSidebarLabel } = useContext(AppContext);
 
   const { getValues, setValue, reset } = useFormContext<{
     status: string[];

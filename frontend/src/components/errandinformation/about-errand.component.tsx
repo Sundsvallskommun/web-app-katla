@@ -8,10 +8,7 @@ import { useFormContext, UseFormReturn } from 'react-hook-form';
 export const AboutErrand: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
 
-  const {
-    register,
-    formState: { errors },
-  }: UseFormReturn<IErrand, any, undefined> = useFormContext();
+  const { register }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
   return (
     <Disclosure
       icon={<LucideIcon name="info" />}
@@ -26,9 +23,9 @@ export const AboutErrand: React.FC = () => {
         <strong className="mb-10">Ärendetyp*</strong>
         <Select className="w-full" {...register('caseType')}>
           {Object.entries(PTCaseLabel)
-            .filter(([key, label]) => label !== 'Överklagan')
+            .filter(([, label]) => label !== 'Överklagan')
             .sort((a, b) => a[1].localeCompare(b[1]))
-            .map(([key, label]: [string, string], index) => {
+            .map(([key, label]: [string, string]) => {
               return (
                 <Select.Option
                   className={cx(`cursor-pointer select-none relative py-4 pl-10 pr-4`)}

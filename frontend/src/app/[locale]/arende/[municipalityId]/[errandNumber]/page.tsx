@@ -1,5 +1,4 @@
 'use client';
-import { CancelRegistrationButton } from '@components/cancel-registration-button.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
 import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
@@ -8,12 +7,11 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import { PageHeader } from '@components/page-header.component';
-import { RegisterErrandButton } from '@components/register-errand-button.component';
 import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { Role } from '@interfaces/role';
-import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
@@ -70,8 +68,7 @@ const Arende: React.FC = () => {
   const method = useForm<IErrand>();
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
-  const { municipalityId, setMunicipalityId, user, setUser, errand, setErrand, isLoading, setIsLoading } =
-    useContext(AppContext);
+  const { setMunicipalityId, user, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 
   const router = useRouter();
   const pathName = usePathname();

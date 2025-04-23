@@ -10,7 +10,6 @@ import { All, Priority } from './priority';
 import { CasedataOwnerOrContact, CreateStakeholderDto, Stakeholder } from './stakeholder';
 import { ExtraParameter } from './extra-parameters';
 import { Notification } from './notification';
-import { Admin } from '@services/user-service';
 
 export interface ApiErrand {
   id: number;
@@ -84,7 +83,7 @@ export interface IErrand {
   caseType: string;
   label: string;
   description: string;
-  administrator?: Admin;
+  administrator?: Stakeholder;
   administratorName: string;
   priority: string;
   status: ApiErrandStatus;
