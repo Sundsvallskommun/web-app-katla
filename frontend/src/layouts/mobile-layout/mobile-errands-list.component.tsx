@@ -63,6 +63,7 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
       setVisibleCount(4);
       setInitialLoaded(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialLoaded, errands?.errands]);
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
       setInitialLoaded(false);
       previousFilterKeyRef.current = currentFilterKey;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentFilterKey]);
 
   useEffect(() => {
@@ -82,6 +84,7 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
       const newOnes = errands.errands.filter((e) => !existingIds.has(e.id));
       return [...prev, ...newOnes];
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errands, initialLoaded]);
 
   const handleLoadMore = () => {

@@ -125,17 +125,18 @@ export const sendMessage: (
           .post<boolean, FormData>(url, messageFormData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(() => {
             if (data.newAttachments.length) {
-              const attachmentsToSave: { type: string; file: FileList; attachmentName: string }[] = data.newAttachments
+              const attachmentsToSave: { type: string; file: File[]; attachmentName: string }[] = data.newAttachments
                 ?.filter((f) => f.file !== undefined)
                 .map((f) => {
                   return {
                     type: 'OTHER_ATTACHMENT',
-                    file: f.file as FileList,
+                    file: Array.from(f.file as FileList),
                     attachmentName: f.file?.[0]?.name ?? '',
                   };
                 });
 
-              sendAttachments(municipalityId, errand.id, errand.errandNumber, attachmentsToSave);
+              if (errand.errandNumber)
+                sendAttachments(municipalityId, errand.id, errand.errandNumber, attachmentsToSave);
             }
             data.newAttachments = [];
 
