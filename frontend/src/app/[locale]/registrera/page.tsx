@@ -15,7 +15,7 @@ import { IErrand } from '@interfaces/errand';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getMe } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Divider, FileUpload, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
+import { Button, Divider, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
 import { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -151,19 +151,6 @@ const Registrera: React.FC = () => {
                           <div className="flex">
                             <h2>Bilagor</h2>
                           </div>
-                          <div>
-                            <Button
-                              data-cy="add-attachment-button"
-                              disabled={false}
-                              color="vattjom"
-                              rightIcon={<LucideIcon name="upload" size={16} />}
-                              inverted
-                              size="sm"
-                              onClick={() => {}}
-                            >
-                              Ladda upp bilaga
-                            </Button>
-                          </div>
                         </div>
                         <div className="w-[68rem] py-[1rem]">
                           <p>
@@ -171,9 +158,6 @@ const Registrera: React.FC = () => {
                             spara ett utkast på ärendet.
                           </p>
                         </div>
-                        <FileUpload.List>
-                          <FileUpload.ListItem index={0}></FileUpload.ListItem>
-                        </FileUpload.List>
                       </div>
                     </div>
                   </div>

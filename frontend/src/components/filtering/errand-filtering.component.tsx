@@ -30,7 +30,11 @@ const CaseDataFiltering: React.FC<{
             >
               {show ? 'Dölj filter' : `Visa filter ${numberOfFilters !== 0 ? `(${numberOfFilters})` : ''}`}
             </Button>
-            <Link href={`/registrera`} target="_blank" data-cy="register-new-errand-button">
+            <Link
+              href={`${process.env.NEXT_PUBLIC_BASE_PATH}/registrera`}
+              target="_blank"
+              data-cy="register-new-errand-button"
+            >
               <Button color={'vattjom'} variant={'primary'}>
                 Nytt ärende
               </Button>

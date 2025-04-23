@@ -1,16 +1,16 @@
 import { Data } from '@services/api-service';
+import { Admin } from '@services/user-service';
 import { Attachment } from './attachment';
 import { Channels } from './channels';
 import { Decision } from './decision';
 import { ErrandPhase } from './errand-phase';
 import { ApiErrandStatus } from './errand-status';
 import { ErrandNote } from './errandNote';
+import { ExtraParameter } from './extra-parameters';
 import { FacilityDTO } from './facilities';
+import { Notification } from './notification';
 import { All, Priority } from './priority';
 import { CasedataOwnerOrContact, CreateStakeholderDto, Stakeholder } from './stakeholder';
-import { ExtraParameter } from './extra-parameters';
-import { Notification } from './notification';
-import { Admin } from '@services/user-service';
 
 export interface ApiErrand {
   id: number;
@@ -80,7 +80,7 @@ export interface PagedApiErrandsResponse extends ApiPagingData {
 export interface IErrand {
   id: number;
   externalCaseId: string;
-  errandNumber: string;
+  errandNumber?: string;
   caseType: string;
   label: string;
   description: string;
@@ -90,7 +90,7 @@ export interface IErrand {
   status: ApiErrandStatus;
   statuses: ApiErrandStatus[];
   phase: ErrandPhase;
-  channel: Channels;
+  channel?: Channels;
   municipalityId: string;
   stakeholders: CasedataOwnerOrContact[];
   facilities: FacilityDTO[];

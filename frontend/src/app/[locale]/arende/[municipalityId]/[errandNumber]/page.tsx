@@ -1,5 +1,4 @@
 'use client';
-import { CancelRegistrationButton } from '@components/cancel-registration-button.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
 import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
@@ -7,19 +6,21 @@ import { HealthCareStaff } from '@components/errandinformation/healthcare-staff.
 import { MedicalOpinion } from '@components/errandinformation/medical-opinion.component';
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
+import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { PageHeader } from '@components/page-header.component';
-import { RegisterErrandButton } from '@components/register-errand-button.component';
 import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
+import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
 import { Role } from '@interfaces/role';
-import { CasedataOwnerOrContact, Stakeholder } from '@interfaces/stakeholder';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
+import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Divider, FileUpload, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
+import { Button, Divider, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 const menuGroups: MenuItemGroup[] = [
@@ -70,8 +71,7 @@ const Arende: React.FC = () => {
   const method = useForm<IErrand>();
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
-  const { municipalityId, setMunicipalityId, user, setUser, errand, setErrand, isLoading, setIsLoading } =
-    useContext(AppContext);
+  const { setMunicipalityId, user, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 
   const router = useRouter();
   const pathName = usePathname();
@@ -92,6 +92,12 @@ const Arende: React.FC = () => {
         if (res.errand) {
           setErrand(res.errand);
           method.reset(res.errand);
+
+          if (res.errand.attachments) {
+            const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
+            method.setValue('attachments', uploadFiles as unknown as Attachment[]); // Sätt bilagorna i formuläret
+            console.log('Bilagor:', uploadFiles);
+          }
           setApplicants(
             res.errand.stakeholders
               .filter((s) => s.roles.includes(Role.APPLICANT))
@@ -116,7 +122,7 @@ const Arende: React.FC = () => {
   return (
     <FormProvider {...method}>
       <PageHeader
-        logo={<SingleErrandTitle errandNumber={errand.errandNumber} />}
+        logo={<SingleErrandTitle errandNumber={errand.errandNumber || ''} />}
         userMenu={
           <div className="flex items-center h-fit">
             <span data-cy="usermenu">
@@ -182,35 +188,7 @@ const Arende: React.FC = () => {
                       <ExternalCircumstances />
                       <PersonalInformation />
                       <MedicalOpinion />
-                      <div className="w-full pb-[2rem] pt-[5rem] px-32 ">
-                        <div className="flex justify-between">
-                          <div className="flex">
-                            <h2>Bilagor</h2>
-                          </div>
-                          <div>
-                            <Button
-                              data-cy="add-attachment-button"
-                              disabled={false}
-                              color="vattjom"
-                              rightIcon={<LucideIcon name="upload" size={16} />}
-                              inverted
-                              size="sm"
-                              onClick={() => {}}
-                            >
-                              Ladda upp bilaga
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="w-[68rem] py-[1rem]">
-                          <p>
-                            Ladda upp andra bilagor av relevans för ansökan. För att kunna ladda upp bilagor behöver du
-                            spara ett utkast på ärendet.
-                          </p>
-                        </div>
-                        <FileUpload.List>
-                          <FileUpload.ListItem index={0}></FileUpload.ListItem>
-                        </FileUpload.List>
-                      </div>
+                      <FileUploadComponent />
                     </div>
                   </div>
                 </section>

@@ -2,6 +2,7 @@ import { Attachment } from '@interfaces/attachment';
 import { PTCaseType } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import { ApiResponse, apiService } from '@services/api-service';
+import { UploadFile } from '@sk-web-gui/react';
 import { toBase64 } from '@utils/toBase64';
 
 export const MAX_FILE_SIZE_MB = 50;
@@ -179,9 +180,8 @@ export const getImageAspect: (attachment: Attachment) => number | undefined = (a
 const uniqueAttachments: AttachmentCategory[] = [];
 const uniquePTAttachments: PTAttachmentCategory[] = ['PASSPORT_PHOTO', 'SIGNATURE'];
 
-export const onlyOneAllowed: (cat: AttachmentCategory | PTAttachmentCategory) => boolean = (
-  cat: AttachmentCategory | PTAttachmentCategory
-) => uniquePTAttachments.includes(cat as PTAttachmentCategory);
+export const onlyOneAllowed: (cat: PTAttachmentCategory) => boolean = (cat: PTAttachmentCategory) =>
+  uniquePTAttachments.includes(cat as PTAttachmentCategory);
 
 export const validateAttachmentsForUtredning: (errand: IErrand) => boolean = (errand) => {
   // Errand may only have max one passport photo and max one signature before moving to Utredning phase
@@ -189,6 +189,34 @@ export const validateAttachmentsForUtredning: (errand: IErrand) => boolean = (er
     (u) => errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === u).length < 2
   );
   return uniqueAttachmentsOnlyOnce;
+};
+
+export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFile[] => {
+  return attachments.map((attachment) => {
+    console.log('attachment', attachment);
+    // Konvertera Base64-strängen tillbaka till en Blob
+    const binaryData = atob(attachment.file); // Decode Base64
+    const byteArray = new Uint8Array(binaryData.length);
+    for (let i = 0; i < binaryData.length; i++) {
+      byteArray[i] = binaryData.charCodeAt(i);
+    }
+    const blob = new Blob([byteArray], { type: attachment.mimeType });
+
+    // Skapa en File-instans från Blob
+    const file = new File([blob], attachment.name, { type: attachment.mimeType });
+
+    return {
+      id: attachment.id || '', // Fallback om id saknas
+      file, // File-instansen
+      meta: {
+        name: attachment.name,
+        ending: attachment.extension,
+        category: attachment.category,
+        note: attachment.note,
+        ...attachment.extraParameters, // Lägg till extra parametrar om de finns
+      },
+    };
+  });
 };
 
 export const validateAttachmentsForDecision: (errand: IErrand) => { valid: boolean; reason: string } = (errand) => {
@@ -256,7 +284,7 @@ export const withRetries: <T>(retries: number, func: () => Promise<T>) => Promis
 
 export const editAttachment = (
   municipalityId: string,
-  errandId: string,
+  errandId: number,
   attachmentId: string,
   attachmentName: string,
   attachmentType: string
@@ -283,9 +311,10 @@ export const sendAttachments = (
   municipalityId: string,
   errandId: number,
   errandNumber: string,
-  attachmentData: { type: string; file: FileList; attachmentName: string }[]
+  attachmentData: { type: string; file: File[]; attachmentName: string }[]
 ) => {
   const attachmentPromises = attachmentData.map(async (attachment) => {
+    console.log('attachment', attachment);
     const fileItem = attachment.file[0];
     if (fileItem.size / 1024 / 1024 > MAX_FILE_SIZE_MB) {
       throw new Error('MAX_SIZE');
@@ -296,7 +325,7 @@ export const sendAttachments = (
     const fileData = await toBase64(fileItem);
     const extension = fileItem.name.split('.').pop();
     const obj: Attachment = {
-      category: attachment.type,
+      category: fileItem.type,
       name: fileItem.name,
       note: '',
       extension: extension || '',
@@ -340,7 +369,7 @@ export const sendAttachments = (
   });
 };
 
-export const deleteAttachment = (municipalityId: string, errandId: number, attachment: Attachment) => {
+export const deleteAttachment = (municipalityId: string, errandId: number, attachment: UploadFile) => {
   if (!attachment.id) {
     console.error('No id found, cannot continue.');
     return;

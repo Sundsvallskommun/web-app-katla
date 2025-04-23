@@ -5,17 +5,16 @@ import { ErrandStatus } from '@interfaces/errand-status';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import { Button, Spinner, useSnackbar } from '@sk-web-gui/react';
+import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 
 export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const toastMessage = useSnackbar();
+  const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const {
-    getValues,
-    formState: { errors },
-  }: UseFormReturn<IErrand, any, undefined> = useFormContext();
+  const { getValues }: UseFormReturn<IErrand, undefined> = useFormContext();
 
   const onSubmit = () => {
     setIsLoading(true);
@@ -23,8 +22,8 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
     data.stakeholders = owners;
     data.status = data.status || {};
     data.status.statusType = ErrandStatus.Utkast;
-    delete (data as any).errandNumber;
-    delete (data as any).channel;
+    delete data.errandNumber;
+    delete data.channel;
 
     return saveErrand(data, municipalityId).then(async (res) => {
       if (!res.errandSuccessful) {
@@ -34,6 +33,7 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
         const e = await getErrand(municipalityId, res.errandId);
         if (e.errand) {
           setErrand(e.errand);
+          router.push(`/arende/${municipalityId}/${e.errand.errandNumber}`);
         }
         toastMessage({
           position: 'bottom',
@@ -55,7 +55,7 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
         disabled={isLoading}
         rightIcon={isLoading ? <Spinner size={2} /> : undefined}
       >
-        Spara ärende
+        Spara utkast
       </Button>
     </>
   );
