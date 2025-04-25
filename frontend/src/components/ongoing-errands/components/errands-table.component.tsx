@@ -1,5 +1,5 @@
 import NextLink from 'next/link';
-import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
+import { Badge, Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { AppContext } from '@contexts/app-context-interface';
@@ -7,6 +7,7 @@ import { IErrand } from '@interfaces/errand';
 import { CasedataStatusLabelComponent } from './casedata-status-label.component';
 import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
+import { Priority } from '@interfaces/priority';
 
 export const ErrandsTable: React.FC = () => {
   const { watch, setValue, register } = useFormContext<TableForm>();
@@ -20,7 +21,10 @@ export const ErrandsTable: React.FC = () => {
   const serverSideSortableColsPT: { [key: number]: string } = {
     0: 'status.statusType',
     1: 'caseType',
-    2: 'created',
+    2: 'errandNumber',
+    3: 'priority',
+    4: 'created',
+    5: 'channel',
   };
 
   const sortOrders: { [key: string]: 'ascending' | 'descending' } = {
@@ -98,6 +102,22 @@ export const ErrandsTable: React.FC = () => {
         <Table.Column>
           <time dateTime={errand.created}>{errand.created}</time>
         </Table.Column>
+        <Table.Column>
+          <>
+            <Badge
+              className="w-[0.8rem] h-[0.8rem]"
+              color={
+                errand.priority === Priority.HIGH ? 'error'
+                : errand.priority === Priority.MEDIUM ?
+                  'warning'
+                : 'vattjom'
+              }
+              rounded
+            />
+            {errand.priority ? errand.priority.toString() : ''}
+          </>
+        </Table.Column>
+        <Table.Column>{errand.channel ? errand.channel : ''}</Table.Column>
         <Table.Column sticky>
           <div className="w-full flex justify-end">
             <NextLink

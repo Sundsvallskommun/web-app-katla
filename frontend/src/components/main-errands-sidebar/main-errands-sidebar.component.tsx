@@ -5,6 +5,7 @@ import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import { appConfig } from 'src/config/app-config';
 
 interface SidebarProps {
   open: boolean;
@@ -28,7 +29,6 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
   setOpen,
   children,
   user,
-  applicationName,
   applicationEnvironment,
 }) => {
   const MainTitle = (open: boolean) => (
@@ -37,7 +37,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         className={cx(open ? '' : 'w-[2.8rem]')}
         variant={open ? 'service' : 'symbol'}
         title={'Draken'}
-        subtitle={applicationName + (applicationEnvironment ? ` ${applicationEnvironment}` : '')}
+        subtitle={appConfig.applicationName + (applicationEnvironment ? ` ${applicationEnvironment}` : '')}
       />
     </NextLink>
   );

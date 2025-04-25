@@ -5,17 +5,17 @@ import { AppContext } from '@contexts/app-context-interface';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import { getMe } from '@services/user-service';
 import { useContext, useEffect, useState } from 'react';
-import { MobileHeader } from '@layouts/mobile-layout/mobile-header.component';
 import { MobileMenuBody } from '@layouts/mobile-layout/mobile-meny-body.component';
 import { MobilePage } from '@layouts/mobile-layout/moible-page.component';
 import { CaseDataFilter, CaseStatusValues } from '@components/filtering/errand-filter';
 import { FormProvider, useForm } from 'react-hook-form';
-import { CasedataFilterSidebarStatusSelector } from '@components/filtering/errand-filter-sidebarstatus-selector.component';
+import { CasedataFilterSidebarStatusSelector } from '@components/filtering/desktopFiltering/errand-filter-sidebarstatus-selector.component';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import { MobileSearchBody } from '@layouts/mobile-layout/mobile-search-body.component';
 import { MobileErrandsList } from '@layouts/mobile-layout/mobile-errands-list.component';
 import { IErrand } from '@interfaces/errand';
 import { useIsMobile } from '@utils/useIsMobile';
+import { MobileMainPageHeader } from '@layouts/mobile-layout/mobile-main-page-header.component';
 
 const Oversikt: React.FC = () => {
   const { setMunicipalityId, setUser } = useContext(AppContext);
@@ -51,7 +51,7 @@ const Oversikt: React.FC = () => {
   return isMobile ?
       <>
         {!openSearch && !openNotification && !openMenu && (
-          <MobileHeader
+          <MobileMainPageHeader
             openNotification={openNotification}
             setOpenNotification={setOpenNotification}
             openSearch={openSearch}
@@ -67,7 +67,7 @@ const Oversikt: React.FC = () => {
               initialLoaded={initialLoaded}
               setInitialLoaded={setInitialLoaded}
             />
-          </MobileHeader>
+          </MobileMainPageHeader>
         )}
 
         {openSearch && (
@@ -85,7 +85,7 @@ const Oversikt: React.FC = () => {
         )}
 
         {openMenu && (
-          <MobilePage open={openMenu} setOpen={setOpenMenu} onClose={closeAll} sundsvallHeader={true}>
+          <MobilePage open={openMenu} setOpen={setOpenMenu} onClose={closeAll}>
             <MobileMenuBody>
               <FormProvider {...casedataFilterForm}>
                 <CasedataFilterSidebarStatusSelector iconButton={!open} />

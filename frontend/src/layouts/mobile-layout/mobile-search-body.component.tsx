@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 interface MobileSearchBodyProps {
-  children?: React.ReactNode;
   onSearch?: (query: string) => void;
   onDone?: () => void;
   onResetList?: () => void;

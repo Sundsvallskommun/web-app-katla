@@ -152,4 +152,7 @@ export class CPatchErrandDto implements IPatchErrandDTO {
   @IsString()
   @IsOptional()
   applicationReceived?: string;
+  @IsString()
+  @IsOptional()
+  channel?: ErrandChannelEnum;
 }

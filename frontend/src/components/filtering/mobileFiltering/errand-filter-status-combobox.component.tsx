@@ -1,6 +1,6 @@
 import { ErrandStatus } from '@interfaces/errand-status';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CaseStatusFilter } from './errand-filter';
+import { CaseStatusFilter } from '../errand-filter';
 import { Combobox } from '@sk-web-gui/react';
 
 export const CasedataFilterStatusMobile: React.FC = () => {

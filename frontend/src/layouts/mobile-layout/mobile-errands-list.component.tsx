@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
 import { Button } from '@sk-web-gui/react';
 import LucideIcon from '@sk-web-gui/lucide-icon';
@@ -8,7 +8,7 @@ import { getCaseLabels } from '@services/casedata-errand-service';
 import { IErrand } from '@interfaces/errand';
 import MobileErrandItem from './mobile-errand-item';
 import { MobilePage } from './moible-page.component';
-import CaseDataFilteringMobile from '@components/filtering/errand-filtering-mobile.component';
+import CaseDataFilteringMobile from '@components/filtering/mobileFiltering/errand-filtering-mobile.component';
 
 interface MobileErrandsListProps {
   allErrands: IErrand[];
@@ -29,6 +29,7 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
 }) => {
   const { sidebarLabel } = useContext(AppContext);
   const [filterOpen, setFilterOpen] = useState(false);
+  const filterTriggeredRef = useRef(false);
 
   const {
     errands,
@@ -44,64 +45,93 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
 
   const caseType = filterForm.watch('caseType');
   const status = filterForm.watch('status');
+  const priority = filterForm.watch('priority');
+  const channel = filterForm.watch('channel');
+  const startdate = filterForm.watch('startdate');
+  const enddate = filterForm.watch('enddate');
 
   const currentFilter = useMemo(
     () => ({
       caseType,
       status,
+      priority,
+      channel,
+      startdate,
+      enddate,
       ownerFilter,
     }),
-    [caseType, status, ownerFilter]
+    [caseType, status, ownerFilter, priority, channel, startdate, enddate]
   );
 
   const currentFilterKey = JSON.stringify(currentFilter);
   const previousFilterKeyRef = useRef<string>(currentFilterKey);
 
   useEffect(() => {
-    if (!initialLoaded && errands?.errands?.length) {
+    if (!initialLoaded && errands && !filterTriggeredRef.current) {
       setAllErrands(errands.errands);
       setVisibleCount(4);
       setInitialLoaded(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialLoaded, errands?.errands]);
+  }, [initialLoaded, errands, setAllErrands, setVisibleCount, setInitialLoaded]);
+
+  const clearErrands = useCallback(() => {
+    setAllErrands([]);
+    setVisibleCount(4);
+    setInitialLoaded(false);
+    filterTriggeredRef.current = false;
+  }, [setAllErrands, setVisibleCount, setInitialLoaded]);
 
   useEffect(() => {
     if (previousFilterKeyRef.current !== currentFilterKey) {
-      setAllErrands([]);
-      setVisibleCount(4);
-      setInitialLoaded(false);
+      clearErrands();
       previousFilterKeyRef.current = currentFilterKey;
+      filterTriggeredRef.current = true;
+      setShouldTriggerFilter(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentFilterKey]);
+  }, [currentFilterKey, clearErrands, setShouldTriggerFilter]);
 
   useEffect(() => {
-    if (!initialLoaded || !errands?.errands?.length) return;
+    if (!initialLoaded || !errands?.errands?.length || filterTriggeredRef.current) return;
 
     setAllErrands((prev) => {
       const existingIds = new Set(prev.map((e) => e.id));
       const newOnes = errands.errands.filter((e) => !existingIds.has(e.id));
       return [...prev, ...newOnes];
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errands, initialLoaded]);
+  }, [errands, initialLoaded, setAllErrands]);
+
+  useEffect(() => {
+    if (errands?.errands?.length && filterTriggeredRef.current) {
+      filterTriggeredRef.current = false;
+      setAllErrands(errands.errands);
+      setVisibleCount(4);
+      setInitialLoaded(true);
+    }
+  }, [errands, setAllErrands, setVisibleCount, setInitialLoaded]);
+
+  useEffect(() => {
+    if (visibleCount < allErrands.length) {
+      setVisibleCount((prev) => Math.min(prev + 4, allErrands.length));
+    }
+  }, [allErrands.length, setVisibleCount, visibleCount]);
 
   const handleLoadMore = () => {
+    if (errands.isLoading) return;
     const stillHasMoreLocally = visibleCount + 4 <= allErrands.length;
     const hasMoreInApi = errands.page + 1 < errands.totalPages;
 
     if (stillHasMoreLocally) {
       setVisibleCount((prev) => prev + 4);
     } else if (hasMoreInApi) {
+      setVisibleCount((prev) => prev + 4);
       tableForm.setValue('page', errands.page + 1);
     }
   };
 
-  const totalTags = (caseType?.length || 0) + (status?.length || 0);
+  const totalTags = (caseType?.length || 0) + (status?.length || 0) + (priority?.length || 0) + (channel?.length || 0);
 
   return (
-    <div className="w-full p-[1rem] py-[1.6rem]">
+    <div className="w-full p-[1rem] py-[1.6rem] relative">
       <div className="flex justify-between items-center mb-4">
         <div className="text-xl font-bold">{errandSidebarLabel || sidebarLabel || 'Ärenden'}</div>
         <div>
@@ -134,7 +164,7 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
               errand={{
                 id: errand.id,
                 title: errand.label || 'Namnlöst ärende',
-                status: errand.status?.statusType || 'Okänd',
+                statusType: errand.status?.statusType || 'Okänd',
                 type: label,
                 registeredDate: new Date(errand.created).toLocaleDateString('sv-SE'),
               }}
@@ -152,6 +182,8 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
             inverted={true}
             className="w-full px-[1.8rem] pt-[1.6rem]"
             onClick={handleLoadMore}
+            disabled={errands.isLoading}
+            loading={errands.isLoading}
           >
             <span className="text-vattjom-text">Läs in fler</span>
           </Button>
@@ -166,6 +198,12 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
             ownerFilter={ownerFilter}
             administrators={administrators}
             setShouldTriggerFilter={setShouldTriggerFilter}
+            onClearErrands={() => {
+              setAllErrands([]);
+              setVisibleCount(4);
+              setInitialLoaded(false);
+            }}
+            onClose={() => setFilterOpen(false)}
           />
         </FormProvider>
       </MobilePage>

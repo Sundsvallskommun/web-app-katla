@@ -68,6 +68,8 @@ export const ongoingCaseDataPTErrandLabels = [
   { label: 'Status', screenReaderOnly: false, sortable: false, shownForStatus: All.ALL },
   { label: 'Ärendetyp', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
+  { label: 'Prioritet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
+  { label: 'Inkom via', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
 ];
 
 export const newStatuses = [ErrandStatus.ArendeInkommit];
@@ -152,6 +154,12 @@ export const getPriorityColor = (priority: Priority) => {
       return 'text-vattjom-surface-primary';
   }
 };
+
+export const getPriorityLabels = () => ({
+  HIGH: 'Hög',
+  MEDIUM: 'Mellan',
+  LOW: 'Låg',
+});
 
 export const emptyErrand: Partial<IErrand> = {
   caseType: '',
@@ -516,7 +524,7 @@ const createApiErrandData: (data: Partial<IErrand>) => Partial<RegisterErrandDat
     ...(data.errandNumber && { errandNumber: data.errandNumber }),
     ...(data.priority && { priority: ApiPriority[data.priority as keyof typeof ApiPriority] }),
     ...(data.caseType && { caseType: data.caseType }),
-    ...(data.channel && { channel: ApiChannels[data.channel] }),
+    ...(data.channel && { channel: ApiChannels[data.channel as keyof typeof ApiChannels] }),
     ...(data.description && { description: data.description }),
     ...(data.caseType &&
       data.caseType in PTCaseLabel && { caseTitleAddition: PTCaseLabel[data.caseType as keyof typeof PTCaseLabel] }),

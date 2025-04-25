@@ -2,7 +2,7 @@ import { FormProvider } from 'react-hook-form';
 import { Disclosure } from '@headlessui/react';
 import { ErrandsTable } from './components/errands-table.component';
 import { useOngoingCaseDataErrands } from '@utils/useOngoingCaseDataErrands';
-import CaseDataFiltering from '@components/filtering/errand-filtering.component';
+import CaseDataFiltering from '@components/filtering/desktopFiltering/errand-filtering.component';
 
 export const OngoingCaseDataErrands: React.FC = () => {
   const {
@@ -14,6 +14,7 @@ export const OngoingCaseDataErrands: React.FC = () => {
     closedErrands,
     sidebarLabel,
     administrators,
+    errands,
   } = useOngoingCaseDataErrands();
 
   return (
@@ -26,6 +27,7 @@ export const OngoingCaseDataErrands: React.FC = () => {
               ownerFilterHandler={setOwnerFilter}
               ownerFilter={ownerFilter}
               administrators={administrators}
+              errands={errands?.errands || []}
             />
           </FormProvider>
         </div>

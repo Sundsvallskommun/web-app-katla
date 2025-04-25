@@ -3,7 +3,7 @@ import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, PopupMenu, SearchField } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CaseTypeFilter } from './errand-filter';
+import { CaseTypeFilter } from '../errand-filter';
 
 export const CasedataFilterCaseType: React.FC = () => {
   const { register } = useFormContext<CaseTypeFilter>();

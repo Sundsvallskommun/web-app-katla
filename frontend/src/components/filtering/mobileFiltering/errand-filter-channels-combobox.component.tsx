@@ -1,12 +1,12 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import { CaseTypeFilter } from './errand-filter';
-import { getCaseLabels } from '@services/casedata-errand-service';
+import { Channels } from '@interfaces/channels';
 import { Combobox } from '@sk-web-gui/react';
+import { CaseChannelFilter } from '../errand-filter';
 
-export const CasedataFilterCaseTypeMobile: React.FC = () => {
-  const { control } = useFormContext<CaseTypeFilter>();
+export const CasedataFilterChannelMobile: React.FC = () => {
+  const { control } = useFormContext<CaseChannelFilter>();
 
-  const caseTypeOptions = Object.entries(getCaseLabels()).map(([value, label]) => ({
+  const channelOptions = Object.entries(Channels).map(([value, label]) => ({
     value,
     label,
   }));
@@ -14,7 +14,7 @@ export const CasedataFilterCaseTypeMobile: React.FC = () => {
   return (
     <div className="w-full">
       <Controller
-        name="caseType"
+        name="channel"
         control={control}
         defaultValue={[]}
         render={({ field }) => (
@@ -23,11 +23,11 @@ export const CasedataFilterCaseTypeMobile: React.FC = () => {
             multiple
             value={field.value}
             onChange={(e) => field.onChange(e.target.value)}
-            placeholder="Ärendetyp"
+            placeholder="Inkom via"
           >
             <Combobox.Input className="w-full" />
             <Combobox.List>
-              {caseTypeOptions
+              {channelOptions
                 .sort((a, b) => a.label.localeCompare(b.label))
                 .map((option) => (
                   <Combobox.Option key={option.value} value={option.value}>

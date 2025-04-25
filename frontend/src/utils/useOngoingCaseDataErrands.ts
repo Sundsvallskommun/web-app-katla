@@ -6,6 +6,7 @@ import { getStatusLabel, useErrands } from '@services/casedata-errand-service';
 import store from '@services/storage-service';
 import { CaseDataFilter, CaseDataValues } from '@components/filtering/errand-filter';
 import { ErrandStatus } from '@interfaces/errand-status';
+import { useIsMobile } from './useIsMobile';
 
 export interface TableForm {
   sortOrder: 'asc' | 'desc';
@@ -20,7 +21,7 @@ export interface TableForm {
 export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { manualFilterTrigger?: boolean } = {}) => {
   const filterForm = useForm<CaseDataFilter>({ defaultValues: CaseDataValues });
   const didInit = useRef(false);
-
+  const isMobile = useIsMobile();
   const tableForm = useForm<TableForm>({
     defaultValues: {
       sortColumn: 'updated',
@@ -47,7 +48,16 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
   const [ownerFilter, setOwnerFilter] = useState(false);
   const caseTypeFilter = watchFilter('caseType');
   const statusFilter = watchFilter('status');
-  const sortObject = useMemo(() => ({ [sortColumn]: sortOrder }), [sortColumn, sortOrder]);
+  const priorityFilter = watchFilter('priority');
+  const startdate = watchFilter('startdate');
+  const enddate = watchFilter('enddate');
+  const channelFilter = watchFilter('channel');
+
+  const sortObject = useMemo(() => {
+    if (!sortColumn) return undefined;
+    return { [sortColumn]: sortOrder };
+  }, [sortColumn, sortOrder]);
+
   const [filterObject, setFilterObject] = useState<{ [key: string]: string | boolean }>();
   const [shouldTriggerFilter, setShouldTriggerFilter] = useState(true);
 
@@ -67,6 +77,7 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     hasSyncedSelectedStatuses.current = true;
   }, [selectedErrandStatuses, getValues, setValue]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (didInit.current) return;
 
@@ -80,6 +91,10 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
         storedFilters = {
           caseType: filter?.caseType?.split(',') || CaseDataValues.caseType,
           status: filter?.status !== '' ? filter?.status?.split(',') || CaseDataValues.status : CaseDataValues.status,
+          priority: filter?.priority?.split(',') || CaseDataValues.priority,
+          startdate: filter?.start || CaseDataValues.startdate,
+          enddate: filter?.end || CaseDataValues.enddate,
+          channel: filter?.channel?.split(',') || CaseDataValues.channel,
         };
 
         const filterStatuses = filter?.status?.split(',') || CaseDataValues.status;
@@ -96,6 +111,9 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
           caseType: CaseDataValues.caseType,
           priority: CaseDataValues.priority,
           status: CaseDataValues.status,
+          startdate: CaseDataValues.startdate,
+          enddate: CaseDataValues.enddate,
+          channel: CaseDataValues.channel,
         };
       }
 
@@ -113,19 +131,23 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
 
   useEffect(() => {
     const sortData = store.get('sort');
+    const targetPageSize = isMobile ? 4 : 12;
 
     if (sortData) {
       try {
         const sort = JSON.parse(sortData);
         setTableValue('size', sort.size);
-        setTableValue('pageSize', sort.pageSize);
+        setTableValue('pageSize', targetPageSize);
         setTableValue('sortOrder', sort.sortOrder);
         setTableValue('sortColumn', sort.sortColumn);
       } catch {
         store.set('sort', JSON.stringify({}));
+        setTableValue('pageSize', targetPageSize);
       }
+    } else {
+      setTableValue('pageSize', targetPageSize);
     }
-  }, [setTableValue]);
+  }, [setTableValue, isMobile]);
 
   useEffect(() => {
     setTableValue('page', 0);
@@ -145,9 +167,26 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
       if (manualFilterTrigger && !shouldTriggerFilter) return;
 
       const fObj: { [key: string]: string | boolean } = {};
-      if (caseTypeFilter?.length) fObj.caseType = caseTypeFilter.join(',');
-      if (statusFilter?.length) fObj.status = statusFilter.join(',');
-      if (ownerFilter) fObj.stakeholders = user.username;
+
+      const multiValueFilters: Record<string, string[] | undefined> = {
+        caseType: caseTypeFilter,
+        status: statusFilter,
+        priority: priorityFilter,
+        channel: channelFilter,
+      };
+
+      Object.entries(multiValueFilters).forEach(([key, value]) => {
+        if (value && value.length) {
+          fObj[key] = value.join(',');
+        }
+      });
+
+      if (startdate) fObj.start = startdate;
+      if (enddate) fObj.end = enddate;
+
+      if (ownerFilter) {
+        fObj.stakeholders = user.username;
+      }
 
       setFilterObject(fObj);
       store.set('filter', JSON.stringify(fObj));
@@ -157,7 +196,9 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
       }
     },
     200,
-    manualFilterTrigger ? [shouldTriggerFilter] : [ownerFilter, caseTypeFilter, statusFilter]
+    manualFilterTrigger ?
+      [shouldTriggerFilter]
+    : [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, channelFilter]
   );
 
   useDebounceEffect(
@@ -168,7 +209,15 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     [watchTable, sortObject, pageSize]
   );
 
-  const numberOfFilters = getValues().caseType.length + (ownerFilter ? 1 : 0);
+  const currentValues = getValues();
+  const numberOfFilters =
+    currentValues.caseType.length +
+    (currentValues.priority?.length || 0) +
+    (currentValues.status?.length || 0) +
+    (currentValues.startdate ? 1 : 0) +
+    (currentValues.enddate ? 1 : 0) +
+    (currentValues.channel?.length || 0) +
+    (ownerFilter ? 1 : 0);
 
   return {
     filterForm,
@@ -181,6 +230,6 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     sidebarLabel,
     administrators,
     setShouldTriggerFilter,
-    ...(manualFilterTrigger && { setShouldTriggerFilter }),
+    ...(manualFilterTrigger ? { setShouldTriggerFilter } : {}),
   };
 };
