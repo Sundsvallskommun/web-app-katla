@@ -20,7 +20,6 @@ import {
 } from '@config';
 import errorMiddleware from '@middlewares/error.middleware';
 import { Strategy, VerifiedCallback } from '@node-saml/passport-saml';
-import { PrismaClient } from '@prisma/client';
 import { logger, stream } from '@utils/logger';
 import bodyParser from 'body-parser';
 import { defaultMetadataStorage } from 'class-transformer/cjs/storage';
@@ -56,7 +55,6 @@ const sessionTTL = 4 * 24 * 60 * 60;
 // NOTE: memory uses ms while file uses seconds
 const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { sessionTTL, path: './data/sessions' });
 
-const prisma = new PrismaClient();
 const apiService = new ApiService();
 
 passport.serializeUser(function (user, done) {
@@ -127,18 +125,6 @@ const samlStrategy = new Strategy(
       };
 
       logger.info('Found user:', findUser);
-
-      const userSettings = await prisma.userSettings.findFirst({ where: { username: findUser.username } });
-      // Create user settings for new users
-      const data = {
-        username: findUser.username,
-        readNotificationsClearedDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
-      };
-      if (!userSettings) {
-        await prisma.userSettings.create({
-          data,
-        });
-      }
 
       done(null, findUser);
     } catch (err) {

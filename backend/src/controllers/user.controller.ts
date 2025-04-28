@@ -5,18 +5,15 @@ import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Permissions } from '@/interfaces/users.interface';
 import ApiService from '@/services/api.service';
 import authMiddleware from '@middlewares/auth.middleware';
-import { PrismaClient } from '@prisma/client';
 import { Controller, Get, Header, Param, QueryParam, Req, Res, UseBefore } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
-
-const prisma = new PrismaClient();
 
 interface UserData {
   name: string;
   firstName: string;
   lastName: string;
   username: string;
-  userSettings: any;
+  userSettings: {username: string};
   permissions: Permissions;
 }
 
@@ -55,31 +52,12 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    let userSettings = await prisma.userSettings.findFirst({
-      where: {
-        username: req.user.username,
-      },
-    });
-
-    if (!userSettings) {
-      userSettings = await prisma.userSettings.create({
-        data: {
-          username: req.user.username,
-
-          readNotificationsClearedDate: new Date().toISOString(),
-        },
-      });
-    }
-
-    userSettings && delete userSettings.id;
-    userSettings && delete userSettings.username;
-
     const userData: UserData = {
       name,
       firstName,
       lastName,
       username,
-      userSettings,
+      userSettings: { username },
       permissions,
     };
 
