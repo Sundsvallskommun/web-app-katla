@@ -48,7 +48,6 @@ const Oversikt: React.FC = () => {
     setOpenSearch(false);
     setOpenMenu(false);
   };
-  console.log('IsMobile/IsMaxLargeDevice:', isMaxLargeDevice);
   return isMaxLargeDevice ?
       <>
         {!openSearch && !openNotification && !openMenu && (
