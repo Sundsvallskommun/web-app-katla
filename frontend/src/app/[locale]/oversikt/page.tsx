@@ -15,7 +15,9 @@ import { MobileSearchBody } from '@layouts/mobile-layout/mobile-search-body.comp
 import { MobileErrandsList } from '@layouts/mobile-layout/mobile-errands-list.component';
 import { IErrand } from '@interfaces/errand';
 import { MobileMainPageHeader } from '@layouts/mobile-layout/mobile-main-page-header.component';
-import { useThemeQueries } from '@sk-web-gui/react';
+import { Button, Divider, useThemeQueries } from '@sk-web-gui/react';
+import LucideIcon from '@sk-web-gui/lucide-icon';
+import { useRouter } from 'next/navigation';
 
 const Oversikt: React.FC = () => {
   const { setMunicipalityId, setUser } = useContext(AppContext);
@@ -48,6 +50,12 @@ const Oversikt: React.FC = () => {
     setOpenSearch(false);
     setOpenMenu(false);
   };
+
+  const router = useRouter();
+  const handleLogout = () => {
+    router.push('/logout');
+  };
+
   return isMaxLargeDevice ?
       <>
         {!openSearch && !openNotification && !openMenu && (
@@ -90,6 +98,22 @@ const Oversikt: React.FC = () => {
               <FormProvider {...casedataFilterForm}>
                 <CasedataFilterSidebarStatusSelector iconButton={!open} />
               </FormProvider>
+              <div className="py-24">
+                <Divider />
+              </div>
+
+              <div className="flex justify-center w-full">
+                <Button
+                  onClick={handleLogout}
+                  variant="ghost"
+                  size="md"
+                  color="primary"
+                  className="justify-start w-full hover:bg-dark-ghost"
+                  leftIcon={<LucideIcon name="log-out" />}
+                >
+                  <span className="w-full flex justify-between">Logga ut</span>
+                </Button>
+              </div>
             </MobileMenuBody>
           </MobilePage>
         )}

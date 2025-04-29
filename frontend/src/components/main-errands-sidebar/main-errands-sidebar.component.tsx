@@ -4,6 +4,7 @@ import { NotificationsWrapper } from '@components/notifications/notifications-wr
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
 import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { appConfig } from 'src/config/app-config';
 
@@ -41,6 +42,11 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
       />
     </NextLink>
   );
+
+  const router = useRouter();
+  const handleLogout = () => {
+    router.push('/logout');
+  };
 
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -83,6 +89,20 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         <div className={cx('flex flex-col gap-8', open ? 'py-24' : 'items-center justify-center py-15')}>
           {children}
         </div>
+        <Divider className={cx(open ? '' : 'w-[4rem] mx-auto')} />
+        <div className="py-10 w-full ">
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            size="md"
+            color="primary"
+            className="justify-start w-full hover:bg-dark-ghost"
+            leftIcon={<LucideIcon name="log-out" />}
+          >
+            <span className="w-full flex justify-between">Logga ut</span>
+          </Button>
+        </div>
+
         <div
           className={cx('absolute bottom-[2.4rem]', open ? 'right-[2.4rem]' : 'left-1/2 transform -translate-x-1/2')}
         >
