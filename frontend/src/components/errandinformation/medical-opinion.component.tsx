@@ -9,7 +9,8 @@ export const MedicalOpinion: React.FC = () => {
       icon={<LucideIcon name="clipboard-signature" />}
       header="Medicinskt utlåtande"
       variant="alt"
-      className="w-full px-32"
+      open={false}
+      className="w-full"
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >

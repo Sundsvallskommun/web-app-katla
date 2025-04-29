@@ -15,8 +15,9 @@ export const OtherParties: React.FC<{
     <Disclosure
       icon={<LucideIcon name="users" />}
       header="Övriga parter"
+      open={false}
       variant="alt"
-      className="w-full px-32"
+      className="w-full mobileVersion"
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >

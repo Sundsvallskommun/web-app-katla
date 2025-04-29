@@ -1,5 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { Avatar, Button, Divider } from '@sk-web-gui/react';
+import { Avatar, Button, Divider, Link } from '@sk-web-gui/react';
 import React, { useContext } from 'react';
 
 interface MobileMenuBodyProps {
@@ -26,14 +26,20 @@ export const MobileMenuBody: React.FC<MobileMenuBodyProps> = ({ children, onNewC
       </div>
 
       <div className="flex justify-center w-full px-4 mt-[2.4rem]">
-        <Button
-          size="md"
-          color="vattjom"
-          className="flex items-center justify-center w-full gap-2 px-4 py-2 text-white"
-          onClick={onNewCaseClick}
+        <Link
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH}/registrera`}
+          data-cy="register-new-errand-button"
+          className="w-full"
         >
-          <span>Nytt ärende</span>
-        </Button>
+          <Button
+            size="md"
+            color="vattjom"
+            className="flex items-center w-full justify-center gap-2 px-4 py-2 text-white"
+            onClick={onNewCaseClick}
+          >
+            <span>Nytt ärende</span>
+          </Button>
+        </Link>
       </div>
 
       <div className="py-[2.4rem]">

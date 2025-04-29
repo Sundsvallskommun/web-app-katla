@@ -14,8 +14,8 @@ import { NotificationsWrapper } from '@components/notifications/notifications-wr
 import { MobileSearchBody } from '@layouts/mobile-layout/mobile-search-body.component';
 import { MobileErrandsList } from '@layouts/mobile-layout/mobile-errands-list.component';
 import { IErrand } from '@interfaces/errand';
-import { useIsMobile } from '@utils/useIsMobile';
 import { MobileMainPageHeader } from '@layouts/mobile-layout/mobile-main-page-header.component';
+import { useThemeQueries } from '@sk-web-gui/react';
 
 const Oversikt: React.FC = () => {
   const { setMunicipalityId, setUser } = useContext(AppContext);
@@ -27,7 +27,8 @@ const Oversikt: React.FC = () => {
   const [allErrands, setAllErrands] = useState<IErrand[]>([]);
   const [visibleCount, setVisibleCount] = useState(4);
   const [initialLoaded, setInitialLoaded] = useState(false);
-  const isMobile = useIsMobile();
+  const { isMaxLargeDevice } = useThemeQueries();
+
   const resetErrandList = () => {
     setAllErrands([]);
     setVisibleCount(4);
@@ -47,8 +48,7 @@ const Oversikt: React.FC = () => {
     setOpenSearch(false);
     setOpenMenu(false);
   };
-
-  return isMobile ?
+  return isMaxLargeDevice ?
       <>
         {!openSearch && !openNotification && !openMenu && (
           <MobileMainPageHeader

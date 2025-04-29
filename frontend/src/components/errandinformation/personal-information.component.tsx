@@ -9,7 +9,8 @@ export const PersonalInformation: React.FC = () => {
       icon={<LucideIcon name="person-standing" />}
       header="Personlig information"
       variant="alt"
-      className="w-full px-32"
+      open={false}
+      className="w-full"
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >

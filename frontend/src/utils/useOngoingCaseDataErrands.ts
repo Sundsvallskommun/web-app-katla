@@ -6,7 +6,7 @@ import { getStatusLabel, useErrands } from '@services/casedata-errand-service';
 import store from '@services/storage-service';
 import { CaseDataFilter, CaseDataValues } from '@components/filtering/errand-filter';
 import { ErrandStatus } from '@interfaces/errand-status';
-import { useIsMobile } from './useIsMobile';
+import { useThemeQueries } from '@sk-web-gui/react';
 
 export interface TableForm {
   sortOrder: 'asc' | 'desc';
@@ -21,7 +21,7 @@ export interface TableForm {
 export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { manualFilterTrigger?: boolean } = {}) => {
   const filterForm = useForm<CaseDataFilter>({ defaultValues: CaseDataValues });
   const didInit = useRef(false);
-  const isMobile = useIsMobile();
+  const { isMaxLargeDevice } = useThemeQueries();
   const tableForm = useForm<TableForm>({
     defaultValues: {
       sortColumn: 'updated',
@@ -131,7 +131,7 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
 
   useEffect(() => {
     const sortData = store.get('sort');
-    const targetPageSize = isMobile ? 4 : 12;
+    const targetPageSize = isMaxLargeDevice ? 4 : 12;
 
     if (sortData) {
       try {
@@ -147,7 +147,7 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     } else {
       setTableValue('pageSize', targetPageSize);
     }
-  }, [setTableValue, isMobile]);
+  }, [setTableValue, isMaxLargeDevice]);
 
   useEffect(() => {
     setTableValue('page', 0);

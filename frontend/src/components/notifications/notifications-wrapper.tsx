@@ -2,10 +2,9 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Notification } from '@interfaces/notification';
 import { getCasedataNotifications } from '@services/casedata-notification-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Divider, cx } from '@sk-web-gui/react';
+import { Button, Divider, cx, useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect } from 'react';
 import { NotificationItem } from './notification-item';
-import { useIsMobile } from '@utils/useIsMobile';
 
 const sortByCreated = (notifications: Notification[]) => {
   return notifications.sort((a, b) => {
@@ -15,12 +14,13 @@ const sortByCreated = (notifications: Notification[]) => {
   });
 };
 
-export const NotificationsWrapper: React.FC<{ show: boolean; setShow: (arg0: boolean) => void }> = ({
-  show,
-  setShow,
-}) => {
+export const NotificationsWrapper: React.FC<{
+  show: boolean;
+  setShow: (arg0: boolean) => void;
+  withSidebar?: boolean;
+}> = ({ show, setShow, withSidebar = true }) => {
   const { municipalityId, notifications, setNotifications } = useContext(AppContext);
-  const isMobile = useIsMobile();
+  const { isMaxLargeDevice } = useThemeQueries();
 
   useEffect(() => {
     if (municipalityId) {
@@ -35,24 +35,32 @@ export const NotificationsWrapper: React.FC<{ show: boolean; setShow: (arg0: boo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId]);
 
-  const acknowledgedNotifications = sortByCreated(notifications.filter((n) => n.acknowledged === true));
-
-  const newNotifications = sortByCreated(notifications.filter((n) => n.acknowledged === false));
+  const acknowledgedNotifications = sortByCreated(notifications.filter((n) => n.acknowledged));
+  const newNotifications = sortByCreated(notifications.filter((n) => !n.acknowledged));
 
   return (
     <div className="static">
       {show && (
         <>
-          {!isMobile && (
-            <div className="w-[calc(100vw-32rem)] ml-[32rem] top-0 bottom-0 h-full absolute bg-primitives-overlay-darken-6"></div>
+          {!isMaxLargeDevice && (
+            <div
+              className={cx(
+                'top-0 bottom-0 h-full absolute bg-primitives-overlay-darken-6 transition-opacity duration-150',
+                withSidebar ? 'w-[calc(100vw-32rem)] ml-[32rem]' : 'w-full'
+              )}
+            ></div>
           )}
+
           <div
             className={cx(
-              `border-1 border-t-0 absolute top-0 bottom-0 -right-[48rem] bg-background-content h-auto transition-all ease-in-out duration-150 z-[20]`,
-              show ?
-                isMobile ? 'w-full left-0 right-0'
-                : 'w-[48rem] -right-[48rem]'
-              : 'w-0 px-0'
+              'border-1 border-t-0 absolute top-0 bottom-0 bg-background-content h-auto transition-all ease-in-out duration-150 z-[20] overflow-y-auto',
+              isMaxLargeDevice ?
+                show ? 'w-full left-0 right-0'
+                : 'w-0 px-0'
+              : show ?
+                withSidebar ? 'w-[48rem] right-0 ml-[32rem]'
+                : 'w-[48rem] right-0'
+              : 'w-0 right-[-48rem]'
             )}
           >
             <div className="py-16 px-40 w-full flex justify-between items-center shadow-lg h-[8rem]">
@@ -64,24 +72,13 @@ export const NotificationsWrapper: React.FC<{ show: boolean; setShow: (arg0: boo
                 aria-label="Stäng notiser"
                 iconButton
                 variant="tertiary"
-                onClick={() => {
-                  setShow(false);
-                }}
+                onClick={() => setShow(false)}
               >
                 <LucideIcon name="x" />
               </Button>
             </div>
-          </div>
-          <section
-            className={cx(
-              `border-1 border-t-0 mt-md absolute top-[9rem] bottom-0 -right-[48rem] transition-all ease-in-out duration-150 z-[20] flex flex-col shadow-lg`,
-              show ?
-                isMobile ? 'w-full left-0 right-0'
-                : 'w-[48rem]'
-              : 'w-0 px-0'
-            )}
-          >
-            <div className="flex-grow mt-sm mb-0 p-24 pt-0 flex flex-col gap-24 overflow-auto left-0 right-0">
+
+            <section className="flex-grow mt-sm mb-0 p-24 pt-0 flex flex-col gap-24 overflow-auto left-0 right-0 max-h-[calc(100vh-8rem)]">
               <div className="flex flex-col gap-4">
                 <Divider.Section>
                   <div className="flex gap-sm items-center">
@@ -104,7 +101,6 @@ export const NotificationsWrapper: React.FC<{ show: boolean; setShow: (arg0: boo
                     <h2 className="text-h4-sm">Tidigare</h2>
                   </div>
                 </Divider.Section>
-
                 {acknowledgedNotifications.length > 0 ?
                   <ul>
                     {acknowledgedNotifications.map((notification) => (
@@ -115,8 +111,8 @@ export const NotificationsWrapper: React.FC<{ show: boolean; setShow: (arg0: boo
                   </ul>
                 : <div className="m-md">Inga notifieringar</div>}
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </>
       )}
     </div>

@@ -1,6 +1,6 @@
 import { Role } from '@interfaces/role';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, FormLabel, Input, Modal } from '@sk-web-gui/react';
+import { Button, FormLabel, Input, Modal, useThemeQueries } from '@sk-web-gui/react';
 import { useState } from 'react';
 
 export const DisplayCard: React.FC<{
@@ -35,7 +35,7 @@ export const DisplayCard: React.FC<{
   onUpdate,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const { isMaxLargeDevice } = useThemeQueries();
   const openHandler = () => {
     setIsOpen(!isOpen);
   };
@@ -65,13 +65,13 @@ export const DisplayCard: React.FC<{
   };
 
   return (
-    <div className="border-1 rounded-12 bg-background-content w-[52.5rem] my-15">
+    <div className="border-1 rounded-12 bg-background-content w-full max-w-[52.5rem] my-15">
       <div className="rounded-t-12 bg-vattjom-background-200 h-[4rem] flex items-center mb-[1.5rem]">
         <strong className="px-[1rem]">{roles}</strong>
       </div>
       <div className="px-[1rem]">
         <p className="text-[1.6rem] font-semibold">{firstName + ' ' + lastName}</p>
-        <div className="flex text-md mb-10">
+        <div className={`flex text-md mb-10 ${isMaxLargeDevice ? 'flex-col' : 'flex-row'}`}>
           {userName ?
             <div className="mr-30">{userName}</div>
           : null}
@@ -88,7 +88,7 @@ export const DisplayCard: React.FC<{
           </div>
         </div>
         {isEditable ?
-          <div className="flex gap-[1rem] mb-10">
+          <div className="flex flex-col sm:flex-row gap-[1rem] mb-10">
             <Button
               data-cy="edit-card-button"
               leftIcon={<LucideIcon name="pen" size={16} />}
@@ -110,7 +110,7 @@ export const DisplayCard: React.FC<{
           </div>
         : null}
 
-        <Modal className="w-[48rem]" show={isOpen} onClose={openHandler} label={'Redigera uppgifter'}>
+        <Modal className=" w-full max-w-[48rem]" show={isOpen} onClose={openHandler} label={'Redigera uppgifter'}>
           <Modal.Content>
             <FormLabel>Personnummer*</FormLabel>
             <Input name="ssn" value={formData.personalNumber} onChange={handleInputChange} readOnly={isEditable} />
