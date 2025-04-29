@@ -7,9 +7,10 @@ export const ExternalCircumstances: React.FC = () => {
   return (
     <Disclosure
       icon={<LucideIcon name="clipboard-signature" />}
+      open={false}
       header="Yttre omständigheter"
       variant="alt"
-      className="w-full px-32"
+      className="w-full"
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >

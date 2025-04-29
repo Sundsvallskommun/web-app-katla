@@ -7,15 +7,14 @@ import { useFormContext, UseFormReturn } from 'react-hook-form';
 
 export const AboutErrand: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
-
   const { register }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
   return (
     <Disclosure
       icon={<LucideIcon name="info" />}
       header="Om ärendet"
       variant="alt"
-      className="w-full px-32"
-      open={true}
+      className="w-full mobileVersion"
+      open={false}
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >

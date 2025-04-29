@@ -14,11 +14,11 @@ export const Applicant: React.FC<{
 
   return (
     <Disclosure
-      open={true}
+      open={false}
       icon={<LucideIcon name="users" />}
       header="Sökande"
       variant="alt"
-      className="w-full px-32"
+      className="w-full mobileVersion"
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >

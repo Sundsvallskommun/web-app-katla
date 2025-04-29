@@ -140,24 +140,30 @@ export const StakeholderList: React.FC<{
   return (
     <div>
       <FormLabel>Sök på personnummer</FormLabel>
-      <Input.Group size="md" className="rounded-12 w-[52.5rem] mt-5" disabled={false}>
+      <Input.Group
+        size="md"
+        className="rounded-12 flex w-full max-w-[52.5rem] mt-5 items-stretch overflow-hidden"
+        disabled={false}
+      >
         <Input.LeftAddin icon>
           <LucideIcon name="search" />
         </Input.LeftAddin>
+
         <Input
           disabled={false}
           aria-disabled={false}
           readOnly={false}
-          className="read-only:cursor-not-allowed"
-          data-cy={`contact-personalNumber-${1}`}
+          className="read-only:cursor-not-allowed w-full"
           {...register(`personalNumber`)}
         />
-        <Input.RightAddin icon>
+
+        <Input.RightAddin icon className="flex gap-2">
           <Button
             iconButton
+            size="sm"
             variant="primary"
-            disabled={false}
             inverted
+            className="min-w-[2.5rem] h-full"
             onClick={() => {
               reset();
               setValue('personalNumber', '');
@@ -166,11 +172,11 @@ export const StakeholderList: React.FC<{
           >
             <LucideIcon name="x" />
           </Button>
+
           <Button
-            variant="primary"
             size="sm"
-            disabled={false}
-            data-cy={`search-button-${1}`}
+            variant="primary"
+            className="h-full"
             onClick={doSearch}
             loading={searching}
             loadingText="Söker"
@@ -180,7 +186,7 @@ export const StakeholderList: React.FC<{
         </Input.RightAddin>
       </Input.Group>
       {searchResult && !notFound ?
-        <div className="border-1 rounded-12 bg-background-content w-[52.5rem] my-15">
+        <div className="border-1 rounded-12 bg-background-content w-max-[52.5rem] my-15">
           <div className="px-[1rem]">
             <p className="text-[1.6rem] font-semibold py-10">{firstName + ' ' + lastName}</p>
             <div className="flex text-md mb-10">
@@ -191,8 +197,8 @@ export const StakeholderList: React.FC<{
             </div>
 
             <div className="mt-4">
-              <div className="flex py-10">
-                <div className="flex-col  mx-5">
+              <div className="flex flex-col lg:flex-row py-10 gap-10">
+                <div className="flex-col  lg:mx-5">
                   <FormLabel>E-postadress*</FormLabel>
                   <Input
                     className="w-full"
@@ -201,7 +207,7 @@ export const StakeholderList: React.FC<{
                     {...register(`emails.0.value`, { required: true })}
                   />
                 </div>
-                <div className="flex-col mx-5">
+                <div className="flex-col lg:mx-5">
                   <FormLabel>Telefonnummer*</FormLabel>
                   <Input
                     className="w-full"
@@ -211,7 +217,7 @@ export const StakeholderList: React.FC<{
                   />
                 </div>
               </div>
-              <div className="flex flex-col py-10">
+              <div className="flex flex-col lg:py-10">
                 <FormLabel>Personens roll*</FormLabel>
                 <Select className="w-full" {...register('roles', { required: true })}>
                   {roles.map((role, index) => (
@@ -226,6 +232,7 @@ export const StakeholderList: React.FC<{
                   leftIcon={<LucideIcon name="plus" size={16} />}
                   variant="primary"
                   onClick={addStakeholderToErrand}
+                  className="w-full lg:w-auto"
                 >
                   Lägg till person
                 </Button>

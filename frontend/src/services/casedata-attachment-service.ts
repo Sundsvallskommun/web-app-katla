@@ -193,7 +193,6 @@ export const validateAttachmentsForUtredning: (errand: IErrand) => boolean = (er
 
 export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFile[] => {
   return attachments.map((attachment) => {
-    console.log('attachment', attachment);
     // Konvertera Base64-strängen tillbaka till en Blob
     const binaryData = atob(attachment.file); // Decode Base64
     const byteArray = new Uint8Array(binaryData.length);
@@ -203,13 +202,15 @@ export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFi
     const blob = new Blob([byteArray], { type: attachment.mimeType });
 
     // Skapa en File-instans från Blob
-    const file = new File([blob], attachment.name, { type: attachment.mimeType });
+    const file = new File([blob], attachment.name + '.' + (attachment.extension || ''), { type: attachment.mimeType });
+
+    const nameWithoutExtension = attachment.name.replace(/\.[^/.]+$/, '');
 
     return {
-      id: attachment.id || '', // Fallback om id saknas
-      file, // File-instansen
+      id: attachment.id || '',
+      file,
       meta: {
-        name: attachment.name,
+        name: nameWithoutExtension,
         ending: attachment.extension,
         category: attachment.category,
         note: attachment.note,
@@ -314,48 +315,50 @@ export const sendAttachments = (
   attachmentData: { type: string; file: File[]; attachmentName: string }[]
 ) => {
   const attachmentPromises = attachmentData.map(async (attachment) => {
-    console.log('attachment', attachment);
     const fileItem = attachment.file[0];
+
     if (fileItem.size / 1024 / 1024 > MAX_FILE_SIZE_MB) {
       throw new Error('MAX_SIZE');
     }
     if (!attachment.type) {
       throw new Error('TYPE_MISSING');
     }
+
     const fileData = await toBase64(fileItem);
-    const extension = fileItem.name.split('.').pop();
+
+    const extension = fileItem.name.split('.').pop() || '';
+    const nameWithoutExtension =
+      attachment.attachmentName ?
+        attachment.attachmentName.replace(/\.[^/.]+$/, '')
+      : fileItem.name.replace(/\.[^/.]+$/, '');
+
     const obj: Attachment = {
-      category: fileItem.type,
-      name: fileItem.name,
+      category: attachment.type,
+      name: nameWithoutExtension,
       note: '',
-      extension: extension || '',
-      // msg files not handled properly by the browser, so we need to set the mime type manually
+      extension: extension,
       mimeType: extension === 'msg' ? 'application/vnd.ms-outlook' : fileItem.type,
       file: fileData,
     };
-    console.log(obj);
+
     const buf = Buffer.from(obj.file, 'base64');
     const blob = new Blob([buf], { type: obj.mimeType });
 
-    // Building form data
     const formData = new FormData();
-    formData.append(`files`, blob, obj.name);
-    formData.append(`category`, attachment.type);
-    formData.append(`name`, attachment.attachmentName);
-    formData.append(`note`, '');
-    formData.append(`extension`, obj.extension);
-    formData.append(`mimeType`, obj.mimeType);
-    formData.append(`errandNumber`, errandNumber);
-    console.log('formData', formData);
+    formData.append('files', blob, fileItem.name);
+    formData.append('category', obj.category);
+    formData.append('mimeType', obj.mimeType);
+    formData.append('extension', obj.extension);
+    formData.append('name', obj.name);
+    formData.append('note', '');
+    formData.append('errandNumber', errandNumber);
 
     const postAttachment = () =>
       apiService
         .post<boolean, FormData>(`casedata/${municipalityId}/errands/${errandId}/attachments`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
-        .then((res) => {
-          return res;
-        })
+        .then((res) => res)
         .catch((e) => {
           console.error('Something went wrong when creating attachment ', obj.category);
           throw e;
@@ -364,9 +367,7 @@ export const sendAttachments = (
     return withRetries(3, postAttachment);
   });
 
-  return Promise.all(attachmentPromises).then(() => {
-    return true;
-  });
+  return Promise.all(attachmentPromises).then(() => true);
 };
 
 export const deleteAttachment = (municipalityId: string, errandId: number, attachment: UploadFile) => {

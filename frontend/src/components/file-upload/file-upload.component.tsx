@@ -28,7 +28,9 @@ const FileUploadComponent: React.FC = () => {
 
   const handleRemoveFile = (file: UploadFile) => {
     const updatedFiles = files.filter((f) => f !== file);
-    deleteAttachment(municipalityId, errand.id, file);
+    const errandIdNum = typeof errand.id === 'string' ? Number(errand.id) : errand.id;
+
+    deleteAttachment(municipalityId, errandIdNum, file);
     setValue('attachments', updatedFiles);
   };
 
@@ -45,7 +47,7 @@ const FileUploadComponent: React.FC = () => {
 
   return (
     <FileUpload.Area onChange={onChange}>
-      <div className="w-full pb-[2rem] pt-[5rem] px-32">
+      <div className="w-full pb-[2rem] pt-[5rem] lg:px-32">
         <div className="flex justify-between">
           <h2>Bilagor</h2>
           <FileUpload.Button onChange={onChange} />
