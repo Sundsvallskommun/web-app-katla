@@ -1,5 +1,5 @@
 {
-  "name": "@sk-web-gui/web-app-starter",
+  "name": "@sk-web-gui/web-app-katla",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -34,6 +34,8 @@
     "react-dom": "19.0.0",
     "react-hook-form": "^7.54.2",
     "react-i18next": "^15.4.1",
+    "react-quill": "2.0.0",
+    "sanitize-html": "^2.12.1",
     "sass": "^1.86.0",
     "sharp": "^0.33.5",
     "underscore.string": "^3.3.6",

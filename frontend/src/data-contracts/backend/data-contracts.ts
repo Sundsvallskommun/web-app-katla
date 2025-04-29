@@ -238,6 +238,7 @@ export interface CPatchErrandDto {
   suspension?: object;
   relatesTo?: any[];
   applicationReceived?: string;
+  channel?: string;
 }
 
 export interface CreateErrandNoteDto {

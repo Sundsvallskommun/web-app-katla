@@ -7,6 +7,7 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
+import { CasedataMessagesTab } from '@components/messages/message.component';
 import { PageHeader } from '@components/page-header.component';
 import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
@@ -18,7 +19,7 @@ import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-servi
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Divider, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
+import { Button, Divider, Link, Logo, MenuBar, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -71,6 +72,7 @@ const Arende: React.FC = () => {
   const method = useForm<IErrand>();
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
+  const [current, setCurrent] = React.useState<number | undefined>(0);
   const { setMunicipalityId, user, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 
   const router = useRouter();
@@ -95,8 +97,7 @@ const Arende: React.FC = () => {
 
           if (res.errand.attachments) {
             const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
-            method.setValue('attachments', uploadFiles as unknown as Attachment[]); // Sätt bilagorna i formuläret
-            console.log('Bilagor:', uploadFiles);
+            method.setValue('attachments', uploadFiles as unknown as Attachment[]);
           }
           setApplicants(
             res.errand.stakeholders
@@ -173,22 +174,41 @@ const Arende: React.FC = () => {
 
                 <section className="bg-transparent pt-24 pb-4">
                   <div className="py-12 bg-transparent">
-                    <div className="border-1 rounded-12 bg-background-content pt-22 pl-5">
-                      <div className="w-full py-[1.5rem] px-32">
-                        <h2>Grundinformation</h2>
-                      </div>
+                    <div className="border-1 rounded-12 bg-background-content">
+                      <MenuBar className="pt-[1rem] pl-[1.6rem]" current={current}>
+                        <MenuBar.Item>
+                          <button onClick={() => setCurrent(0)}>Rapporterat</button>
+                        </MenuBar.Item>
+                        <MenuBar.Item>
+                          <button onClick={() => setCurrent(1)}>Meddelanden</button>
+                        </MenuBar.Item>
+                        <MenuBar.Item>
+                          <button onClick={() => setCurrent(2)}>Bilagor</button>
+                        </MenuBar.Item>
+                      </MenuBar>
+                      <Divider />
+                      <div className="pt-22 pl-5">
+                        {current === 0 && (
+                          <>
+                            <div className="w-full py-[1.5rem] px-32">
+                              <h2>Grundinformation</h2>
+                            </div>
 
-                      <AboutErrand />
-                      <HealthCareStaff />
-                      <Applicant owners={applicants} setOwners={setApplicants} />
-                      <OtherParties owners={otherParties} setOwners={setOtherParties} />
-                      <div className="w-full pb-[2rem] pt-[5rem] px-32">
-                        <h2>Ärendeuppgifter</h2>
+                            <AboutErrand />
+                            <HealthCareStaff />
+                            <Applicant owners={applicants} setOwners={setApplicants} />
+                            <OtherParties owners={otherParties} setOwners={setOtherParties} />
+                            <div className="w-full pb-[2rem] pt-[5rem] px-32">
+                              <h2>Ärendeuppgifter</h2>
+                            </div>
+                            <ExternalCircumstances />
+                            <PersonalInformation />
+                            <MedicalOpinion />
+                          </>
+                        )}
+                        {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
+                        {current === 2 && <FileUploadComponent />}
                       </div>
-                      <ExternalCircumstances />
-                      <PersonalInformation />
-                      <MedicalOpinion />
-                      <FileUploadComponent />
                     </div>
                   </div>
                 </section>

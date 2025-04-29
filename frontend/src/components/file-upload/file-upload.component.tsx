@@ -21,7 +21,6 @@ const FileUploadComponent: React.FC = () => {
           meta: { ...file.meta, category: Object.keys(PTAttachmentLabels)[0] },
         }))
       );
-      console.log(updatedFiles);
       setValue('attachments', updatedFiles);
     }
   };
@@ -39,13 +38,12 @@ const FileUploadComponent: React.FC = () => {
 
   const handleOnChangeCategory = (file: UploadFile) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     const updatedFiles = files.map((f) => (f === file ? { ...f, meta: { ...f.meta, category: e.target.value } } : f));
-    console.log('Updated files with category:', updatedFiles);
     setValue('attachments', updatedFiles);
   };
 
   return (
     <FileUpload.Area onChange={onChange}>
-      <div className="w-full pb-[2rem] pt-[5rem] px-32">
+      <div className="w-full pb-[2rem] px-32">
         <div className="flex justify-between">
           <h2>Bilagor</h2>
           <FileUpload.Button onChange={onChange} />

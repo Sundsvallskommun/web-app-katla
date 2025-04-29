@@ -193,27 +193,24 @@ export const validateAttachmentsForUtredning: (errand: IErrand) => boolean = (er
 
 export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFile[] => {
   return attachments.map((attachment) => {
-    console.log('attachment', attachment);
-    // Konvertera Base64-strängen tillbaka till en Blob
-    const binaryData = atob(attachment.file); // Decode Base64
+    const binaryData = atob(attachment.file);
     const byteArray = new Uint8Array(binaryData.length);
     for (let i = 0; i < binaryData.length; i++) {
       byteArray[i] = binaryData.charCodeAt(i);
     }
     const blob = new Blob([byteArray], { type: attachment.mimeType });
 
-    // Skapa en File-instans från Blob
     const file = new File([blob], attachment.name, { type: attachment.mimeType });
 
     return {
-      id: attachment.id || '', // Fallback om id saknas
-      file, // File-instansen
+      id: attachment.id || '',
+      file,
       meta: {
         name: attachment.name,
         ending: attachment.extension,
         category: attachment.category,
         note: attachment.note,
-        ...attachment.extraParameters, // Lägg till extra parametrar om de finns
+        ...attachment.extraParameters,
       },
     };
   });
@@ -314,7 +311,6 @@ export const sendAttachments = (
   attachmentData: { type: string; file: File[]; attachmentName: string }[]
 ) => {
   const attachmentPromises = attachmentData.map(async (attachment) => {
-    console.log('attachment', attachment);
     const fileItem = attachment.file[0];
     if (fileItem.size / 1024 / 1024 > MAX_FILE_SIZE_MB) {
       throw new Error('MAX_SIZE');
@@ -333,7 +329,6 @@ export const sendAttachments = (
       mimeType: extension === 'msg' ? 'application/vnd.ms-outlook' : fileItem.type,
       file: fileData,
     };
-    console.log(obj);
     const buf = Buffer.from(obj.file, 'base64');
     const blob = new Blob([buf], { type: obj.mimeType });
 
@@ -346,7 +341,6 @@ export const sendAttachments = (
     formData.append(`extension`, obj.extension);
     formData.append(`mimeType`, obj.mimeType);
     formData.append(`errandNumber`, errandNumber);
-    console.log('formData', formData);
 
     const postAttachment = () =>
       apiService
