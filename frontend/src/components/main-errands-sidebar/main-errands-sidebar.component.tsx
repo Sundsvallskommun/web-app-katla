@@ -1,10 +1,10 @@
 import { CaseDataFilter } from '@components/filtering/errand-filter';
+import { LogoutButton } from '@components/logout-button.component';
 import { NotificationsBell } from '@components/notifications/notifications-bell';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { appConfig } from 'src/config/app-config';
 
@@ -42,11 +42,6 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
       />
     </NextLink>
   );
-
-  const router = useRouter();
-  const handleLogout = () => {
-    router.push('/logout');
-  };
 
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -91,16 +86,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         </div>
         <Divider className={cx(open ? '' : 'w-[4rem] mx-auto')} />
         <div className="py-10 w-full ">
-          <Button
-            onClick={handleLogout}
-            variant="ghost"
-            size="md"
-            color="primary"
-            className="justify-start w-full hover:bg-dark-ghost"
-            leftIcon={<LucideIcon name="log-out" />}
-          >
-            <span className="w-full flex justify-between">Logga ut</span>
-          </Button>
+          <LogoutButton />
         </div>
 
         <div
