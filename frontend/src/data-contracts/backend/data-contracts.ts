@@ -13,69 +13,6 @@ export interface SsnPayload {
   ssn: string;
 }
 
-export interface OrgNrPayload {
-  orgNr: string;
-}
-
-export interface CLegalForm {
-  legalFormCode: string;
-  legalFormDescription: string;
-}
-
-export interface CAddress {
-  city?: string;
-  street?: string;
-  postcode?: string;
-  careOf?: string;
-}
-
-export interface CMunicipality {
-  municipalityCode: string;
-  municipalityName: string;
-}
-
-export interface CCounty {
-  countyCode: string;
-  countyName: string;
-}
-
-export interface CLEPostAddress {
-  coAdress: string;
-  country: string;
-  postalCode: string;
-  city: string;
-  address1: string;
-  address2: string;
-}
-
-export interface CLEAddress {
-  addressArea: string;
-  adressNumber: string;
-  city: string;
-  postalCode: string;
-  municipality: string;
-  county: string;
-}
-
-export interface CLegalEntity2 {
-  legalEntityId: string;
-  organizationNumber: string;
-  name: string;
-  postAddress: CLEPostAddress;
-  address: CLEAddress;
-  phoneNumber: string;
-}
-
-export interface CLegalEntity2WithId {
-  partyId: string;
-  legalEntityId: string;
-  organizationNumber: string;
-  name: string;
-  postAddress: CLEPostAddress;
-  address: CLEAddress;
-  phoneNumber: string;
-}
-
 export interface ExtraParametersDto {
   'application.reason'?: string;
   'application.role'?: ExtraParametersDtoApplicationRoleEnum;
@@ -238,6 +175,7 @@ export interface CPatchErrandDto {
   suspension?: object;
   relatesTo?: any[];
   applicationReceived?: string;
+  channel?: string;
 }
 
 export interface CreateErrandNoteDto {
