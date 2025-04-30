@@ -1,19 +1,21 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-// const ReactQuill = typeof window === 'object' ? require('react-quill') : () => false;
+// const ReactQuill = typeof window === 'object' ? require('react-quill-new') : () => false;
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { cx, useForkRef } from '@sk-web-gui/react';
-import { DeltaStatic, Sources } from 'quill';
+import {  Sources } from 'quill';
 import React, { useEffect, useRef } from 'react';
-import ReactQuill, { UnprivilegedEditor, Value } from 'react-quill';
+import ReactQuill, { DeltaStatic } from 'react-quill-new';
+import 'react-quill/dist/quill.snow.css';
+// import{ UnprivilegedEditor, Value } from 'react-quill';
 
 // FOR CUSTOM TOOLBAR LOOK AT:
 // https://medium.com/@mircea.calugaru/react-quill-editor-with-full-toolbar-options-and-custom-buttons-undo-redo-176d79f8d375
 
 export const RichTextEditor = React.forwardRef<
-  UnprivilegedEditor,
+ReactQuill,
   {
-    value: Value;
-    onChange: ((value: string, delta?: DeltaStatic, source?: Sources, editor?: UnprivilegedEditor) => void) | undefined;
+    value: string;
+    onChange: ((value: string, delta?: DeltaStatic, source?: Sources, editor?: typeof ReactQuill) => void) | undefined;
     toggleModal?: () => void;
     isMaximizable?: boolean;
     readOnly?: boolean;
@@ -40,7 +42,7 @@ export const RichTextEditor = React.forwardRef<
       [{ header: 2 }],
       ['bold'],
       ['italic'],
-      [{ list: 'bullet' }],
+      // [{ list: 'bullet' }], //Needs fix
       [{ list: 'ordered' }],
     ];
 
@@ -131,10 +133,10 @@ export const RichTextEditor = React.forwardRef<
             preserveWhitespace={true}
             ref={useForkRef(ref as React.Ref<ReactQuill>, internalRef)}
             readOnly={readOnly}
-            className={cx(`mb-md h-[80%]`)}
+            className={cx(`mb-md h-[300px]`)}
             value={value}
-            onChange={(val, delta, source, editor) => {
-              return onChange?.(val, delta, source, editor);
+            onChange={(val, delta, editor) => {
+              return onChange?.(val, delta, editor);
             }}
             modules={modules}
           />

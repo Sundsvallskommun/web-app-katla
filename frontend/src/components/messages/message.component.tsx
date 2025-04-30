@@ -1,3 +1,5 @@
+import { AppContext } from '@contexts/app-context-interface';
+import { MessageResponse } from '@interfaces/message';
 import { messageAttachment } from '@services/casedata-attachment-service';
 import { isErrandLocked, validateAction } from '@services/casedata-errand-service';
 import { fetchMessages, fetchMessagesTree, setMessageViewStatus } from '@services/casedata-message-service';
@@ -9,8 +11,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { MessageComposer } from './message-composer.component';
 import { MessageWrapper } from './message-wrapper.component';
 import MessageTreeComponent from './tree.component';
-import { AppContext } from '@contexts/app-context-interface';
-import { MessageResponse } from '@interfaces/message';
 
 export const CasedataMessagesTab: React.FC<{
   setUnsaved: (unsaved: boolean) => void;
@@ -70,6 +70,32 @@ export const CasedataMessagesTab: React.FC<{
         });
       });
   };
+
+  useEffect(() => {
+    if (errand && errand.errandNumber) {
+      fetchMessages(municipalityId, errand)
+        .then(setMessages)
+        .catch(() => {
+          toastMessage({
+            position: 'bottom',
+            closeable: false,
+            message: 'Något gick fel när meddelanden hämtades',
+            status: 'error',
+          });
+        });
+      fetchMessagesTree(municipalityId, errand)
+        .then(setMessageTree)
+        .catch(() => {
+          toastMessage({
+            position: 'bottom',
+            closeable: false,
+            message: 'Något gick fel när meddelanden hämtades',
+            status: 'error',
+          });
+        });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [municipalityId, errand]);
 
   const getSender = (msg: MessageResponse) =>
     msg?.firstName && msg?.lastName ? `${msg.firstName} ${msg.lastName}`
@@ -254,8 +280,8 @@ export const CasedataMessagesTab: React.FC<{
                       <Button
                         key={`${a.name}-${idx}`}
                         onClick={() => {
-                          if (selectedMessage?.messageId && a?.id) {
-                            messageAttachment(municipalityId, errand.id, selectedMessage.messageId, a.id)
+                          if (selectedMessage?.messageId && a?.attachmentId) {
+                            messageAttachment(municipalityId, errand.id, selectedMessage.messageId, a.attachmentId)
                               .then((res) => {
                                 if (res.data.length !== 0) {
                                   const uri = `data:${a.file};base64,${res.data}`;
@@ -319,7 +345,7 @@ export const CasedataMessagesTab: React.FC<{
       </div>
       <div className="h-xl"></div>
       <MessageComposer
-        message={selectedMessage}
+        message={selectedMessage ?? ({} as MessageResponse)}
         show={showMessageComposer}
         closeHandler={() => {
           setTimeout(() => {

@@ -1,13 +1,12 @@
+import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
+import { MessageResponse } from '@interfaces/message';
 import { Role } from '@interfaces/role';
-// import { MessageResponseDirectionEnum } from '@data-contracts/case-data/data-contracts';
 import sanitized from '@services/sanitizer-service';
-// import { useAppContext } from '@contexts/app.context';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Avatar, cx } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
-import React from 'react';
-// import { MessageResponse } from 'src/data-contracts/backend/data-contracts';
+import React, { useContext } from 'react';
 
 enum MessageResponseDirectionEnum {
   INBOUND = 'INBOUND',
@@ -31,12 +30,10 @@ export const RenderedMessage: React.FC<{
   );
 
   const {
-    municipalityId,
     errand,
   }: {
-    municipalityId: string;
     errand: IErrand;
-  } = useAppContext();
+  } = useContext(AppContext);
 
   const getSender = (msg: MessageResponse) =>
     msg?.firstName && msg?.lastName ? `${msg.firstName} ${msg.lastName}`
@@ -72,7 +69,7 @@ export const RenderedMessage: React.FC<{
             selected === message.messageId ? 'bg-background-color-mixin-1 rounded-xl' : null
           }`
         )}
-        data-cy={`node-${message?.emailHeaders[0]?.values || message?.messageId}`}
+        data-cy={`node-${message?.emailHeaders?.[0]?.values || message?.messageId}`}
       >
         <div className="flex w-full">
           {messageAvatar(message)}
@@ -102,7 +99,7 @@ export const RenderedMessage: React.FC<{
           <div className="inline-flex items-start flex-nowrap">
             <span className="text-xs whitespace-nowrap">{dayjs(message.sent).format('YYYY-MM-DD HH:mm')}</span>
             <span className="text-xs mx-sm">|</span>
-            {message.attachments?.length > 0 ?
+            {(message.attachments?.length ?? 0) > 0 ?
               <>
                 <div className="mx-sm inline-flex items-center gap-xs">
                   <LucideIcon name="paperclip" size="1.5rem" />
