@@ -3,43 +3,41 @@ import { ErrandStatus } from '@interfaces/errand-status';
 import {
   assignedStatuses,
   closedStatuses,
+  draftStatuses,
   findCaseLabelForCaseType,
   findStatusKeyForStatusLabel,
   newStatuses,
 } from '@services/casedata-errand-service';
+
 import { Chip } from '@sk-web-gui/react';
-import React, { useContext } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React, { useContext, useEffect } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { CaseDataFilter, CaseDataValues } from '../errand-filter';
 import { Priority } from '@interfaces/priority';
 import dayjs from 'dayjs';
 import { IErrand } from '@interfaces/errand';
 import { Channels } from '@interfaces/channels';
+import { useHasTags } from '@utils/has-taggable-filters';
 
 interface CasedataFilterTagsProps {
   errands: IErrand[];
 }
 
 export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
-  const { watch, setValue, reset } = useFormContext<CaseDataFilter>();
-  const types = watch('caseType') ?? [];
-  const statuses = watch('status') ?? [];
-  const startdate = watch('startdate');
-  const enddate = watch('enddate');
+  const { control, setValue, reset } = useFormContext<CaseDataFilter>();
+  const values = useWatch({ control });
 
-  const rawPriorities = watch('priority');
-  const priorities = Array.isArray(rawPriorities) ? rawPriorities : [];
-
-  const rawChannels = watch('channel');
+  const types = values.caseType ?? [];
+  const statuses = values.status ?? [];
+  const startdate = values.startdate;
+  const enddate = values.enddate;
+  const priorities = Array.isArray(values.priority) ? values.priority : [];
   const channels =
-    Array.isArray(rawChannels) ? rawChannels
-    : rawChannels ? [rawChannels]
+    Array.isArray(values.channel) ? values.channel
+    : values.channel ? [values.channel]
     : [];
 
   const { selectedErrandStatuses } = useContext(AppContext);
-
-  const hasTags =
-    types.length > 0 || statuses.length > 0 || priorities.length > 0 || startdate || enddate || channels.length > 0;
 
   const handleRemoveType = (type: string) => {
     const newTypes = types.filter((caseType) => caseType !== type);
@@ -52,8 +50,10 @@ export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
   };
 
   const handleReset = () => {
-    reset(CaseDataValues);
-    setValue('status', selectedErrandStatuses);
+    reset({
+      ...CaseDataValues,
+      status: selectedErrandStatuses,
+    });
   };
 
   const handleRemoveDates = () => {
@@ -61,15 +61,11 @@ export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
     setValue('enddate', '');
   };
 
-  // const getChannelLabel = (key: string) => {
-  //   const labels: Record<string, string> = {
-  //     EMAIL: 'E-post',
-  //     ESERVICE: 'E-tjänst',
-  //     WEB_UI: 'Webgränssnitt',
-  //   };
-  //   return labels[key] || key;
-  // };
+  useEffect(() => {
+    setValue('status', selectedErrandStatuses);
+  }, [selectedErrandStatuses, setValue]);
 
+  const hasTags = useHasTags();
   return (
     <div className="flex gap-8 flex-wrap justify-start">
       {types.map((type, typeIndex) => (
@@ -81,8 +77,11 @@ export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
       {statuses
         .filter(
           (status) =>
-            ![...newStatuses, ...closedStatuses, ...assignedStatuses].map(findStatusKeyForStatusLabel).includes(status)
+            ![...newStatuses, ...closedStatuses, ...assignedStatuses, ...draftStatuses]
+              .map(findStatusKeyForStatusLabel)
+              .includes(status)
         )
+
         .map((status, statusIndex) => (
           <Chip
             data-cy={`tag-status-${status}`}
@@ -123,8 +122,7 @@ export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
             setValue('channel', newChannels);
           }}
         >
-          {/* {getChannelLabel(channel)} */}
-          {Channels[channel as keyof typeof Channels]}
+          {Channels[channel as keyof typeof Channels] || channel}
         </Chip>
       ))}
 

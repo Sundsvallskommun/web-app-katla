@@ -1,5 +1,5 @@
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Checkbox, PopupMenu, SearchField } from '@sk-web-gui/react';
+import { Checkbox, PopupMenu, SearchField, useThemeQueries } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CaseStatusFilter } from '../errand-filter';
@@ -8,16 +8,17 @@ import { ErrandStatus } from '@interfaces/errand-status';
 export const CasedataFilterStatus: React.FC = () => {
   const { register } = useFormContext<CaseStatusFilter>();
   const [query, setQuery] = useState<string>('');
+  const { isMaxLargeDevice } = useThemeQueries();
 
   return (
     <PopupMenu>
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
         data-cy="Status-filter"
-        variant="tertiary"
+        variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
-        size="sm"
-        className="max-md:w-full"
+        size={isMaxLargeDevice ? 'md' : 'sm'}
+        className={isMaxLargeDevice ? 'max-md:w-full flex justify-between items-center text-left' : 'max-md:w-full'}
       >
         Status
       </PopupMenu.Button>

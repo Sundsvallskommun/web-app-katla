@@ -32,14 +32,13 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
   const filterTriggeredRef = useRef(false);
 
   const {
-    errands,
+    errands = { errands: [], page: 0, totalPages: 0, isLoading: false },
     filterForm,
     tableForm,
     sidebarLabel: errandSidebarLabel,
     ownerFilter,
     setOwnerFilter,
     administrators,
-    numberOfFilters,
     setShouldTriggerFilter,
   } = useOngoingCaseDataErrands({ manualFilterTrigger: true });
 
@@ -65,12 +64,16 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
 
   const currentFilterKey = JSON.stringify(currentFilter);
   const previousFilterKeyRef = useRef<string>(currentFilterKey);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  const isLoading = errands.isLoading || isFetchingMore;
 
   useEffect(() => {
     if (!initialLoaded && errands && !filterTriggeredRef.current) {
       setAllErrands(errands.errands);
       setVisibleCount(4);
       setInitialLoaded(true);
+      setIsFetchingMore(false);
     }
   }, [initialLoaded, errands, setAllErrands, setVisibleCount, setInitialLoaded]);
 
@@ -101,34 +104,42 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
   }, [errands, initialLoaded, setAllErrands]);
 
   useEffect(() => {
-    if (errands?.errands?.length && filterTriggeredRef.current) {
-      filterTriggeredRef.current = false;
-      setAllErrands(errands.errands);
-      setVisibleCount(4);
-      setInitialLoaded(true);
+    if (isFetchingMore && !errands.isLoading) {
+      setIsFetchingMore(false);
     }
-  }, [errands, setAllErrands, setVisibleCount, setInitialLoaded]);
+  }, [errands.isLoading, isFetchingMore]);
 
   useEffect(() => {
-    if (visibleCount < allErrands.length) {
-      setVisibleCount((prev) => Math.min(prev + 4, allErrands.length));
+    if (errands?.errands?.length && (filterTriggeredRef.current || isFetchingMore)) {
+      filterTriggeredRef.current = false;
+      setAllErrands((prev) => [...prev, ...errands.errands]);
+      setVisibleCount((prev) => Math.min(prev + 4, allErrands.length + errands.errands.length));
+      setIsFetchingMore(false);
     }
-  }, [allErrands.length, setVisibleCount, visibleCount]);
+  }, [errands, setAllErrands, setVisibleCount, isFetchingMore, allErrands.length]);
+
+  useEffect(() => {
+    if (isFetchingMore && errands.errands.length === 0 && !errands.isLoading) {
+      setIsFetchingMore(false);
+    }
+  }, [errands.errands.length, errands.isLoading, isFetchingMore]);
 
   const handleLoadMore = () => {
-    if (errands.isLoading) return;
+    if (isLoading) return;
+
     const stillHasMoreLocally = visibleCount + 4 <= allErrands.length;
     const hasMoreInApi = errands.page + 1 < errands.totalPages;
 
     if (stillHasMoreLocally) {
       setVisibleCount((prev) => prev + 4);
     } else if (hasMoreInApi) {
-      setVisibleCount((prev) => prev + 4);
+      setIsFetchingMore(true);
       tableForm.setValue('page', errands.page + 1);
+      setShouldTriggerFilter(true);
     }
   };
 
-  const totalTags = (caseType?.length || 0) + (status?.length || 0) + (priority?.length || 0) + (channel?.length || 0);
+  const totalTags = (caseType?.length || 0) + (priority?.length || 0) + (channel?.length || 0);
 
   return (
     <div className="w-full p-[1rem] py-[1.6rem] relative">
@@ -149,9 +160,7 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
         </div>
       </div>
 
-      {errands?.isLoading && allErrands.length === 0 && (
-        <div className="text-center py-10 text-gray-500">Laddar ärenden...</div>
-      )}
+      {isLoading && allErrands.length === 0 && <div className="text-center py-10 text-gray-500">Laddar ärenden...</div>}
 
       <div className="flex flex-col gap-4">
         {allErrands.slice(0, visibleCount).map((errand) => {
@@ -182,8 +191,8 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
             inverted={true}
             className="w-full px-[1.8rem] pt-[1.6rem]"
             onClick={handleLoadMore}
-            disabled={errands.isLoading}
-            loading={errands.isLoading}
+            disabled={errands.isLoading || isLoading}
+            loading={isLoading}
           >
             <span className="text-vattjom-text">Läs in fler</span>
           </Button>
@@ -193,7 +202,6 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
       <MobilePage open={filterOpen} setOpen={setFilterOpen} lucideIconName="list-filter" title="Filter">
         <FormProvider {...filterForm}>
           <CaseDataFilteringMobile
-            numberOfFilters={numberOfFilters}
             ownerFilterHandler={setOwnerFilter}
             ownerFilter={ownerFilter}
             administrators={administrators}

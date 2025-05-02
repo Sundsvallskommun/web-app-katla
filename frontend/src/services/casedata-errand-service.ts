@@ -144,14 +144,14 @@ export const isErrandLocked: (errand: IErrand | CasedataFormModel) => boolean = 
   return errand?.status === ErrandStatus.ArendeAvslutat || phaseChangeInProgress(errand as IErrand);
 };
 
-export const getPriorityColor = (priority: Priority) => {
+export const getPriorityColor = (priority: keyof typeof Priority): 'error' | 'warning' | 'vattjom' => {
   switch (priority) {
-    case Priority.HIGH:
-      return 'text-error-surface-primary';
-    case Priority.MEDIUM:
-      return 'text-warning-surface-primary';
-    case Priority.LOW:
-      return 'text-vattjom-surface-primary';
+    case 'HIGH':
+      return 'error';
+    case 'MEDIUM':
+      return 'warning';
+    case 'LOW':
+      return 'vattjom';
   }
 };
 
