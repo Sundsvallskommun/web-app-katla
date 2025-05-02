@@ -1,4 +1,5 @@
 import { CaseDataFilter } from '@components/filtering/errand-filter';
+import { LogoutButton } from '@components/logout-button.component';
 import { NotificationsBell } from '@components/notifications/notifications-bell';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import LucideIcon from '@sk-web-gui/lucide-icon';
@@ -83,6 +84,11 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         <div className={cx('flex flex-col gap-8', open ? 'py-24' : 'items-center justify-center py-15')}>
           {children}
         </div>
+        <Divider className={cx(open ? '' : 'w-[4rem] mx-auto')} />
+        <div className="py-10 w-full ">
+          <LogoutButton />
+        </div>
+
         <div
           className={cx('absolute bottom-[2.4rem]', open ? 'right-[2.4rem]' : 'left-1/2 transform -translate-x-1/2')}
         >

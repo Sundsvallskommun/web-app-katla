@@ -15,7 +15,8 @@ import { MobileSearchBody } from '@layouts/mobile-layout/mobile-search-body.comp
 import { MobileErrandsList } from '@layouts/mobile-layout/mobile-errands-list.component';
 import { IErrand } from '@interfaces/errand';
 import { MobileMainPageHeader } from '@layouts/mobile-layout/mobile-main-page-header.component';
-import { useThemeQueries } from '@sk-web-gui/react';
+import { LogoutButton } from '@components/logout-button.component';
+import { Divider, useThemeQueries } from '@sk-web-gui/react';
 
 const Oversikt: React.FC = () => {
   const { setMunicipalityId, setUser } = useContext(AppContext);
@@ -48,6 +49,7 @@ const Oversikt: React.FC = () => {
     setOpenSearch(false);
     setOpenMenu(false);
   };
+
   return isMaxLargeDevice ?
       <>
         {!openSearch && !openNotification && !openMenu && (
@@ -90,6 +92,10 @@ const Oversikt: React.FC = () => {
               <FormProvider {...casedataFilterForm}>
                 <CasedataFilterSidebarStatusSelector iconButton={!open} />
               </FormProvider>
+              <div className="py-24">
+                <Divider />
+              </div>
+              <LogoutButton />
             </MobileMenuBody>
           </MobilePage>
         )}
