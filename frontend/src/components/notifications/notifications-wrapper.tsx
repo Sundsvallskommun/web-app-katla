@@ -58,9 +58,9 @@ export const NotificationsWrapper: React.FC<{
                 show ? 'w-full left-0 right-0'
                 : 'w-0 px-0'
               : show ?
-                withSidebar ? 'w-[48rem] right-0 ml-[32rem]'
-                : 'w-[48rem] right-0'
-              : 'w-0 right-[-48rem]'
+                withSidebar ? 'w-[48rem] left-[32rem]'
+                : 'w-[48rem] left-[5.6rem]'
+              : 'w-0'
             )}
           >
             <div className="py-16 px-40 w-full flex justify-between items-center shadow-lg h-[8rem]">

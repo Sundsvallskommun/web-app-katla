@@ -86,7 +86,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         </div>
         <Divider className={cx(open ? '' : 'w-[4rem] mx-auto')} />
         <div className="py-10 w-full ">
-          <LogoutButton />
+          <LogoutButton collapsed={!open} />
         </div>
 
         <div
@@ -104,7 +104,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} />
+      <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} withSidebar={open} />
     </aside>
   );
 };
