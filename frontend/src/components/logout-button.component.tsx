@@ -2,7 +2,11 @@ import { Button } from '@sk-web-gui/react';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { useRouter } from 'next/navigation';
 
-export const LogoutButton: React.FC = () => {
+interface LogoutButtonProps {
+  collapsed?: boolean;
+}
+
+export const LogoutButton: React.FC<LogoutButtonProps> = ({ collapsed = false }) => {
   const router = useRouter();
 
   const handleLogout = () => {
@@ -18,8 +22,9 @@ export const LogoutButton: React.FC = () => {
         color="primary"
         className="justify-start w-full hover:bg-dark-ghost"
         leftIcon={<LucideIcon name="log-out" />}
+        aria-label="Logga ut"
       >
-        <span className="w-full flex justify-between">Logga ut</span>
+        {!collapsed && <span className="w-full flex justify-between">Logga ut</span>}
       </Button>
     </div>
   );
