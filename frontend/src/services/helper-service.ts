@@ -18,6 +18,9 @@ export const invalidUsernameMessage = 'Ej giltigt användarnamn, mellanslag ej t
 export const orgNumberPattern = /^$|^([0-9]{6}-[0-9]{4})$/gi;
 export const invalidOrgNumberMessage = 'Ej giltigt organisationsnummer (ange tio siffror med streck: kkllmm-nnnn)';
 
+export const zipPattern = /^\d{5}$/;
+export const invalidZipMessage = 'Postnummer måste bestå av 5 siffror';
+
 export const luhnCheck = (str = ''): boolean => {
   str = str?.replace('-', '');
   if (!str) {
