@@ -16,6 +16,7 @@ export interface CitizenAddressData extends Data {
     postalCode: string;
     city: string;
     country: string;
+    municipality: string;
   }[];
 }
 
@@ -28,14 +29,15 @@ export interface AddressResult {
   careof: string;
   zip: string;
   city: string;
-  phone?: string;
-  email?: string;
-  workPhone?: string;
-  error?: string;
   loginName: string;
   company: string;
   administrationCode: string;
   administrationName: string;
+  municipality?: string;
+  phone?: string;
+  email?: string;
+  workPhone?: string;
+  error?: string;
 }
 
 interface EmployedPersonData {
@@ -76,6 +78,7 @@ export const searchPerson: (ssn: string) => Promise<AddressResult> = async (ssn:
     careof: addressItem?.co || '',
     zip: addressItem?.postalCode || '',
     city: addressItem?.city || '',
+    municipality: addressItem?.municipality || '',
     loginName: '',
     company: '',
     administrationCode: '',
