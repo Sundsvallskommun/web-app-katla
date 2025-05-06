@@ -17,12 +17,14 @@ import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
+import { useThemeQueries } from '@sk-web-gui/react';
 import { usePathname } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useThemeQueries } from '@sk-web-gui/react';
+
 const Arende: React.FC = () => {
   const method = useForm<IErrand>();
+  const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
   const { setMunicipalityId, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
@@ -97,7 +99,7 @@ const Arende: React.FC = () => {
 
               {!isMaxLargeDevice && (
                 <div className="flex gap-x-md">
-                  <SaveErrandButton owners={applicants.concat(otherParties)} />
+                  <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
                 </div>
               )}
             </header>
@@ -114,7 +116,7 @@ const Arende: React.FC = () => {
 
               <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
                 <AboutErrand />
-                <HealthCareStaff />
+                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
                 <Applicant owners={applicants} setOwners={setApplicants} />
                 <OtherParties owners={otherParties} setOwners={setOtherParties} />
               </div>

@@ -1,5 +1,4 @@
 'use client';
-
 import { CancelRegistrationButton } from '@components/cancel-registration-button.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
@@ -8,20 +7,21 @@ import { HealthCareStaff } from '@components/errandinformation/healthcare-staff.
 import { MedicalOpinion } from '@components/errandinformation/medical-opinion.component';
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
+import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { RegisterErrandButton } from '@components/register-errand-button.component';
 import { DraftErrandButton } from '@components/save-draft-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getMe } from '@services/user-service';
+import { useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { RegisterHeader } from './register-errand-header.component';
-import FileUploadComponent from '@components/file-upload/file-upload.component';
-import { useThemeQueries } from '@sk-web-gui/react';
 
 const Registrera: React.FC = () => {
   const method = useForm<IErrand>();
+  const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
   const { setMunicipalityId, setUser } = useContext(AppContext);
@@ -60,8 +60,8 @@ const Registrera: React.FC = () => {
               {!isMaxLargeDevice && (
                 <div className="flex gap-x-md">
                   <CancelRegistrationButton />
-                  <DraftErrandButton owners={applicants.concat(otherParties)} />
-                  <RegisterErrandButton owners={applicants.concat(otherParties)} />
+                  <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                  <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
                 </div>
               )}
             </header>
@@ -77,7 +77,7 @@ const Registrera: React.FC = () => {
               </div>
               <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
                 <AboutErrand />
-                <HealthCareStaff />
+                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
                 <Applicant owners={applicants} setOwners={setApplicants} />
                 <OtherParties owners={otherParties} setOwners={setOtherParties} />
               </div>
@@ -97,8 +97,8 @@ const Registrera: React.FC = () => {
         </main>
         {isMaxLargeDevice && (
           <div className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 pt-16">
-            <RegisterErrandButton owners={applicants.concat(otherParties)} />
-            <DraftErrandButton owners={applicants.concat(otherParties)} />
+            <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+            <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
             <CancelRegistrationButton />
           </div>
         )}
