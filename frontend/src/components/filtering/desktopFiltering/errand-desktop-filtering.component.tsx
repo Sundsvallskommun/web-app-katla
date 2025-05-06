@@ -43,11 +43,7 @@ const CaseDataFiltering: React.FC<{
       </div>
 
       <div className={cx(show ? 'visible' : 'hidden')}>
-        <CasedataFilterBase
-          ownerFilter={ownerFilter}
-          ownerFilterHandler={ownerFilterHandler}
-          backgroundColor="bg-background-200"
-        />
+        <CasedataFilterBase ownerFilter={ownerFilter} ownerFilterHandler={ownerFilterHandler} />
         <div className="mt-16">
           <CasedataFilterTags errands={errands} />
         </div>
