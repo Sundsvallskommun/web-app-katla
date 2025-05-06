@@ -11,7 +11,7 @@ export interface CaseStatusFilter {
 }
 
 export const CaseStatusValues = {
-  status: [],
+  status: ['ArendeInkommi'],
 };
 
 export interface CasePriorityFilter {

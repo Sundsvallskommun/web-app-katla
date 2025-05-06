@@ -2,7 +2,7 @@ import { FormProvider } from 'react-hook-form';
 import { Disclosure } from '@headlessui/react';
 import { ErrandsTable } from './components/errands-table.component';
 import { useOngoingCaseDataErrands } from '@utils/useOngoingCaseDataErrands';
-import CaseDataFiltering from '@components/filtering/desktopFiltering/errand-filtering.component';
+import CaseDataFiltering from '@components/filtering/desktopFiltering/errand-desktop-filtering.component';
 
 export const OngoingCaseDataErrands: React.FC = () => {
   const {

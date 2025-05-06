@@ -18,7 +18,11 @@ export interface TableForm {
   pageSize: number;
 }
 
-export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { manualFilterTrigger?: boolean } = {}) => {
+export const useOngoingCaseDataErrands = ({
+  manualFilterTrigger = false,
+}: {
+  manualFilterTrigger?: boolean;
+} = {}) => {
   const filterForm = useForm<CaseDataFilter>({ defaultValues: CaseDataValues });
   const didInit = useRef(false);
   const { isMaxLargeDevice } = useThemeQueries();
@@ -45,7 +49,7 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     user,
   } = useContext(AppContext);
 
-  const [ownerFilter, setOwnerFilter] = useState(false);
+  const [ownerFilter, setOwnerFilter] = useState<boolean>(false);
   const caseTypeFilter = watchFilter('caseType');
   const statusFilter = watchFilter('status');
   const priorityFilter = watchFilter('priority');
@@ -59,7 +63,7 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
   }, [sortColumn, sortOrder]);
 
   const [filterObject, setFilterObject] = useState<{ [key: string]: string | boolean }>();
-  const [shouldTriggerFilter, setShouldTriggerFilter] = useState(true);
+  const [shouldTriggerFilter, setShouldTriggerFilter] = useState(!manualFilterTrigger);
 
   const errands = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
 
@@ -117,10 +121,7 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
         };
       }
 
-      if (filter?.stakeholders === user.username) {
-        setOwnerFilter(true);
-      }
-
+      setOwnerFilter(true);
       resetFilter(storedFilters);
       triggerFilter();
     }
@@ -230,6 +231,5 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     sidebarLabel,
     administrators,
     setShouldTriggerFilter,
-    ...(manualFilterTrigger ? { setShouldTriggerFilter } : {}),
   };
 };
