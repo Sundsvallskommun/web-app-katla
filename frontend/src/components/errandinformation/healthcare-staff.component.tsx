@@ -11,11 +11,11 @@ import { useFieldArray, useForm } from 'react-hook-form';
 export const HealthCareStaff: React.FC<{
   staff?: CasedataOwnerOrContact[];
   setStaff: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-}> = ({ setStaff }) => {
+  isNewErrand: boolean;
+}> = ({ setStaff, isNewErrand }) => {
   const [doneMark, setDoneMark] = useState(false);
   const { user } = useContext(AppContext);
   const { isMaxLargeDevice } = useThemeQueries();
-
   const { control, getValues, watch, setValue } = useForm<CasedataOwnerOrContact>({
     mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
     defaultValues: {
@@ -40,6 +40,7 @@ export const HealthCareStaff: React.FC<{
   const emails = watch(`emails`);
   const phoneNumbers = watch(`phoneNumbers`);
   const personNumber = watch(`personalNumber`);
+  const roles = watch('roles');
 
   const { append: appendPhonenumber } = useFieldArray({
     control,
@@ -49,37 +50,46 @@ export const HealthCareStaff: React.FC<{
   const { append: appendEmail } = useFieldArray({ control, name: 'emails' });
 
   useEffect(() => {
-    searchADUser(user.username).then((res) => {
-      if (!isArray(res)) {
-        setValue(`firstName`, res.firstName, { shouldDirty: true });
-        setValue(`lastName`, res.lastName, { shouldDirty: true });
-        setValue(`street`, res.street || '', { shouldDirty: true });
-        setValue(`careof`, res.careof || '', { shouldDirty: true });
-        setValue(`zip`, res.zip, { shouldDirty: true });
-        setValue(`city`, res.city, { shouldDirty: true });
-        setValue(`personId`, res.personId, { shouldDirty: true });
-        setValue(`roles`, [Role.DOCTOR], { shouldDirty: true });
-        setValue(`newRole`, Role.DOCTOR, { shouldDirty: true });
-        setValue(`stakeholderType`, 'PERSON', { shouldDirty: true });
-        if (res.phone) {
-          appendPhonenumber({ value: res.phone });
+    if (!user?.username || !isNewErrand) {
+      console.warn('user.username is missing:', user);
+      return;
+    }
+
+    searchADUser(user.username)
+      .then((res) => {
+        if (!isArray(res)) {
+          setValue(`firstName`, res.firstName, { shouldDirty: true });
+          setValue(`lastName`, res.lastName, { shouldDirty: true });
+          setValue(`street`, res.street || '', { shouldDirty: true });
+          setValue(`careof`, res.careof || '', { shouldDirty: true });
+          setValue(`zip`, res.zip, { shouldDirty: true });
+          setValue(`city`, res.city, { shouldDirty: true });
+          setValue(`personId`, res.personId, { shouldDirty: true });
+          setValue(`roles`, [Role.REPORTER], { shouldDirty: true });
+          setValue(`newRole`, Role.REPORTER, { shouldDirty: true });
+          setValue(`stakeholderType`, 'PERSON', { shouldDirty: true });
+          if (res.phone) {
+            appendPhonenumber({ value: res.phone });
+          }
+          if (res.workPhone) {
+            appendPhonenumber({ value: res.workPhone });
+          }
+          if (res.email) {
+            appendEmail({ value: res.email });
+          }
+          if (res.loginName) {
+            setValue('adAccount', res.loginName);
+          }
+          const formData = getValues();
+          setStaff([formData]);
         }
-        if (res.workPhone) {
-          appendPhonenumber({ value: res.workPhone });
-        }
-        if (res.email) {
-          appendEmail({ value: res.email });
-        }
-        if (res.loginName) {
-          setValue('adAccount', res.loginName);
-        }
-        const formData = getValues();
-        setStaff([formData]);
-      }
-    });
+      })
+      .catch(() => {
+        console.error('Kunde inte hämta vårdpersonal från AD');
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, isNewErrand]);
 
   return (
     <Disclosure
@@ -87,7 +97,7 @@ export const HealthCareStaff: React.FC<{
       header="Vårdpersonal"
       variant="alt"
       className="w-full mobileVersion"
-      open={false}
+      open={true}
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >
@@ -95,21 +105,23 @@ export const HealthCareStaff: React.FC<{
         <div className={`${isMaxLargeDevice ? '' : 'px-16'}`}>
           <p>Vårdpersonal är den person som initierat ärendet och vår primära kontakt när ärendet handläggs.</p>
 
-          <DisplayCard
-          isEditable={true}
-          userName={username}
-          personalNumber={personNumber}
-          street={street}
-          city={city}
-          newEmail={emails?.[0]?.value}
-          newPhoneNumber={phoneNumbers?.[0]?.value}
-          roles={[Role.DOCTOR]}
-          firstName={firstName}
-          lastName={lastName}
-        />
+          {firstName &&
+            lastName && ( // TEMP
+              <DisplayCard
+                isEditable={false}
+                userName={username}
+                personalNumber={personNumber}
+                street={street}
+                city={city}
+                newEmail={emails?.[0]?.value}
+                newPhoneNumber={phoneNumbers?.[0]?.value}
+                roles={roles}
+                firstName={firstName}
+                lastName={lastName}
+              />
+            )}
         </div>
       </div>
-
       <div className={`${isMaxLargeDevice ? 'mt-24' : 'mt-24 px-16'}`}>
         <Checkbox onClick={() => setDoneMark(!doneMark)} checked={doneMark}>
           Markera avsnittet som komplett

@@ -4,11 +4,3 @@ export enum PTCaseType {
   LOST_PARKING_PERMIT = 'LOST_PARKING_PERMIT',
   APPEAL = 'APPEAL',
 }
-
-// export const CaseType = { ...PTCaseType, ...MEXCaseType };
-
-// export const CaseTypes = {
-//   PT: PTCaseType,
-//   MEX: MEXCaseType,
-//   ALL: { ...PTCaseType, ...MEXCaseType },
-// };
