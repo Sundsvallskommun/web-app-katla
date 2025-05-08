@@ -37,6 +37,7 @@ const Arende: React.FC = () => {
     const initializeData = async () => {
       try {
         setIsLoading(true);
+
         const municipality = process.env.NEXT_PUBLIC_MUNICIPALITY_ID || pathName.split('/')[2];
         setMunicipalityId(municipality);
 
@@ -44,24 +45,54 @@ const Arende: React.FC = () => {
         setUser(user);
 
         const res = await getErrandByErrandNumber(municipality, errandNumber);
+
         if (res.errand) {
+          console.log('res.errand', res.errand);
           setErrand(res.errand);
           method.reset(res.errand);
 
           if (res.errand.attachments) {
             const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
-            method.setValue('attachments', uploadFiles as unknown as Attachment[]); // Sätt bilagorna i formuläret
+            method.setValue('attachments', uploadFiles as unknown as Attachment[]);
             console.log('Bilagor:', uploadFiles);
           }
-          setApplicants(
-            res.errand.stakeholders
-              .filter((s) => s.roles.includes(Role.APPLICANT))
-              .map((applicant) => ({
-                ...applicant,
-                newEmail: applicant.emails[0]?.value,
-                newPhoneNumber: applicant.phoneNumbers[0]?.value,
-              }))
-          );
+
+          console.log('Stakeholders:', res.errand.stakeholders);
+
+          const reporter = res.errand.stakeholders.find((s) => s.roles.includes(Role.REPORTER));
+          if (reporter) {
+            console.log('Vårdpersonal (reporter):', reporter);
+            setHealthCareStaff([
+              {
+                ...reporter,
+                newEmail: reporter.emails[0]?.value,
+                newPhoneNumber: reporter.phoneNumbers[0]?.value,
+              },
+            ]);
+          } else {
+            console.warn('Ingen vårdpersonal (REPORTER) hittades.');
+            setHealthCareStaff([]);
+          }
+
+          const applicants = res.errand.stakeholders
+            .filter((s) => s.roles.includes(Role.APPLICANT))
+            .map((applicant) => ({
+              ...applicant,
+              newEmail: applicant.emails[0]?.value,
+              newPhoneNumber: applicant.phoneNumbers[0]?.value,
+            }));
+          console.log('Sökande:', applicants);
+          setApplicants(applicants);
+
+          const otherParties = res.errand.stakeholders
+            .filter((s) => s.roles.some((r) => [Role.FELLOW_APPLICANT, Role.CONTACT_PERSON].includes(r)))
+            .map((person) => ({
+              ...person,
+              newEmail: person.emails[0]?.value,
+              newPhoneNumber: person.phoneNumbers[0]?.value,
+            }));
+          console.log('Övriga parter:', otherParties);
+          setOtherParties(otherParties);
         }
       } catch (err) {
         console.error('Error initializing data:', err);
@@ -116,7 +147,7 @@ const Arende: React.FC = () => {
 
               <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
                 <AboutErrand />
-                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} isNewErrand={false} />
+                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
                 <Applicant owners={applicants} setOwners={setApplicants} />
                 <OtherParties owners={otherParties} setOwners={setOtherParties} />
               </div>

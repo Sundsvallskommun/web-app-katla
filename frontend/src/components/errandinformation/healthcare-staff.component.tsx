@@ -11,8 +11,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 export const HealthCareStaff: React.FC<{
   staff?: CasedataOwnerOrContact[];
   setStaff: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-  isNewErrand: boolean;
-}> = ({ setStaff, isNewErrand }) => {
+}> = ({ setStaff }) => {
   const [doneMark, setDoneMark] = useState(false);
   const { user } = useContext(AppContext);
   const { isMaxLargeDevice } = useThemeQueries();
@@ -50,7 +49,7 @@ export const HealthCareStaff: React.FC<{
   const { append: appendEmail } = useFieldArray({ control, name: 'emails' });
 
   useEffect(() => {
-    if (!user?.username || !isNewErrand) {
+    if (!user?.username) {
       console.warn('user.username is missing:', user);
       return;
     }
@@ -89,7 +88,7 @@ export const HealthCareStaff: React.FC<{
       });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isNewErrand]);
+  }, [user]);
 
   return (
     <Disclosure

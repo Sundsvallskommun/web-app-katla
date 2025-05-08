@@ -10,7 +10,7 @@ export const OtherParties: React.FC<{
   setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
 }> = ({ owners, setOwners }) => {
   const [doneMark, setDoneMark] = useState(false);
-  const allowedRoles = [Role.DOCTOR, Role.CONTACT_PERSON, Role.FELLOW_APPLICANT];
+  const allowedRoles = [Role.CONTACT_PERSON, Role.FELLOW_APPLICANT];
   return (
     <Disclosure
       icon={<LucideIcon name="users" />}
