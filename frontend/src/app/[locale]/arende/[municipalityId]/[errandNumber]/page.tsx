@@ -47,7 +47,6 @@ const Arende: React.FC = () => {
         const res = await getErrandByErrandNumber(municipality, errandNumber);
 
         if (res.errand) {
-          console.log('res.errand', res.errand);
           setErrand(res.errand);
           method.reset(res.errand);
 
@@ -57,11 +56,8 @@ const Arende: React.FC = () => {
             console.log('Bilagor:', uploadFiles);
           }
 
-          console.log('Stakeholders:', res.errand.stakeholders);
-
           const reporter = res.errand.stakeholders.find((s) => s.roles.includes(Role.REPORTER));
           if (reporter) {
-            console.log('Vårdpersonal (reporter):', reporter);
             setHealthCareStaff([
               {
                 ...reporter,
@@ -81,7 +77,6 @@ const Arende: React.FC = () => {
               newEmail: applicant.emails[0]?.value,
               newPhoneNumber: applicant.phoneNumbers[0]?.value,
             }));
-          console.log('Sökande:', applicants);
           setApplicants(applicants);
 
           const otherParties = res.errand.stakeholders
@@ -91,7 +86,6 @@ const Arende: React.FC = () => {
               newEmail: person.emails[0]?.value,
               newPhoneNumber: person.phoneNumbers[0]?.value,
             }));
-          console.log('Övriga parter:', otherParties);
           setOtherParties(otherParties);
         }
       } catch (err) {
