@@ -1,14 +1,32 @@
-export enum PTCaseType {
-  PARKING_PERMIT = 'PARKING_PERMIT',
-  PARKING_PERMIT_RENEWAL = 'PARKING_PERMIT_RENEWAL',
-  LOST_PARKING_PERMIT = 'LOST_PARKING_PERMIT',
+export enum FTCaseType {
+  PARATRANSIT = 'PARATRANSIT',
+  PARATRANSIT_CHANGE = 'PARATRANSIT_CHANGE',
+  PARATRANSIT_RENEWAL = 'PARATRANSIT_RENEWAL',
+  PARATRANSIT_NATIONAL = 'PARATRANSIT_NATIONAL',
+  PARATRANSIT_NATIONAL_RENEWAL = 'PARATRANSIT_NATIONAL_RENEWAL',
+  PARATRANSIT_RIAK = 'PARATRANSIT_RIAK',
+  PARATRANSIT_BUS_CARD = 'PARATRANSIT_BUS_CARD',
   APPEAL = 'APPEAL',
 }
 
-// export const CaseType = { ...PTCaseType, ...MEXCaseType };
+export enum FTCaseLabel {
+  PARATRANSIT = 'Ny anmälan om färdtjänst',
+  PARATRANSIT_CHANGE = 'Anmälan om förändring av insatser',
+  PARATRANSIT_RENEWAL = 'Anmälan om fortsatt färdtjänst',
+  PARATRANSIT_NATIONAL = 'Ny anmälan om riksfärdtjänst',
+  PARATRANSIT_NATIONAL_RENEWAL = 'Ny anmälan om fortsatt riksfärdtjänst',
+  PARATRANSIT_RIAK = 'Ny anmälan om RIAK',
+  PARATRANSIT_BUS_CARD = 'Ny anmälan om busskort',
+  APPEAL = 'Överklagan',
+}
 
-// export const CaseTypes = {
-//   PT: PTCaseType,
-//   MEX: MEXCaseType,
-//   ALL: { ...PTCaseType, ...MEXCaseType },
-// };
+export const getCaseLabels = (): Record<FTCaseType, string> => ({
+  [FTCaseType.PARATRANSIT]: FTCaseLabel.PARATRANSIT,
+  [FTCaseType.PARATRANSIT_CHANGE]: FTCaseLabel.PARATRANSIT_CHANGE,
+  [FTCaseType.PARATRANSIT_RENEWAL]: FTCaseLabel.PARATRANSIT_RENEWAL,
+  [FTCaseType.PARATRANSIT_NATIONAL]: FTCaseLabel.PARATRANSIT_NATIONAL,
+  [FTCaseType.PARATRANSIT_NATIONAL_RENEWAL]: FTCaseLabel.PARATRANSIT_NATIONAL_RENEWAL,
+  [FTCaseType.PARATRANSIT_RIAK]: FTCaseLabel.PARATRANSIT_RIAK,
+  [FTCaseType.PARATRANSIT_BUS_CARD]: FTCaseLabel.PARATRANSIT_BUS_CARD,
+  [FTCaseType.APPEAL]: FTCaseLabel.APPEAL,
+});

@@ -8,6 +8,7 @@ import { CasedataStatusLabelComponent } from './casedata-status-label.component'
 import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
 import { Priority } from '@interfaces/priority';
+import { FTCaseType } from '@interfaces/case-type';
 
 export const ErrandsTable: React.FC = () => {
   const { watch, setValue, register } = useFormContext<TableForm>();
@@ -73,30 +74,8 @@ export const ErrandsTable: React.FC = () => {
             status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string}
           />
         </Table.HeaderColumn>
-        <Table.Column scope="row" className={'font-bold max-w-[190px] whitespace-nowrap overflow-x-hidden'}>
-          <>
-            {(
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Nytt parkeringstillstånd'
-            ) ?
-              'Nytt p-tillstånd'
-            : (
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Borttappat parkeringstillstånd'
-            ) ?
-              'Borttappat p-tillstånd'
-            : (
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Förnyat parkeringstillstånd'
-            ) ?
-              'Förnyelse av p-tillstånd'
-            : (
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Överklagan'
-            ) ?
-              'Överklagan av p-tillstånd'
-            : ''}
-          </>
+        <Table.Column scope="row" className="font-bold max-w-[190px] whitespace-nowrap overflow-x-hidden">
+          {getCaseLabels()[errand.caseType as FTCaseType] ?? errand.caseType}
         </Table.Column>
 
         <Table.Column>
