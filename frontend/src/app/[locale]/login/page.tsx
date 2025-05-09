@@ -33,17 +33,20 @@ const Login: React.FC = () => {
 
   const onLogin = () => {
     const searchPath = searchParams.get('path');
-    const nonLoginPath = !pathName?.match(/\/login/) && pathName; // Contains path as long as it's not /login
-    const nonLoginSearch = !searchPath?.match(/\/login|\/logout/) && searchPath; // Contains redirect path as long as it's not /login or /logout
+    const nonLoginPath = !pathName?.match(/\/login/) && pathName;
+    const nonLoginSearch = !searchPath?.match(/\/login|\/logout/) && searchPath;
     const path = nonLoginPath || nonLoginSearch || '/';
+
+    //Basepath problem, lägger till FT/FT vid login. Detta löser buggen men inte en bra lösning.
+    const cleanedPath = path.replace(new RegExp(`^${process.env.NEXT_PUBLIC_BASE_PATH}`), '');
 
     const url = new URL(apiURL('/saml/login'));
     const queries = new URLSearchParams({
-      successRedirect: `${appURL(path as string)}`,
+      successRedirect: `${appURL(cleanedPath)}`,
       failureRedirect: `${appURL()}/login`,
     });
     url.search = queries.toString();
-    // NOTE: send user to login with SSO
+
     router.push(url.toString());
   };
 
