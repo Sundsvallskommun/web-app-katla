@@ -1,4 +1,3 @@
-import { CaseDataFilter } from '@components/filtering/errand-filter';
 import { LogoutButton } from '@components/logout-button.component';
 import { NotificationsBell } from '@components/notifications/notifications-bell';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
@@ -15,13 +14,10 @@ interface SidebarProps {
     firstName: string;
     lastName: string;
   };
-  isLoading: boolean;
   applicationName: string;
   applicationEnvironment: string;
   isNotificationEnabled: boolean;
-  casedataFilterForm?: CaseDataFilter;
   onFilterChange: () => void;
-
   children: React.ReactNode;
 }
 

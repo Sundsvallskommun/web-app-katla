@@ -1,4 +1,4 @@
-import { PTCaseLabel } from '@interfaces/case-label';
+import { FTCaseLabel } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, cx, Disclosure, Select } from '@sk-web-gui/react';
@@ -21,7 +21,7 @@ export const AboutErrand: React.FC = () => {
       <div className="flex flex-col">
         <strong className="mb-10">Ärendetyp*</strong>
         <Select className="w-full" {...register('caseType')}>
-          {Object.entries(PTCaseLabel)
+          {Object.entries(FTCaseLabel)
             .filter(([, label]) => label !== 'Överklagan')
             .sort((a, b) => a[1].localeCompare(b[1]))
             .map(([key, label]: [string, string]) => {

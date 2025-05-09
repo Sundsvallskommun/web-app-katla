@@ -1,5 +1,4 @@
 import { Attachment } from '@interfaces/attachment';
-import { PTCaseType } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import { ApiResponse, apiService } from '@services/api-service';
 import { UploadFile } from '@sk-web-gui/react';
@@ -220,55 +219,65 @@ export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFi
   });
 };
 
-export const validateAttachmentsForDecision: (errand: IErrand) => { valid: boolean; reason: string } = (errand) => {
-  const uniqueAttachmentsOnlyOnce = validateAttachmentsForUtredning(errand);
-  const passportPhotoMissing =
-    errand.caseType === PTCaseType.PARKING_PERMIT &&
-    errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'PASSPORT_PHOTO').length === 0;
-  const tooManypassportPhotos =
-    errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'PASSPORT_PHOTO').length > 1;
-  const medicalConfirmationValid =
-    (errand.extraParameters.find((p) => p.key === 'application.renewal.medicalConfirmationRequired')?.values?.[0] ??
-      '') === 'no' ||
-    errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'MEDICAL_CONFIRMATION').length > 0 ||
-    errand.caseType !== PTCaseType.PARKING_PERMIT;
-  const signatureValid =
-    errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'SIGNATURE').length ==
-    ((
-      (errand.extraParameters.find((p) => p.key === 'application.applicant.signingAbility')?.values?.[0] ?? '') ===
-      'true'
-    ) ?
-      1
-    : 0);
-  const rsn = [];
-  if (passportPhotoMissing) {
-    rsn.push('passfoto saknas');
-  }
-  if (tooManypassportPhotos) {
-    rsn.push('endast ett passfoto får bifogas');
-  }
-  if (!medicalConfirmationValid) {
-    rsn.push('läkarintyg saknas');
-  }
-  if (!signatureValid) {
-    rsn.push('signaturfoto måste bifogas om den sökande kan signera');
-  }
+// export const validateAttachmentsForDecision: (errand: IErrand) => { valid: boolean; reason: string } = (errand) => {
+//   const uniqueAttachmentsOnlyOnce = validateAttachmentsForUtredning(errand);
+//   const passportPhotoMissing =
+//     errand.caseType === FTCaseType.PARKING_PERMIT &&
+//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'PASSPORT_PHOTO').length === 0;
+//   const tooManypassportPhotos =
+//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'PASSPORT_PHOTO').length > 1;
+//   const medicalConfirmationValid =
+//     (errand.extraParameters.find((p) => p.key === 'application.renewal.medicalConfirmationRequired')?.values?.[0] ??
+//       '') === 'no' ||
+//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'MEDICAL_CONFIRMATION').length > 0 ||
+//     errand.caseType !== FTCaseType.PARKING_PERMIT;
+//   const signatureValid =
+//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'SIGNATURE').length ==
+//     ((
+//       (errand.extraParameters.find((p) => p.key === 'application.applicant.signingAbility')?.values?.[0] ?? '') ===
+//       'true'
+//     ) ?
+//       1
+//     : 0);
+//   const rsn = [];
+//   if (passportPhotoMissing) {
+//     rsn.push('passfoto saknas');
+//   }
+//   if (tooManypassportPhotos) {
+//     rsn.push('endast ett passfoto får bifogas');
+//   }
+//   if (!medicalConfirmationValid) {
+//     rsn.push('läkarintyg saknas');
+//   }
+//   if (!signatureValid) {
+//     rsn.push('signaturfoto måste bifogas om den sökande kan signera');
+//   }
 
-  const reason = rsn.map((r, i) => {
-    if (i === 0) {
-      return r.charAt(0).toUpperCase() + r.slice(1);
-    }
-    return r;
-  });
+//   const reason = rsn.map((r, i) => {
+//     if (i === 0) {
+//       return r.charAt(0).toUpperCase() + r.slice(1);
+//     }
+//     return r;
+//   });
+
+//   return {
+//     valid:
+//       uniqueAttachmentsOnlyOnce &&
+//       !passportPhotoMissing &&
+//       !tooManypassportPhotos &&
+//       medicalConfirmationValid &&
+//       signatureValid,
+//     reason: reason.join(', '),
+//   };
+// };
+
+//TEMP: Vet inte reglerna för bilagor ännu.
+export const validateAttachmentsForDecision = (errand: IErrand): { valid: boolean; reason: string } => {
+  const valid = validateAttachmentsForUtredning(errand);
 
   return {
-    valid:
-      uniqueAttachmentsOnlyOnce &&
-      !passportPhotoMissing &&
-      !tooManypassportPhotos &&
-      medicalConfirmationValid &&
-      signatureValid,
-    reason: reason.join(', '),
+    valid,
+    reason: valid ? '' : 'Ogiltiga eller dubbla bilagor förekommer',
   };
 };
 
