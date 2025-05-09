@@ -1,3 +1,5 @@
+'use client';
+
 import { NotificationsBell } from '@components/notifications/notifications-bell';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Logo } from '@sk-web-gui/react';
@@ -59,7 +61,7 @@ export const MobileMainPageHeader: React.FC<MobileMainPageHeaderProps> = ({
         </div>
       </div>
 
-      {children && <div className="flex-1 overflow-auto">{children}</div>}
+      {children && <div className="flex-1 overflow-scroll">{children}</div>}
     </div>
   );
 };

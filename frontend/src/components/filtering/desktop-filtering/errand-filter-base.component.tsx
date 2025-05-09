@@ -1,5 +1,5 @@
-import { Checkbox, useThemeQueries } from '@sk-web-gui/react';
-import { CasedataFilterCaseType } from '../mobileFiltering/errand-filter-casetype.component';
+import { Checkbox, cx, useThemeQueries } from '@sk-web-gui/react';
+import { CasedataFilterCaseType } from './errand-filter-casetype.component';
 import { CasedataFilterStatus } from './casedata-filter-status.component';
 import { CasedataFilterPriority } from './errand-filter-priority.component';
 import { CasedataFilterDates } from './errand-filter-dates.component';
@@ -16,17 +16,12 @@ export const CasedataFilterBase: React.FC<Props> = ({ ownerFilterHandler, ownerF
   const { isMaxLargeDevice } = useThemeQueries();
   const { sidebarLabel } = useContext(AppContext);
 
-  const layoutWrapperClass = isMaxLargeDevice ? 'flex-col' : 'flex-row gap-16 items-center';
+  const layoutWrapperClass = isMaxLargeDevice ? 'flex-col' : 'flex-row gap-[1.6rem] items-center';
 
-  const filterContainerClass = [
-    'w-full',
-    'flex',
-    'justify-start',
-    'items-center',
-    'gap-4',
-    'rounded-groups',
-    isMaxLargeDevice ? 'flex-col' : 'flex-row flex-wrap bg-background-200 p-10',
-  ].join(' ');
+  const filterContainerClass = cx(
+    'w-full flex justify-start items-center gap-[0.4rem] rounded-groups',
+    isMaxLargeDevice ? 'flex-col' : 'flex-row flex-wrap bg-background-200 p-[1rem]'
+  );
 
   const filterItemClass = isMaxLargeDevice ? 'relative w-full mb-24' : 'relative w-auto';
 

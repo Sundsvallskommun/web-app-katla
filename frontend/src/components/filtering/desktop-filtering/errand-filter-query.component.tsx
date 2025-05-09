@@ -2,24 +2,22 @@ import { SearchField } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CaseQueryFilter } from '../errand-filter';
+import { useDebounceEffect } from '@utils/useDebounceEffect';
 
 export const CasedataFilterQuery: React.FC = () => {
   const { watch, setValue } = useFormContext<CaseQueryFilter>();
   const value = watch('query');
   const [query, setQuery] = useState<string>(value);
-  //const gui = useGui();
 
-  //   const isMobile = useMediaQuery(`screen and (max-width: ${gui.theme.screens.md})`);
-
-  //   useDebounceEffect(
-  //     () => {
-  //       if (query !== value) {
-  //         setValue('query', query);
-  //       }
-  //     },
-  //     1000,
-  //     [query]
-  //   );
+  useDebounceEffect(
+    () => {
+      if (query !== value) {
+        setValue('query', query);
+      }
+    },
+    1000,
+    [query]
+  );
 
   return (
     <SearchField
