@@ -41,10 +41,6 @@ export const ErrandsTable: React.FC = () => {
     }
   };
 
-  const handleClick = async (errand: IErrand) => {
-    window.open(`${process.env.NEXT_PUBLIC_BASEPATH}/arende/${municipalityId}/${errand.errandNumber}`, '_blank');
-  };
-
   const headers = data.labels.map((header, index) => (
     <Table.HeaderColumn key={`header-${index}`} sticky={header.sticky}>
       {header.screenReaderOnly ?
@@ -62,12 +58,17 @@ export const ErrandsTable: React.FC = () => {
   ));
 
   const rows = (data.errands || []).map((errand: IErrand, index) => {
+    const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${municipalityId}/${errand.errandNumber}`;
+
     return (
       <Table.Row
         key={`row-${index}`}
         aria-label={`Ärende ${errand.errandNumber}, öppna ärende i ny flik`}
-        onClick={() => handleClick(errand)}
-        className="cursor-pointer"
+        onClick={() => {
+          window.open(url, '_blank');
+          return false;
+        }}
+        className="cursor-pointer hover:bg-gray-50"
       >
         <Table.HeaderColumn scope="row" className="w-full w-max-[15rem] whitespace-nowrap text-ellipsis table-caption">
           <CasedataStatusLabelComponent
@@ -81,10 +82,11 @@ export const ErrandsTable: React.FC = () => {
         <Table.Column>
           <time dateTime={errand.created}>{errand.created}</time>
         </Table.Column>
+
         <Table.Column>
           <>
             <Badge
-              className="w-[0.8rem] h-[0.8rem]"
+              className="w-[0.8rem] h-[0.8rem] mr-2"
               color={
                 errand.priority === Priority.HIGH ? 'error'
                 : errand.priority === Priority.MEDIUM ?
@@ -93,17 +95,21 @@ export const ErrandsTable: React.FC = () => {
               }
               rounded
             />
-            {errand.priority ? errand.priority.toString() : ''}
+            {errand.priority}
           </>
         </Table.Column>
-        <Table.Column>{errand.channel ? errand.channel : ''}</Table.Column>
+
+        <Table.Column>{errand.channel || ''}</Table.Column>
+
         <Table.Column sticky>
           <div className="w-full flex justify-end">
             <NextLink
-              href={`/arende/${municipalityId}/${errand.errandNumber}`}
-              onClick={(e) => e.stopPropagation()}
+              href={url}
+              onClick={() => {
+                return false;
+              }}
               target="_blank"
-              title={'Visa ärende'}
+              title="Visa ärende"
               className={cx(
                 'no-underline sk-btn max-lg:sk-btn-icon sk-btn-sm bg-primary text-light-primary w-full hover:text-dark-secondary',
                 rowHeight === 'normal' ? 'sk-btn-md' : 'sk-btn-sm',
