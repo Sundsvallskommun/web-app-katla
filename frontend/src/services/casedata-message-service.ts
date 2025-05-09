@@ -57,6 +57,8 @@ export const sendMessage: (
   const url =
     data.contactMeans === 'webmessage' ? `casedata/${municipalityId}/webmessage` : `casedata/${municipalityId}/email`;
 
+    console.log('data', data); // Add this line to log the data
+
   const targets = data.contactMeans === 'webmessage' ? [{ value: '' }] : [...data.emails];
   const msgPromises = targets.map(async (target) => {
     const messageFormData = new FormData();

@@ -26,7 +26,7 @@ import authMiddleware from '@middlewares/auth.middleware';
 import { validationMiddleware } from '@middlewares/validation.middleware';
 import ApiService from '@services/api.service';
 // import { generateMessageId, sendDigitalMail, sendEmail, sendSms, sendWebMessage } from '@services/message.service';
-import { getOwnerStakeholder, getOwnerStakeholderEmail } from '@services/stakeholder.service';
+import { getHealthcCreStaffStakeholder, getOwnerStakeholder, getOwnerStakeholderEmail } from '@services/stakeholder.service';
 import { fileUploadOptions } from '@utils/fileUploadOptions';
 import { validateRequestBody } from '@utils/validate';
 import { IsArray, IsOptional, IsString, Validate, ValidateNested } from 'class-validator';
@@ -188,7 +188,7 @@ const MESSAGE_SUBJECT = 'Meddelande gällande er ansökan om parkeringstillstån
 export class MessageController {
   private apiService = new ApiService();
   SERVICE = `case-data/11.0`;
-  MESSAGING_SERVICE = `messaging/6.0`;
+  MESSAGING_SERVICE = `messaging/7.0`;
 
   @Post('/casedata/:municipalityId/message/decision')
   @HttpCode(201)
@@ -357,14 +357,16 @@ export class MessageController {
     @UploadedFiles('files', { options: fileUploadOptions, required: false }) files: Express.Multer.File[],
     @Body() messageDto: MessageDto,
   ): Promise<{ data: AgnosticMessageResponse; message: string }> {
+    console.log()
     await validateRequestBody(MessageDto, messageDto);
     const errandsUrl = `${messageDto.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${messageDto.errandId}`;
     const baseURL = apiURL(this.SERVICE);
     const errandData = await this.apiService.get<ErrandDTO>({ url: errandsUrl, baseURL }, req.user);
+    console.log('errandData', errandData.data);
     let url;
     let message: WebMessageRequest;
     const MESSAGE_ID = generateMessageId();
-    if (errandData.data.externalCaseId) {
+    // if (errandData.data.externalCaseId) {
       url = `${this.MESSAGING_SERVICE}/${municipalityId}/webmessage`;
       const attachments = files.map(file => {
         return {
@@ -376,19 +378,23 @@ export class MessageController {
       message = {
         party: {
           ...(getOwnerStakeholder(errandData.data).personId && { partyId: getOwnerStakeholder(errandData.data).personId }),
-          externalReferences: [
-            {
-              key: 'flowInstanceId',
-              value: errandData.data.externalCaseId,
-            },
-          ],
+          // externalReferences: [
+          //   {
+          //     key: 'flowInstanceId',
+          //     value: errandData.data.externalCaseId,
+          //   },
+          // ],
         },
+        // sender: {
+        //   ...(getHealthcCreStaffStakeholder(errandData.data).adAccount && { userId: getHealthcCreStaffStakeholder(errandData.data).adAccount }),
+        // },
         message: messageDto.text,
+        dispatch: false,
       } as WebMessageRequest;
       if (attachments.length > 0) {
         message.attachments = attachments;
       }
-    }
+    // }
     return sendWebMessage(municipalityId, message, req, errandData);
   }
 

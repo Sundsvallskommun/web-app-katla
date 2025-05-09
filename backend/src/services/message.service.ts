@@ -89,6 +89,7 @@ export const sendSms = (municipalityId: string, message: SmsRequest, req: Reques
 export const sendWebMessage = (municipalityId: string, message: WebMessageRequest, req: RequestWithUser, errandData: ApiResponse<ErrandDTO>) => {
   const url = `${MESSAGING_SERVICE}/${municipalityId}/webmessage`;
   const apiService = new ApiService();
+  console.log('Sending web message:', message);
   return apiService
     .post<AgnosticMessageResponse, WebMessageRequest>({ url, data: message }, req.user)
     .then(async (res: ApiResponse<WebMessageResponse>) => {

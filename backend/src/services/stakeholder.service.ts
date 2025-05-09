@@ -10,6 +10,8 @@ const SERVICE = `case-data/11.0`;
 
 export const getOwnerStakeholder: (e: ErrandDTO) => StakeholderDTO = e => e.stakeholders.find(s => s.roles.includes(Role.APPLICANT));
 
+export const getHealthcCreStaffStakeholder: (e: ErrandDTO) => StakeholderDTO = e => e.stakeholders.find(s => s.roles.includes(Role.ADMINISTRATOR));
+
 export const getOwnerStakeholderEmail: (e: ErrandDTO) => string = e => {
   const owner = getOwnerStakeholder(e);
   return owner.contactInformation.find(c => c.contactType === 'EMAIL')?.value;

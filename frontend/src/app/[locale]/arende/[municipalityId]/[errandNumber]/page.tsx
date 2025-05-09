@@ -8,6 +8,7 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
+import { CasedataMessagesTab } from '@components/messages/message.component';
 import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
@@ -17,13 +18,14 @@ import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
-import { useThemeQueries } from '@sk-web-gui/react';
+import { Divider, MenuBar, useThemeQueries } from '@sk-web-gui/react';
 import { usePathname } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 const Arende: React.FC = () => {
   const method = useForm<IErrand>();
+  const [current, setCurrent] = React.useState<number | undefined>(0);
   const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
@@ -129,35 +131,53 @@ const Arende: React.FC = () => {
               )}
             </header>
 
-            <section
-              className={`
-            bg-background-content border-1 rounded-12
+            <div className="border-1 rounded-12 bg-background-content">
+              <MenuBar className="py-[1rem] pl-[1.6rem]" current={current}>
+                <MenuBar.Item>
+                  <button onClick={() => setCurrent(0)}>Rapporterat</button>
+                </MenuBar.Item>
+                <MenuBar.Item>
+                  <button onClick={() => setCurrent(1)}>Meddelanden</button>
+                </MenuBar.Item>
+                <MenuBar.Item>
+                  <button onClick={() => setCurrent(2)}>Bilagor</button>
+                </MenuBar.Item>
+              </MenuBar>
+              <Divider />
+              <section
+                className={`
             ${isMaxLargeDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
           `}
-            >
-              <div className={`${isMaxLargeDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
-                <h2>Grundinformation</h2>
-              </div>
+              >
+                {current === 0 && (
+                  <>
+                    <div className={`${isMaxLargeDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
+                      <h2>Grundinformation</h2>
+                    </div>
 
-              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
-                <AboutErrand />
-                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
-                <Applicant owners={applicants} setOwners={setApplicants} />
-                <OtherParties owners={otherParties} setOwners={setOtherParties} />
-              </div>
+                    <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+                      <AboutErrand />
+                      <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
+                      <Applicant owners={applicants} setOwners={setApplicants} />
+                      <OtherParties owners={otherParties} setOwners={setOtherParties} />
+                    </div>
 
-              <div className={`${isMaxLargeDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
-                <h2>Ärendeuppgifter</h2>
-              </div>
+                    <div className={`${isMaxLargeDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
+                      <h2>Ärendeuppgifter</h2>
+                    </div>
 
-              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
-                <ExternalCircumstances />
-                <PersonalInformation />
-                <MedicalOpinion />
-              </div>
+                    <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+                      <ExternalCircumstances />
+                      <PersonalInformation />
+                      <MedicalOpinion />
+                    </div>
+                  </>
+                )}
 
-              <FileUploadComponent />
-            </section>
+                {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
+                {current === 2 && <FileUploadComponent />}
+              </section>
+            </div>
           </section>
         </main>
         {isMaxLargeDevice && (
