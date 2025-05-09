@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 import { UploadFile } from '@sk-web-gui/react';
+import { ErrandStatus } from '@interfaces/errand-status';
 
 export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -31,6 +32,9 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
 
     data.stakeholders = owners;
+    data.status = {
+      statusType: ErrandStatus.ArendeInkommit,
+    };
 
     try {
       const res = await saveErrand(data, municipalityId);
@@ -101,11 +105,15 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     }
   };
 
+  // Logik för att kontrollera om sökande finns, annars vill vi eventuellt inte kunna skapa ett ärende.
+  // const hasApplicant = useMemo(() => owners.some((owner) => owner.roles.includes(Role.APPLICANT)), [owners]); //disabled={!hasApplicant}
+
   return (
     <div className="flex mb-0 w-full">
       <Button variant="primary" color="vattjom" className="w-full" onClick={openHandler}>
         Registrera ärende
       </Button>
+
       {isOpen && (
         <Dialog className="max-w-[36rem]" show={isOpen}>
           <Dialog.Content className="flex flex-col items-center justify-center text-center">

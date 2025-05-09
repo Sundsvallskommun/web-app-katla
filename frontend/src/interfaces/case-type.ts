@@ -6,7 +6,6 @@ export enum FTCaseType {
   PARATRANSIT_NATIONAL_RENEWAL = 'PARATRANSIT_NATIONAL_RENEWAL',
   PARATRANSIT_RIAK = 'PARATRANSIT_RIAK',
   PARATRANSIT_BUS_CARD = 'PARATRANSIT_BUS_CARD',
-  APPEAL = 'APPEAL',
 }
 
 export enum FTCaseLabel {
@@ -17,7 +16,6 @@ export enum FTCaseLabel {
   PARATRANSIT_NATIONAL_RENEWAL = 'Ny anmälan om fortsatt riksfärdtjänst',
   PARATRANSIT_RIAK = 'Ny anmälan om RIAK',
   PARATRANSIT_BUS_CARD = 'Ny anmälan om busskort',
-  APPEAL = 'Överklagan',
 }
 
 export const getCaseLabels = (): Record<FTCaseType, string> => ({
@@ -28,7 +26,6 @@ export const getCaseLabels = (): Record<FTCaseType, string> => ({
   [FTCaseType.PARATRANSIT_NATIONAL_RENEWAL]: FTCaseLabel.PARATRANSIT_NATIONAL_RENEWAL,
   [FTCaseType.PARATRANSIT_RIAK]: FTCaseLabel.PARATRANSIT_RIAK,
   [FTCaseType.PARATRANSIT_BUS_CARD]: FTCaseLabel.PARATRANSIT_BUS_CARD,
-  [FTCaseType.APPEAL]: FTCaseLabel.APPEAL,
 });
 
 export const getCaseShortLabels = (): Record<FTCaseType, string> => ({
@@ -39,5 +36,4 @@ export const getCaseShortLabels = (): Record<FTCaseType, string> => ({
   [FTCaseType.PARATRANSIT_NATIONAL_RENEWAL]: 'Förnyelse av riksfärdtjänst',
   [FTCaseType.PARATRANSIT_RIAK]: 'Ny RIAK',
   [FTCaseType.PARATRANSIT_BUS_CARD]: 'Nytt busskort',
-  [FTCaseType.APPEAL]: 'Överklagan',
 });
