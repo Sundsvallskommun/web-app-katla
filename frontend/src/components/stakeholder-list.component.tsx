@@ -11,6 +11,7 @@ import { AppContext } from '@contexts/app-context-interface';
 import { emailSchema, phoneSchema } from '@utils/validation-schema';
 import * as yup from 'yup';
 import { Role, RoleDisplayNames } from '@interfaces/role';
+import { StakeholderFormModal } from './stakeholder-form.component';
 
 export const StakeholderList: React.FC<{
   owners: CasedataOwnerOrContact[];
@@ -22,6 +23,7 @@ export const StakeholderList: React.FC<{
   const [searchResult, setSearchResult] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [outsideMunicipalityWarning, setOutsideMunicipalityWarning] = useState<string | null>(null);
+  const [manualEntryOpen, setManualEntryOpen] = useState(false);
 
   const [validationMessages, setValidationMessages] = useState({
     email: '',
@@ -245,11 +247,20 @@ export const StakeholderList: React.FC<{
       {searchResult && !notFound && (
         <div className="border-1 rounded-12 bg-background-content w-max-[52.5rem] my-15">
           <div className="px-16 py-8">
-            <p className="text-[1.6rem] font-semibold py-10">{firstName + ' ' + lastName}</p>
+            <p className="text-[1.6rem] font-semibold py-10">
+              {firstName?.trim() || lastName?.trim() ?
+                `${firstName} ${lastName}`
+              : <span className="italic text-text-secondary">Namn saknas</span>}
+            </p>
+
             <div className="flex text-md mb-10">
               <div className="flex flex-col mr-10">
-                <div>{personalNumber}</div>
-                <div>{street + ', ' + city}</div>
+                <div className={!personalNumber ? 'italic text-text-secondary' : ''}>
+                  {personalNumber || 'Personnummer saknas'}
+                </div>
+                <div className={!(street?.trim() && city?.trim()) ? 'italic text-text-secondary' : ''}>
+                  {street?.trim() && city?.trim() ? `${street}, ${city}` : 'Adress saknas'}
+                </div>
               </div>
             </div>
 
@@ -331,19 +342,79 @@ export const StakeholderList: React.FC<{
         </div>
       )}
 
-      {owners?.map((owner, index) => (
-        <DisplayCard
-          isEditable={true}
-          key={index}
-          {...owner}
-          roles={owner.roles}
-          onRemove={() => {
-            if (errand?.id) removeStakeholder(municipalityId, errand.id, owner.id);
-            setOwners((prevOwners) => prevOwners.filter((_, i) => i !== index));
-          }}
-          onUpdate={(updatedData) => updateOwner(index, updatedData)}
-        />
-      ))}
+      {owners?.map((owner, index) => {
+        const email = owner.newEmail || owner.emails?.[0]?.value?.trim() || '';
+        const phone = owner.newPhoneNumber || owner.phoneNumbers?.[0]?.value?.trim() || '';
+        const street = owner.street?.trim() || '';
+        const city = owner.city?.trim() || '';
+
+        return (
+          <DisplayCard
+            key={index}
+            isEditable={true}
+            roles={owner.roles}
+            userName={owner.adAccount}
+            firstName={owner.firstName}
+            lastName={owner.lastName}
+            personalNumber={owner.personalNumber}
+            newEmail={email}
+            newPhoneNumber={phone}
+            street={street}
+            city={city}
+            careof={owner.careof}
+            zip={owner.zip}
+            onRemove={() => {
+              if (errand?.id) removeStakeholder(municipalityId, errand.id, owner.id);
+              setOwners((prev) => prev.filter((_, i) => i !== index));
+            }}
+            onUpdate={(updatedData) => updateOwner(index, updatedData)}
+          />
+        );
+      })}
+
+      <Button
+        variant="primary"
+        size="sm"
+        color="vattjom"
+        inverted={true}
+        className="mt-6"
+        leftIcon={<LucideIcon name="pen" />}
+        onClick={() => {
+          setManualEntryOpen((prev) => !prev);
+          reset();
+        }}
+      >
+        Lägg till manuellt
+      </Button>
+
+      <StakeholderFormModal
+        show={manualEntryOpen}
+        onClose={() => setManualEntryOpen(false)}
+        roles={roles}
+        onSubmit={(values) => {
+          const transformedOwner: CasedataOwnerOrContact = {
+            id: '',
+            stakeholderType: 'PERSON',
+            roles: values.roles ?? [],
+            newRole: values.roles?.[0] ?? Role.APPLICANT,
+            personalNumber: values.ssn ?? '',
+            personId: '',
+            firstName: values.firstName,
+            lastName: values.lastName,
+            street: values.street,
+            careof: values.careof ?? '',
+            zip: values.zip ?? '',
+            city: values.city,
+            newPhoneNumber: values.newPhoneNumber ?? '',
+            phoneNumbers: values.newPhoneNumber ? [{ value: values.newPhoneNumber }] : [],
+            newEmail: values.newEmail ?? '',
+            emails: values.newEmail ? [{ value: values.newEmail }] : [],
+          };
+
+          setOwners((prev) => [...prev, transformedOwner]);
+          setManualEntryOpen(false);
+        }}
+      />
     </div>
   );
 };
