@@ -70,13 +70,12 @@ export const ErrandsTable: React.FC = () => {
         }}
         className="cursor-pointer hover:bg-gray-50"
       >
-        <Table.HeaderColumn scope="row" className="w-[200px] whitespace-nowrap text-ellipsis table-caption">
+        <Table.HeaderColumn scope="row" className="w-full w-max-[15rem] whitespace-nowrap text-ellipsis table-caption">
           <CasedataStatusLabelComponent
             status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string}
           />
         </Table.HeaderColumn>
-
-        <Table.Column scope="row" className="font-bold max-w-[190px] whitespace-nowrap overflow-x-hidden">
+        <Table.Column scope="row" className="font-bold w-full whitespace-nowrap overflow-x-hidden">
           {getCaseLabels()[errand.caseType as FTCaseType] ?? errand.caseType}
         </Table.Column>
 
