@@ -1,49 +1,51 @@
-import { Button, SearchField } from '@sk-web-gui/react';
+import { CaseQueryFilter } from '@components/filtering/errand-filter';
+import LucideIcon from '@sk-web-gui/lucide-icon';
+import { Button, Input } from '@sk-web-gui/react';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 interface MobileSearchBodyProps {
-  onSearch?: (query: string) => void;
   onDone?: () => void;
-  onResetList?: () => void;
 }
 
-export const MobileSearchBody: React.FC<MobileSearchBodyProps> = ({ onSearch, onDone, onResetList }) => {
-  const [query, setQuery] = useState<string>('');
-  const { setValue } = useFormContext<{ query: string }>();
+export const MobileSearchBody: React.FC<MobileSearchBodyProps> = ({ onDone }) => {
+  const { watch, setValue } = useFormContext<CaseQueryFilter>();
+  const value = watch('query');
+  const [query, setQuery] = useState<string>(value);
 
   const handleSearch = () => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-
-    onResetList?.();
-    setValue('query', trimmed);
-    onSearch?.(trimmed);
+    setValue('query', query);
     onDone?.();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
   };
 
   return (
     <div className="w-full bg-vattjom-background-200 px-[1.2rem] pb-[3.2rem]">
       <div className="w-full pt-[1.2rem] flex flex-col">
         <div className="flex gap-2 w-full pt-[3.2rem]">
-          <SearchField
-            size="md"
-            autoFocus
-            value={query}
-            showSearchButton={false}
-            onChange={(e) => setQuery(e.target.value)}
-            onReset={() => setQuery('')}
-            onKeyDown={handleKeyDown}
-            placeholder="Skriv för att söka"
-            className="flex-grow"
-          />
+          <Input.Group className="flex-grow max-w-full">
+            <Input.LeftAddin icon>
+              <LucideIcon name="search" />
+            </Input.LeftAddin>
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
+              placeholder="Skriv för att söka"
+            />
+          </Input.Group>
         </div>
         <div className="h-[2.4rem]" />
-        <Button size="md" color="vattjom" onClick={handleSearch} className="whitespace-nowrap" disabled={!query.trim()}>
+        <Button
+          size="md"
+          color="vattjom"
+          onClick={() => {
+            handleSearch();
+          }}
+        >
           Sök
         </Button>
       </div>

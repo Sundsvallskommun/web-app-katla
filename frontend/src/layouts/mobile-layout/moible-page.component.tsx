@@ -7,24 +7,13 @@ import { getApplicationEnvironment } from 'src/common/application-service';
 
 interface MobilePageProps {
   open: boolean;
-  setOpen?: (state: boolean) => void;
+  setOpen: (state: boolean) => void;
   lucideIconName?: IconName;
   title?: string;
   children?: React.ReactNode;
-  onClose?: () => void;
 }
 
-export const MobilePage: React.FC<MobilePageProps> = ({ open, setOpen, lucideIconName, title, children, onClose }) => {
-  if (!open) return null;
-
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    } else if (setOpen) {
-      setOpen(false);
-    }
-  };
-
+export const MobilePage: React.FC<MobilePageProps> = ({ open, setOpen, lucideIconName, title, children }) => {
   const applicationEnvironment = getApplicationEnvironment();
 
   return (
@@ -53,7 +42,7 @@ export const MobilePage: React.FC<MobilePageProps> = ({ open, setOpen, lucideIco
             variant="tertiary"
             iconButton
             leftIcon={<LucideIcon name="x" />}
-            onClick={handleClose}
+            onClick={() => setOpen(!open)}
           />
         </div>
       </div>
