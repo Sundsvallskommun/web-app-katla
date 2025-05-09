@@ -1,20 +1,20 @@
 import { StakeholderList } from '@components/stakeholder-list.component';
+import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, Disclosure } from '@sk-web-gui/react';
 import { useState } from 'react';
-
-const roles: string[] = ['Sökande', 'Ärendeägare'];
 
 export const Applicant: React.FC<{
   owners: CasedataOwnerOrContact[];
   setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
 }> = ({ owners, setOwners }) => {
   const [doneMark, setDoneMark] = useState(false);
+  const allowedRoles = [Role.APPLICANT];
 
   return (
     <Disclosure
-      open={false}
+      open={owners.length > 0}
       icon={<LucideIcon name="users" />}
       header="Sökande"
       variant="alt"
@@ -23,7 +23,7 @@ export const Applicant: React.FC<{
       labelColor={'gronsta'}
     >
       <p>En sökande kan vara en individ som berörs av ärendet.</p>
-      <StakeholderList owners={owners} setOwners={setOwners} roles={roles} />
+      <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
       <div className="mt-24">
         <Checkbox
           onClick={() => {

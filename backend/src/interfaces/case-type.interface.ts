@@ -8,6 +8,9 @@ export enum FTCaseType {
   PARATRANSIT_BUS_CARD = 'PARATRANSIT_BUS_CARD',
   APPEAL = 'APPEAL', //Har denna typ tillfälligt för att få in test ärenden.
 }
+
+export const CaseType = { ...FTCaseType };
+
 export const CaseTypes = {
   FT: FTCaseType,
 };

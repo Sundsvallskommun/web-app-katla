@@ -77,7 +77,7 @@ const Registrera: React.FC = () => {
               </div>
               <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
                 <AboutErrand />
-                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
+                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} isNewErrand={true} />
                 <Applicant owners={applicants} setOwners={setApplicants} />
                 <OtherParties owners={otherParties} setOwners={setOtherParties} />
               </div>

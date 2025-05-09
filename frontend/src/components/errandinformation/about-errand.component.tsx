@@ -14,7 +14,7 @@ export const AboutErrand: React.FC = () => {
       header="Om ärendet"
       variant="alt"
       className="w-full mobileVersion"
-      open={false}
+      open={true}
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >

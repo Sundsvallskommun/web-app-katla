@@ -1,10 +1,10 @@
-import { Role } from '@interfaces/role';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, FormLabel, Input, Modal, useThemeQueries } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { stakeholderSchema } from '@utils/validation-schema';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { getRoleDisplayName, Role } from '@interfaces/role';
 
 type StakeholderFormValues = {
   ssn?: string;
@@ -32,7 +32,14 @@ export const DisplayCard: React.FC<{
   zip?: string;
   city: string;
   onRemove?: () => void;
-  onUpdate?: (updatedData: { newEmail?: string; newPhoneNumber?: string }) => void;
+  onUpdate?: (updatedData: {
+    newEmail?: string;
+    newPhoneNumber?: string;
+    street?: string;
+    zip?: string;
+    city?: string;
+    careof?: string;
+  }) => void;
 }> = ({
   isEditable,
   roles,
@@ -92,6 +99,10 @@ export const DisplayCard: React.FC<{
     onUpdate?.({
       newEmail: data.newEmail,
       newPhoneNumber: data.newPhoneNumber,
+      street: data.street,
+      zip: data.zip,
+      city: data.city,
+      careof: data.careof,
     });
     openHandler();
   };
@@ -99,7 +110,9 @@ export const DisplayCard: React.FC<{
   return (
     <div className="border-1 rounded-12 bg-background-content w-full max-w-[52.5rem] my-15">
       <div className="rounded-t-12 bg-vattjom-background-200 h-[4rem] flex items-center mb-[1.5rem]">
-        <strong className="px-[1rem]">{roles}</strong>
+        <strong className="px-[1rem]">
+          {Array.isArray(roles) ? roles.map(getRoleDisplayName).join(', ') : getRoleDisplayName(roles)}
+        </strong>
       </div>
       <div className="px-[1rem]">
         <p className="text-[1.6rem] font-semibold">{firstName + ' ' + lastName}</p>
