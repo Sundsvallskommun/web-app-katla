@@ -1,6 +1,7 @@
 import { CasedataStatusLabelComponent } from '@components/ongoing-errands/components/casedata-status-label.component';
+import { FTCaseType, getCaseShortLabels } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
-import { findStatusLabelForStatusKey, getCaseLabels } from '@services/casedata-errand-service';
+import { findStatusLabelForStatusKey } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button } from '@sk-web-gui/react';
 interface ErrandItemProps {
@@ -18,27 +19,7 @@ const MobileErrandItem: React.FC<ErrandItemProps> = ({ errand }) => {
           />
 
           <div className="text-primary-900 font-arial text-xl font-bold lining-nums proportional-nums leading-[2.8rem] pt-[1.2rem]">
-            {(
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Nytt parkeringstillstånd'
-            ) ?
-              'Nytt p-tillstånd'
-            : (
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Borttappat parkeringstillstånd'
-            ) ?
-              'Borttappat p-tillstånd'
-            : (
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Förnyat parkeringstillstånd'
-            ) ?
-              'Förnyelse av p-tillstånd'
-            : (
-              Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === errand.caseType)?.[1] ===
-              'Överklagan'
-            ) ?
-              'Överklagan av p-tillstånd'
-            : ''}
+            {getCaseShortLabels()[errand.caseType as FTCaseType] ?? ''}
           </div>
 
           <div className="flex flex-col items-start gap-1.5 pt-[2.4rem] flex-1">

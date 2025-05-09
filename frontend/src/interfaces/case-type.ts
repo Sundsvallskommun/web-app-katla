@@ -30,3 +30,14 @@ export const getCaseLabels = (): Record<FTCaseType, string> => ({
   [FTCaseType.PARATRANSIT_BUS_CARD]: FTCaseLabel.PARATRANSIT_BUS_CARD,
   [FTCaseType.APPEAL]: FTCaseLabel.APPEAL,
 });
+
+export const getCaseShortLabels = (): Record<FTCaseType, string> => ({
+  [FTCaseType.PARATRANSIT]: 'Ny färdtjänst',
+  [FTCaseType.PARATRANSIT_CHANGE]: 'Ändring av färdtjänst',
+  [FTCaseType.PARATRANSIT_RENEWAL]: 'Förnyelse av färdtjänst',
+  [FTCaseType.PARATRANSIT_NATIONAL]: 'Ny riksfärdtjänst',
+  [FTCaseType.PARATRANSIT_NATIONAL_RENEWAL]: 'Förnyelse av riksfärdtjänst',
+  [FTCaseType.PARATRANSIT_RIAK]: 'Ny RIAK',
+  [FTCaseType.PARATRANSIT_BUS_CARD]: 'Nytt busskort',
+  [FTCaseType.APPEAL]: 'Överklagan',
+});
