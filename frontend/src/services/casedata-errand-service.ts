@@ -822,7 +822,6 @@ export const appealErrand: (data: Partial<IErrand> & { municipalityId: string })
   const errandData: Partial<RegisterErrandData> = {
     ...(data.priority && { priority: ApiPriority[data.priority as keyof typeof ApiPriority] }),
     ...(data.channel && { channel: 'Webgränssnitt' }),
-    caseTitleAddition: FTCaseLabel.APPEAL,
     caseType: 'APPEAL',
     relatesTo: [relatedErrand],
     applicationReceived: dayjs().toISOString(),

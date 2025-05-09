@@ -59,8 +59,8 @@ export const HealthCareStaff: React.FC<{
         if (!isArray(res)) {
           setValue(`firstName`, res.firstName, { shouldDirty: true });
           setValue(`lastName`, res.lastName, { shouldDirty: true });
-          setValue(`street`, res.street || '', { shouldDirty: true });
-          setValue(`careof`, res.careof || '', { shouldDirty: true });
+          setValue(`street`, res.street, { shouldDirty: true });
+          setValue(`careof`, res.careof, { shouldDirty: true });
           setValue(`zip`, res.zip, { shouldDirty: true });
           setValue(`city`, res.city, { shouldDirty: true });
           setValue(`personId`, res.personId, { shouldDirty: true });
