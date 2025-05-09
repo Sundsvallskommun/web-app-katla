@@ -1,6 +1,6 @@
 import { getCaseLabels } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Checkbox, PopupMenu, SearchField } from '@sk-web-gui/react';
+import { Checkbox, PopupMenu, SearchField, useThemeQueries } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CaseTypeFilter } from '../errand-filter';
@@ -8,18 +8,18 @@ import { CaseTypeFilter } from '../errand-filter';
 export const CasedataFilterCaseType: React.FC = () => {
   const { register } = useFormContext<CaseTypeFilter>();
   const [query, setQuery] = useState<string>('');
-
+  const { isMaxLargeDevice } = useThemeQueries();
   return (
     <PopupMenu>
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
         data-cy="Ärendetyp-filter"
-        variant="tertiary"
+        variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
-        size="sm"
-        className="max-md:w-full"
+        size={isMaxLargeDevice ? 'md' : 'sm'}
+        className={isMaxLargeDevice ? 'max-md:w-full flex justify-between items-center text-left' : 'max-md:w-full'}
       >
-        Ärendetyp
+        <span>Ärendetyp</span>
       </PopupMenu.Button>
       <PopupMenu.Panel className="max-md:w-full max-h-[70vh] h-auto overflow-hidden overflow-y-scroll">
         <SearchField

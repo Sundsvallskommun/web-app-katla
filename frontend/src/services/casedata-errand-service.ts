@@ -1,8 +1,7 @@
 // import { CasedataFormModel } from '@casedata/components/errand/tabs/overview/casedata-form.component'; TODO: Add import when implemented
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
-import { PTCaseLabel } from '@interfaces/case-label';
-import { PTCaseType } from '@interfaces/case-type';
+import { FTCaseType, FTCaseLabel } from '@interfaces/case-type';
 import { ApiChannels, Channels } from '@interfaces/channels';
 import {
   ApiErrand,
@@ -126,8 +125,8 @@ export const findStatusKeyForStatusLabel = (statusKey: string) =>
 export const findStatusLabelForStatusKey = (statusLabel: string) =>
   Object.entries(ErrandStatus).find((e: [string, string]) => e[1] === statusLabel)?.[1];
 
-export const getCaseTypes = () => PTCaseType;
-export const getCaseLabels = () => PTCaseLabel;
+export const getCaseTypes = () => FTCaseType;
+export const getCaseLabels = () => FTCaseLabel;
 
 export const findCaseTypeForCaseLabel = (caseLabel: string) => {
   return Object.entries(getCaseLabels()).find((e: [string, string]) => e[1] === caseLabel)?.[0];
@@ -144,14 +143,14 @@ export const isErrandLocked: (errand: IErrand | CasedataFormModel) => boolean = 
   return errand?.status === ErrandStatus.ArendeAvslutat || phaseChangeInProgress(errand as IErrand);
 };
 
-export const getPriorityColor = (priority: Priority) => {
+export const getPriorityColor = (priority: keyof typeof Priority): 'error' | 'warning' | 'vattjom' => {
   switch (priority) {
-    case Priority.HIGH:
-      return 'text-error-surface-primary';
-    case Priority.MEDIUM:
-      return 'text-warning-surface-primary';
-    case Priority.LOW:
-      return 'text-vattjom-surface-primary';
+    case 'HIGH':
+      return 'error';
+    case 'MEDIUM':
+      return 'warning';
+    case 'LOW':
+      return 'vattjom';
   }
 };
 
@@ -181,7 +180,7 @@ export const mapErrandToIErrand: (e: ApiErrand, municipalityId: string) => IErra
       externalCaseId: e.externalCaseId,
       errandNumber: e.errandNumber,
       caseType: e.caseType,
-      label: findCaseLabelForCaseType(PTCaseType[e.caseType as keyof typeof PTCaseType]) || '',
+      label: findCaseLabelForCaseType(FTCaseType[e.caseType as keyof typeof FTCaseType]) || '',
       description: e.description || '',
       administrator: administrator,
       administratorName: administrator ? `${administrator.firstName} ${administrator.lastName}` : '',
@@ -527,7 +526,7 @@ const createApiErrandData: (data: Partial<IErrand>) => Partial<RegisterErrandDat
     ...(data.channel && { channel: ApiChannels[data.channel as keyof typeof ApiChannels] }),
     ...(data.description && { description: data.description }),
     ...(data.caseType &&
-      data.caseType in PTCaseLabel && { caseTitleAddition: PTCaseLabel[data.caseType as keyof typeof PTCaseLabel] }),
+      data.caseType in FTCaseLabel && { caseTitleAddition: FTCaseLabel[data.caseType as keyof typeof FTCaseLabel] }),
     ...(data.status && { status: data.status }),
     ...(data.statuses && { statuses: data.statuses }),
     ...(data.phase && { phase: data.phase }),
@@ -823,7 +822,7 @@ export const appealErrand: (data: Partial<IErrand> & { municipalityId: string })
   const errandData: Partial<RegisterErrandData> = {
     ...(data.priority && { priority: ApiPriority[data.priority as keyof typeof ApiPriority] }),
     ...(data.channel && { channel: 'Webgränssnitt' }),
-    caseTitleAddition: PTCaseLabel.APPEAL,
+    caseTitleAddition: FTCaseLabel.APPEAL,
     caseType: 'APPEAL',
     relatesTo: [relatedErrand],
     applicationReceived: dayjs().toISOString(),

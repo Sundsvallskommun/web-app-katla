@@ -1,16 +1,27 @@
 import { AppContext } from '@contexts/app-context-interface';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Dialog } from '@sk-web-gui/react';
+import { Button, Dialog, useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 
 export const CancelRegistrationButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { isLoading } = useContext(AppContext);
-
+  const { isMaxLargeDevice } = useThemeQueries();
   const openHandler = () => {
     setIsOpen(!isOpen);
   };
 
+  const handleClick = () => {
+    if (isMaxLargeDevice) {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/oversikt';
+      }
+    } else {
+      window.close();
+    }
+  };
   return (
     <>
       <Button variant="secondary" color="vattjom" disabled={isLoading} onClick={openHandler}>
@@ -29,7 +40,7 @@ export const CancelRegistrationButton: React.FC = () => {
           <Button className="w-[12.8rem]" variant="secondary" onClick={openHandler}>
             Nej
           </Button>
-          <Button className="w-[12.8rem]" variant="primary" onClick={() => window.close()}>
+          <Button className="w-[12.8rem]" variant="primary" onClick={handleClick}>
             Ja
           </Button>
         </Dialog.Buttons>

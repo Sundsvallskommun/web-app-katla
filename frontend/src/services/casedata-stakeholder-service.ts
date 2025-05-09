@@ -1,5 +1,5 @@
 import { IErrand } from '@interfaces/errand';
-import { MEXRelation, PTRelation, Role } from '@interfaces/role';
+import { getRoleDisplayName, Role } from '@interfaces/role';
 import {
   CasedataOwnerOrContact,
   ContactInfoType,
@@ -224,7 +224,7 @@ export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (
     personId: s.personId || '',
     organizationName: s.organizationName || '',
     organizationNumber: s.organizationNumber || '',
-    relation: getStakeholderRelation(s),
+    relation: getStakeholderRelationDisplayNames(s),
     firstName: s.firstName || '',
     lastName: s.lastName || '',
     street: s.addresses?.[0]?.street || '',
@@ -249,8 +249,8 @@ export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (
   };
 };
 
-export const getFellowApplicants: (e: IErrand) => CasedataOwnerOrContact[] = (e) =>
-  e.stakeholders?.filter((s) => s.roles.includes(Role.FELLOW_APPLICANT)) || [];
+// export const getFellowApplicants: (e: IErrand) => CasedataOwnerOrContact[] = (e) =>
+//   e.stakeholders?.filter((s) => s.roles.includes(Role.FELLOW_APPLICANT)) || [];
 
 export const getOwnerStakeholder: (e: IErrand) => CasedataOwnerOrContact = (e) =>
   e.stakeholders?.filter((s) => s.roles.includes(Role.APPLICANT))?.[0];
@@ -258,11 +258,15 @@ export const getOwnerStakeholder: (e: IErrand) => CasedataOwnerOrContact = (e) =
 export const getStakeholdersByRelation: (e: IErrand, relation: Role) => CasedataOwnerOrContact[] = (e, relation) =>
   e.stakeholders?.filter((s) => s.roles.includes(relation));
 
-export const getStakeholderRelation: (s: Stakeholder | CasedataOwnerOrContact) => Role | undefined = (s) => {
-  const relations = [...Object.entries(MEXRelation), ...Object.entries(PTRelation)].map(([key]) => key);
-  return s.roles.find((r) => relations.includes(r)) || undefined;
+export const getStakeholderRelationDisplayNames = (
+  s: Stakeholder | CasedataOwnerOrContact
+): string => {
+  const validRoles = Object.values(Role) as string[];
+  return s.roles
+    .filter((r): r is Role => validRoles.includes(r))
+    .map(getRoleDisplayName)
+    .join(', ');
 };
-
 export const validateOwnerForSendingDecision: (e: IErrand) => boolean = (e) =>
   validateOwnerForSendingDecisionByEmail(e) || validateOwnerForSendingDecisionByLetter(e);
 

@@ -184,7 +184,7 @@ export class CaseDataErrandController {
       const ss = caseType.split(',').map(s => `caseType:'${s}'`);
       filterList.push(`(${ss.join(' or ')})`);
     } else {
-      let applicationCaseTypes = Object.values(CaseTypes.PT);
+      let applicationCaseTypes = Object.values(CaseTypes.FT);
       const ss = applicationCaseTypes.map(s => `'${s}'`);
       filterList.push(`(caseType in [${ss.join(',')}])`);
     }

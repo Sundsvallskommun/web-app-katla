@@ -1,7 +1,7 @@
 import { apiService } from './api-service';
 import { ExtraParameter } from '@interfaces/extra-parameters';
 import { IErrand } from '@interfaces/errand';
-import { PTCaseType } from '@interfaces/case-type';
+import { FTCaseType } from '@interfaces/case-type';
 
 export const EXTRAPARAMETER_SEPARATOR = '@';
 export interface UppgiftField {
@@ -1047,7 +1047,7 @@ export const extraParametersToUppgiftMapper: (errand: IErrand) => Partial<ExtraP
 
     const value = param?.values?.[0] || '';
 
-    if (caseType in PTCaseType) {
+    if (caseType in FTCaseType) {
       const templateField = (template[caseType as keyof ExtraParametersObject] as UppgiftField[])?.find(
         (f) => f.field === field
       );

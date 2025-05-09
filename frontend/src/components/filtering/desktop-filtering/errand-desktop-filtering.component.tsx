@@ -1,15 +1,11 @@
 import { Admin } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Checkbox, cx, Link } from '@sk-web-gui/react';
+import { Button, cx, Link } from '@sk-web-gui/react';
 import { useState } from 'react';
-import { CasedataFilterCaseType } from '../mobileFiltering/errand-filter-casetype.component';
 import { CasedataFilterQuery } from './errand-filter-query.component';
-import { CasedataFilterStatus } from './casedata-filter-status.component';
 import { CasedataFilterTags } from './casedata-filter-tags.component';
-import { CasedataFilterPriority } from './errand-filter-priority.component';
-import { CasedataFilterDates } from './errand-filter-dates.component';
 import { IErrand } from '@interfaces/errand';
-import { CasedataFilterChannel } from './errand-filter-channels.component';
+import { CasedataFilterBase } from './errand-filter-base.component';
 
 const CaseDataFiltering: React.FC<{
   ownerFilterHandler: (b: boolean) => void;
@@ -47,34 +43,7 @@ const CaseDataFiltering: React.FC<{
       </div>
 
       <div className={cx(show ? 'visible' : 'hidden')}>
-        <div className="flex gap-16 items-center">
-          <div className="w-full flex flex-col md:flex-row justify-start items-center p-10 gap-4 bg-background-200 rounded-groups flex-wrap">
-            <div className="relative max-md:w-full">
-              <CasedataFilterCaseType />
-            </div>
-            <div className="relative max-md:w-full">
-              <CasedataFilterStatus />
-            </div>
-            <div className="relative max-md:w-full">
-              <CasedataFilterPriority />
-            </div>
-            <div className="relative max-md:w-full">
-              <CasedataFilterDates />
-            </div>
-            <div className="relative max-md:w-full">
-              <CasedataFilterChannel />
-            </div>
-          </div>
-          <div className="min-w-fit">
-            <Checkbox
-              data-cy="myErrands-filter"
-              checked={ownerFilter}
-              onChange={() => ownerFilterHandler(!ownerFilter)}
-            >
-              Mina ärenden
-            </Checkbox>
-          </div>
-        </div>
+        <CasedataFilterBase ownerFilter={ownerFilter} ownerFilterHandler={ownerFilterHandler} />
         <div className="mt-16">
           <CasedataFilterTags errands={errands} />
         </div>

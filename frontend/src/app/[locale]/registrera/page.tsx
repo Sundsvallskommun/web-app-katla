@@ -7,165 +7,101 @@ import { HealthCareStaff } from '@components/errandinformation/healthcare-staff.
 import { MedicalOpinion } from '@components/errandinformation/medical-opinion.component';
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
-import { PageHeader } from '@components/page-header.component';
+import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { RegisterErrandButton } from '@components/register-errand-button.component';
 import { DraftErrandButton } from '@components/save-draft-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getMe } from '@services/user-service';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Divider, Link, Logo, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
+import { useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-
-const menuGroups: MenuItemGroup[] = [
-  {
-    label: 'Annat',
-    elements: [
-      {
-        label: 'Färgläge',
-        element: () => (
-          <PopupMenu.Item>
-            <PopupMenu position="right" align="start">
-              <PopupMenu.Button className="justify-between w-full" leftIcon={<LucideIcon name="palette" />}>
-                <span className="w-full flex justify-between">
-                  Färgläge
-                  <LucideIcon name="chevron-right" />
-                </span>
-              </PopupMenu.Button>
-              <PopupMenu.Panel>{/* <ColorSchemeItems /> TODO */}</PopupMenu.Panel>
-            </PopupMenu>
-          </PopupMenu.Item>
-        ),
-      },
-      {
-        label: 'Logga ut',
-        element: () => (
-          <PopupMenu.Item>
-            <Link key={'logout'} href={`${process.env.NEXT_PUBLIC_API_URL}/saml/logout`} className={`usermenu-item`}>
-              <span className="inline">Logga ut</span>
-            </Link>
-          </PopupMenu.Item>
-        ),
-      },
-    ],
-  },
-];
-
-const SingleErrandTitle = () => (
-  <div className="flex items-center gap-24 py-10">
-    <a href={`${process.env.NEXT_PUBLIC_BASEPATH}`} title={`Draken - Färdtjänst. Gå till startsidan.`}>
-      <Logo variant="symbol" className="h-40" />
-    </a>
-    <strong className="text-large">Nytt ärende</strong>
-    {/* <span className="text-small"></span> */}
-  </div>
-);
+import { RegisterHeader } from './register-errand-header.component';
 
 const Registrera: React.FC = () => {
   const method = useForm<IErrand>();
+  const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
-  const { setMunicipalityId, user, setUser } = useContext(AppContext);
+  const { setMunicipalityId, setUser } = useContext(AppContext);
+  const { isMaxLargeDevice } = useThemeQueries();
 
   useEffect(() => {
     setMunicipalityId(process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '');
     //getAdminUsers().then(setAdministrators);
-    getMe().then((user) => {
-      setUser(user);
-    });
+    getMe().then((user) => setUser(user));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <FormProvider {...method}>
-      <PageHeader
-        logo={<SingleErrandTitle />}
-        userMenu={
-          <div className="flex items-center h-fit">
-            <span data-cy="usermenu">
-              <UserMenu
-                initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
-                menuTitle={`${user.firstName} ${user.lastName}`}
-                menuSubTitle=""
-                menuGroups={menuGroups}
-                buttonSize="sm"
-              />
-            </span>
+      <RegisterHeader />
 
-            <Divider orientation="vertical" className="mx-24" />
-
-            <Link
-              href={`${process.env.NEXT_PUBLIC_BASEPATH}/registrera`}
-              target="_blank"
-              data-cy="register-new-errand-button"
+      <div className="flex flex-col w-full overflow-hidden">
+        <main
+          className={`
+            flex-grow flex justify-center
+            ${isMaxLargeDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
+            ${isMaxLargeDevice ? 'pt-[1.6rem]' : 'pt-24'}
+            ${isMaxLargeDevice ? '' : 'pb-40'}
+            w-full
+          `}
+        >
+          <section className={`w-full ${!isMaxLargeDevice ? 'max-w-[108rem]' : ''}`}>
+            <header
+              className={`
+                flex justify-between items-center
+                ${isMaxLargeDevice ? '' : 'mt-md pt-8 mb-[3.2rem]'}
+              `}
             >
-              <Button
-                color={'primary'}
-                variant={'tertiary'}
-                rightIcon={<LucideIcon name="external-link" color="primary" variant="tertiary" />}
-              >
-                Nytt ärende
-              </Button>
-            </Link>
+              <h1 className={'text-h2-lg'}>Nytt ärende</h1>
+
+              {!isMaxLargeDevice && (
+                <div className="flex gap-x-md">
+                  <CancelRegistrationButton />
+                  <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                  <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                </div>
+              )}
+            </header>
+
+            <section
+              className={`
+                bg-background-content border-1 rounded-12
+                ${isMaxLargeDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
+              `}
+            >
+              <div className={`${isMaxLargeDevice ? 'mb-[2.0rem]' : 'w-full py-[1.5rem] px-32'}`}>
+                <h2>Grundinformation</h2>
+              </div>
+              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+                <AboutErrand />
+                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} isNewErrand={true} />
+                <Applicant owners={applicants} setOwners={setApplicants} />
+                <OtherParties owners={otherParties} setOwners={setOtherParties} />
+              </div>
+
+              <div className={`${isMaxLargeDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
+                <h2>Ärendeuppgifter</h2>
+              </div>
+              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+                <ExternalCircumstances />
+                <PersonalInformation />
+                <MedicalOpinion />
+              </div>
+
+              <FileUploadComponent />
+            </section>
+          </section>
+        </main>
+        {isMaxLargeDevice && (
+          <div className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 pt-16">
+            <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+            <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+            <CancelRegistrationButton />
           </div>
-        }
-      ></PageHeader>
-
-      <div className="grow shrink overflow-y-hidden">
-        <div className="flex justify-end w-full h-full">
-          <div className="flex justify-center overflow-y-auto w-full grow max-lg:mr-[5.6rem]">
-            <main className="flex-grow flex justify-center px-24 max-w-[108rem] h-fit w-full pb-40">
-              <section className="w-full">
-                <header className="flex justify-between mt-md w-full pt-8">
-                  <div className="flex-grow">
-                    <h1 className="text-h3-sm md:text-h3-md xl:text-h2-lg mb-0 break-words">Nytt ärende</h1>
-                  </div>
-                  <div className="flex gap-md">
-                    <CancelRegistrationButton />
-                    <DraftErrandButton owners={applicants.concat(otherParties)} />
-                    <RegisterErrandButton owners={applicants.concat(otherParties)} />
-                  </div>
-                </header>
-
-                <section className="bg-transparent pt-24 pb-4">
-                  <div className="py-12 bg-transparent">
-                    <div className="border-1 rounded-12 bg-background-content pt-22 pl-5">
-                      <div className="w-full py-[1.5rem] px-32">
-                        <h2>Grundinformation</h2>
-                      </div>
-
-                      <AboutErrand />
-                      <HealthCareStaff />
-                      <Applicant owners={applicants} setOwners={setApplicants} />
-                      <OtherParties owners={otherParties} setOwners={setOtherParties} />
-                      <div className="w-full pb-[2rem] pt-[5rem] px-32">
-                        <h2>Ärendeuppgifter</h2>
-                      </div>
-                      <ExternalCircumstances />
-                      <PersonalInformation />
-                      <MedicalOpinion />
-                      <div className="w-full pb-[2rem] pt-[5rem] px-32 ">
-                        <div className="flex justify-between">
-                          <div className="flex">
-                            <h2>Bilagor</h2>
-                          </div>
-                        </div>
-                        <div className="w-[68rem] py-[1rem]">
-                          <p>
-                            Ladda upp andra bilagor av relevans för ansökan. För att kunna ladda upp bilagor behöver du
-                            spara ett utkast på ärendet.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </section>
-            </main>
-          </div>
-        </div>
+        )}
       </div>
     </FormProvider>
   );

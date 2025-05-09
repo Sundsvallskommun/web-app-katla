@@ -8,7 +8,6 @@ export const supportManagementPhonePattern = /^\+[1-9]\d{3,14}$/gi;
 export const supportManagementPhonePatternOrCountryCode = /^\+46$|^\+[1-9]\d{3,14}$/gi;
 
 export const invalidPhoneMessage = 'Ej giltigt telefonnummer';
-// export const invalidPhoneMessage = 'Ej giltigt telefonnummer (ange i formatet 07NNNNNNNN)';
 
 export const ssnPattern = /^$|^((19|20)[0-9]{6}-?[0-9]{4})$/gi;
 export const usernamePattern = /.*/;
@@ -18,6 +17,9 @@ export const invalidUsernameMessage = 'Ej giltigt användarnamn, mellanslag ej t
 
 export const orgNumberPattern = /^$|^([0-9]{6}-[0-9]{4})$/gi;
 export const invalidOrgNumberMessage = 'Ej giltigt organisationsnummer (ange tio siffror med streck: kkllmm-nnnn)';
+
+export const zipPattern = /^\d{5}$/;
+export const invalidZipMessage = 'Postnummer måste bestå av 5 siffror';
 
 export const luhnCheck = (str = ''): boolean => {
   str = str?.replace('-', '');

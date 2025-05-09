@@ -1,12 +1,14 @@
+'use client';
+
+import { CaseDataFilter, CaseDataValues } from '@components/filtering/errand-filter';
+import { AppContext } from '@contexts/app-context-interface';
+import { ErrandStatus } from '@interfaces/errand-status';
+import { getStatusLabel, ongoingStatuses, useErrands } from '@services/casedata-errand-service';
+import store from '@services/storage-service';
+import { useThemeQueries } from '@sk-web-gui/react';
+import { useDebounceEffect } from '@utils/useDebounceEffect';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { AppContext } from '@contexts/app-context-interface';
-import { useDebounceEffect } from '@utils/useDebounceEffect';
-import { getStatusLabel, useErrands } from '@services/casedata-errand-service';
-import store from '@services/storage-service';
-import { CaseDataFilter, CaseDataValues } from '@components/filtering/errand-filter';
-import { ErrandStatus } from '@interfaces/errand-status';
-import { useIsMobile } from './useIsMobile';
 
 export interface TableForm {
   sortOrder: 'asc' | 'desc';
@@ -18,10 +20,9 @@ export interface TableForm {
   pageSize: number;
 }
 
-export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { manualFilterTrigger?: boolean } = {}) => {
+export const useOngoingCaseDataErrands = () => {
   const filterForm = useForm<CaseDataFilter>({ defaultValues: CaseDataValues });
-  const didInit = useRef(false);
-  const isMobile = useIsMobile();
+  const { isMaxLargeDevice } = useThemeQueries();
   const tableForm = useForm<TableForm>({
     defaultValues: {
       sortColumn: 'updated',
@@ -45,8 +46,9 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     user,
   } = useContext(AppContext);
 
-  const [ownerFilter, setOwnerFilter] = useState(false);
+  const [ownerFilter, setOwnerFilter] = useState<boolean>(true);
   const caseTypeFilter = watchFilter('caseType');
+  const queryFilter = watchFilter('query');
   const statusFilter = watchFilter('status');
   const priorityFilter = watchFilter('priority');
   const startdate = watchFilter('startdate');
@@ -58,31 +60,58 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     return { [sortColumn]: sortOrder };
   }, [sortColumn, sortOrder]);
 
+  const mobileUpdate = useRef(isMaxLargeDevice ? true : false);
+
   const [filterObject, setFilterObject] = useState<{ [key: string]: string | boolean }>();
-  const [shouldTriggerFilter, setShouldTriggerFilter] = useState(true);
+  // const [shouldTriggerFilter, setShouldTriggerFilter] = useState(!manualFilterTrigger);
 
-  const errands = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
+  const [shouldFetchErrands, setShouldFetchErrands] = useState(true);
 
-  const hasSyncedSelectedStatuses = useRef(false);
+  const errandsData = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
 
-  useEffect(() => {
-    if (hasSyncedSelectedStatuses.current) return;
+  const errands = useMemo(() => {
+    if (!shouldFetchErrands) return undefined;
+    return errandsData;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldFetchErrands]);
 
-    const current = getValues('status');
-    const hasChanged = JSON.stringify(current) !== JSON.stringify(selectedErrandStatuses);
-    if (hasChanged) {
-      setValue('status', selectedErrandStatuses);
-    }
+  //const errands = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
 
-    hasSyncedSelectedStatuses.current = true;
-  }, [selectedErrandStatuses, getValues, setValue]);
+  // const hasSyncedSelectedStatuses = useRef(false);
+
+  // useEffect(() => {
+  //   if (hasSyncedSelectedStatuses.current) return;
+
+  //   const current = getValues('status');
+  //   const hasChanged = JSON.stringify(current) !== JSON.stringify(selectedErrandStatuses);
+  //   if (hasChanged) {
+  //     setValue('status', selectedErrandStatuses);
+  //   }
+
+  //   hasSyncedSelectedStatuses.current = true;
+  // }, [selectedErrandStatuses, getValues, setValue]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
+
+  // const setInitialFocus = () => {
+  //   setTimeout(() => {
+  //     initialFocus.current && initialFocus.current.focus();
+  //   });
+  // };
+
   useEffect(() => {
-    if (didInit.current) return;
+    setValue('status', selectedErrandStatuses);
+    setTableValue('pageSize', 12);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedErrandStatuses]);
+
+  useEffect(() => {
+    if (mobileUpdate.current) {
+      mobileUpdate.current = false; 
+      return; 
+    }
 
     const filterdata = store.get('filter');
-
     if (filterdata) {
       let filter;
       let storedFilters;
@@ -116,7 +145,6 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
           channel: CaseDataValues.channel,
         };
       }
-
       if (filter?.stakeholders === user.username) {
         setOwnerFilter(true);
       }
@@ -124,100 +152,119 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
       resetFilter(storedFilters);
       triggerFilter();
     }
-
-    didInit.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    
     const sortData = store.get('sort');
-    const targetPageSize = isMobile ? 4 : 12;
-
+    const sort = JSON.parse(sortData);
     if (sortData) {
       try {
-        const sort = JSON.parse(sortData);
-        setTableValue('size', sort.size);
-        setTableValue('pageSize', targetPageSize);
+        setTableValue('size', sort.size || 12);
+        setTableValue('pageSize', sort.pageSize);
         setTableValue('sortOrder', sort.sortOrder);
         setTableValue('sortColumn', sort.sortColumn);
       } catch {
         store.set('sort', JSON.stringify({}));
-        setTableValue('pageSize', targetPageSize);
+        setTableValue('pageSize', sort.pageSize);
       }
-    } else {
-      setTableValue('pageSize', targetPageSize);
+      // } else {
+      //   setTableValue('pageSize', tableForm.getValues('pageSize'));
+      //   setTableValue('sortOrder', tableForm.sortOrder);
+      //   setTableValue('sortColumn', tableForm.sortColumn);
+      // }
     }
-  }, [setTableValue, isMobile]);
+  }, [setTableValue]);
 
-  useEffect(() => {
-    setTableValue('page', 0);
-  }, [filterObject, sortColumn, sortOrder, pageSize, setTableValue]);
+  // useEffect(() => {
+  //   setTableValue('page', 0);
+  // }, [filterObject, sortColumn, sortOrder, pageSize, setTableValue]);
 
-  useEffect(() => {
-    if (errands) {
-      setTableValue('page', errands.page);
-      setTableValue('size', errands.size);
-      setTableValue('totalPages', errands.totalPages);
-      setTableValue('totalElements', errands.totalElements);
-    }
-  }, [errands, setTableValue]);
+  // useEffect(() => {
+  //   if (errands) {
+  //     setTableValue('page', errands.page);
+  //     setTableValue('size', errands.size);
+  //     setTableValue('totalPages', errands.totalPages);
+  //     setTableValue('totalElements', errands.totalElements);
+  //   }
+  // }, [errands]);
+
+  //const isManualQueryUpdate = useRef(false);
 
   useDebounceEffect(
     () => {
-      if (manualFilterTrigger && !shouldTriggerFilter) return;
 
+      if (mobileUpdate.current) {
+        mobileUpdate.current = false;
+        return;
+      }
       const fObj: { [key: string]: string | boolean } = {};
-
+  
       const multiValueFilters: Record<string, string[] | undefined> = {
         caseType: caseTypeFilter,
         status: statusFilter,
         priority: priorityFilter,
         channel: channelFilter,
       };
-
+  
       Object.entries(multiValueFilters).forEach(([key, value]) => {
         if (value && value.length) {
           fObj[key] = value.join(',');
         }
       });
-
-      if (startdate) fObj.start = startdate;
-      if (enddate) fObj.end = enddate;
-
+  
+      if (startdate) {
+        fObj.start = startdate;
+      }
+      if (enddate) {
+        fObj.end = enddate;
+      }
+      if (queryFilter) {
+        fObj.query = queryFilter.replace(/\+/g, '').replace(/ /g, '+');
+      }
       if (ownerFilter) {
         fObj.stakeholders = user.username;
       }
-
-      setFilterObject(fObj);
-      store.set('filter', JSON.stringify(fObj));
-
-      if (manualFilterTrigger) {
-        setShouldTriggerFilter(false);
+  
+      if (isMaxLargeDevice && queryFilter !== '' && queryFilter !== undefined && queryFilter !== null) {
+        const fObjMobile: { [key: string]: string | boolean } = {};
+        fObjMobile.query = queryFilter.replace(/\+/g, '').replace(/ /g, '+');
+        setFilterObject(fObjMobile);
+        setSelectedErrandStatuses([]);
+        store.set('filter', JSON.stringify(fObjMobile));
+        setSidebarLabel('');
+        mobileUpdate.current = true; // Sätt flaggan innan setValue
+        setValue('query', '');
+      } else {
+        setFilterObject(fObj);
+        store.set('filter', JSON.stringify(fObj));
       }
     },
     200,
-    manualFilterTrigger ?
-      [shouldTriggerFilter]
-    : [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, channelFilter]
+    [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, channelFilter, queryFilter]
   );
+  
 
-  useDebounceEffect(
-    () => {
-      store.set('sort', JSON.stringify(watchTable()));
-    },
-    200,
-    [watchTable, sortObject, pageSize]
-  );
+  // useDebounceEffect(
+  //   () => {
+  //     store.set('sort', JSON.stringify(watchTable()));
+  //   },
+  //   200,
+  //   [watchTable, sortObject, pageSize]
+  // );
 
   const currentValues = getValues();
+  const selectedStatuses = selectedErrandStatuses.map((s) => ErrandStatus[s as keyof typeof ErrandStatus]);
   const numberOfFilters =
-    currentValues.caseType.length +
+    currentValues.caseType?.length +
     (currentValues.priority?.length || 0) +
-    (currentValues.status?.length || 0) +
     (currentValues.startdate ? 1 : 0) +
     (currentValues.enddate ? 1 : 0) +
     (currentValues.channel?.length || 0) +
-    (ownerFilter ? 1 : 0);
+    (ownerFilter ? 1 : 0) + 
+    (JSON.stringify(selectedStatuses) === JSON.stringify(ongoingStatuses) ? currentValues.status?.length : 0);
 
   return {
     filterForm,
@@ -229,7 +276,7 @@ export const useOngoingCaseDataErrands = ({ manualFilterTrigger = false }: { man
     closedErrands,
     sidebarLabel,
     administrators,
-    setShouldTriggerFilter,
-    ...(manualFilterTrigger ? { setShouldTriggerFilter } : {}),
+    shouldFetchErrands,
+    setShouldFetchErrands,
   };
 };

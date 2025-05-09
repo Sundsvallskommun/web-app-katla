@@ -1,7 +1,7 @@
 'use client';
 
+import { CasedataFilterSidebarStatusSelector } from '@components/filtering/desktop-filtering/errand-filter-sidebarstatus-selector.component';
 import { CaseDataFilter, CaseStatusValues } from '@components/filtering/errand-filter';
-import { CasedataFilterSidebarStatusSelector } from '@components/filtering/desktopFiltering/errand-filter-sidebarstatus-selector.component';
 import { MainErrandsSidebar } from '@components/main-errands-sidebar/main-errands-sidebar.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { CookieConsent, Link } from '@sk-web-gui/react';
@@ -39,7 +39,6 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
               lastName: user.lastName,
             }}
             applicationName="Färdtjänst"
-            isLoading={false}
             applicationEnvironment={''}
             isNotificationEnabled={false}
             onFilterChange={function (): void {

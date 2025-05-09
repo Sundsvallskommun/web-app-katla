@@ -1,4 +1,5 @@
 'use client';
+import { RegisterHeader } from '@app/[locale]/registrera/register-errand-header.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
 import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
@@ -7,8 +8,6 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
-import { CasedataMessagesTab } from '@components/messages/message.component';
-import { PageHeader } from '@components/page-header.component';
 import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
@@ -18,72 +17,27 @@ import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Divider, Link, Logo, MenuBar, MenuItemGroup, PopupMenu, UserMenu } from '@sk-web-gui/react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useThemeQueries } from '@sk-web-gui/react';
+import { usePathname } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-const menuGroups: MenuItemGroup[] = [
-  {
-    label: 'Annat',
-    elements: [
-      {
-        label: 'Färgläge',
-        element: () => (
-          <PopupMenu.Item>
-            <PopupMenu position="right" align="start">
-              <PopupMenu.Button className="justify-between w-full" leftIcon={<LucideIcon name="palette" />}>
-                <span className="w-full flex justify-between">
-                  Färgläge
-                  <LucideIcon name="chevron-right" />
-                </span>
-              </PopupMenu.Button>
-              <PopupMenu.Panel>{/* <ColorSchemeItems /> TODO */}</PopupMenu.Panel>
-            </PopupMenu>
-          </PopupMenu.Item>
-        ),
-      },
-      {
-        label: 'Logga ut',
-        element: () => (
-          <PopupMenu.Item>
-            <Link key={'logout'} href={`${process.env.NEXT_PUBLIC_API_URL}/saml/logout`} className={`usermenu-item`}>
-              <span className="inline">Logga ut</span>
-            </Link>
-          </PopupMenu.Item>
-        ),
-      },
-    ],
-  },
-];
-
-const SingleErrandTitle: React.FC<{ errandNumber: string }> = ({ errandNumber }) => (
-  <div className="flex items-center gap-24 py-10">
-    <a href={`${process.env.NEXT_PUBLIC_BASEPATH}`} title={`Draken - Färdtjänst. Gå till startsidan.`}>
-      <Logo variant="symbol" className="h-40" />
-    </a>
-    <strong className="text-large">Ärende</strong>
-    <span className="text-small">{errandNumber ? errandNumber : ''}</span>
-  </div>
-);
-
 const Arende: React.FC = () => {
   const method = useForm<IErrand>();
+  const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
-  const [current, setCurrent] = React.useState<number | undefined>(0);
-  const { setMunicipalityId, user, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
+  const { setMunicipalityId, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 
-  const router = useRouter();
   const pathName = usePathname();
-
+  const { isMaxLargeDevice } = useThemeQueries();
   const errandNumber = pathName.split('/')[3];
 
   useEffect(() => {
     const initializeData = async () => {
       try {
         setIsLoading(true);
+
         const municipality = process.env.NEXT_PUBLIC_MUNICIPALITY_ID || pathName.split('/')[2];
         setMunicipalityId(municipality);
 
@@ -91,6 +45,7 @@ const Arende: React.FC = () => {
         setUser(user);
 
         const res = await getErrandByErrandNumber(municipality, errandNumber);
+
         if (res.errand) {
           setErrand(res.errand);
           method.reset(res.errand);
@@ -98,16 +53,40 @@ const Arende: React.FC = () => {
           if (res.errand.attachments) {
             const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
             method.setValue('attachments', uploadFiles as unknown as Attachment[]);
+            console.log('Bilagor:', uploadFiles);
           }
-          setApplicants(
-            res.errand.stakeholders
-              .filter((s) => s.roles.includes(Role.APPLICANT))
-              .map((applicant) => ({
-                ...applicant,
-                newEmail: applicant.emails[0]?.value,
-                newPhoneNumber: applicant.phoneNumbers[0]?.value,
-              }))
-          );
+
+          const reporter = res.errand.stakeholders.find((s) => s.roles.includes(Role.REPORTER));
+          if (reporter) {
+            setHealthCareStaff([
+              {
+                ...reporter,
+                newEmail: reporter.emails[0]?.value,
+                newPhoneNumber: reporter.phoneNumbers[0]?.value,
+              },
+            ]);
+          } else {
+            console.warn('Ingen vårdpersonal (REPORTER) hittades.');
+            setHealthCareStaff([]);
+          }
+
+          const applicants = res.errand.stakeholders
+            .filter((s) => s.roles.includes(Role.APPLICANT))
+            .map((applicant) => ({
+              ...applicant,
+              newEmail: applicant.emails[0]?.value,
+              newPhoneNumber: applicant.phoneNumbers[0]?.value,
+            }));
+          setApplicants(applicants);
+
+          const otherParties = res.errand.stakeholders
+            .filter((s) => s.roles.some((r) => [Role.FELLOW_APPLICANT, Role.CONTACT_PERSON].includes(r)))
+            .map((person) => ({
+              ...person,
+              newEmail: person.emails[0]?.value,
+              newPhoneNumber: person.phoneNumbers[0]?.value,
+            }));
+          setOtherParties(otherParties);
         }
       } catch (err) {
         console.error('Error initializing data:', err);
@@ -122,100 +101,70 @@ const Arende: React.FC = () => {
 
   return (
     <FormProvider {...method}>
-      <PageHeader
-        logo={<SingleErrandTitle errandNumber={errand.errandNumber || ''} />}
-        userMenu={
-          <div className="flex items-center h-fit">
-            <span data-cy="usermenu">
-              <UserMenu
-                initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
-                menuTitle={`${user.firstName} ${user.lastName}`}
-                menuSubTitle=""
-                menuGroups={menuGroups}
-                buttonSize="sm"
-              />
-            </span>
+      <RegisterHeader />
 
-            <Divider orientation="vertical" className="mx-24" />
-
-            <Link
-              href="#"
-              target="_blank"
-              data-cy="register-new-errand-button"
-              onClick={() => router.push('/registrera')}
+      <div className="flex flex-col w-full overflow-hidden">
+        <main
+          className={`
+        flex-grow flex justify-center
+        ${isMaxLargeDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
+        ${isMaxLargeDevice ? 'pt-[1.6rem]' : 'pt-24'}
+        ${isMaxLargeDevice ? '' : 'pb-40'}
+        w-full
+      `}
+        >
+          <section className={`w-full ${!isMaxLargeDevice ? 'max-w-[108rem]' : ''}`}>
+            <header
+              className={`
+            flex justify-between items-center
+            ${isMaxLargeDevice ? '' : 'mt-md pt-8 mb-[3.2rem]'}
+          `}
             >
-              <Button
-                color={'primary'}
-                variant={'tertiary'}
-                rightIcon={<LucideIcon name="external-link" color="primary" variant="tertiary" />}
-              >
-                Nytt ärende
-              </Button>
-            </Link>
+              <h1 className="text-h2-lg">Ärende {errand?.errandNumber}</h1>
+
+              {!isMaxLargeDevice && (
+                <div className="flex gap-x-md">
+                  <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                </div>
+              )}
+            </header>
+
+            <section
+              className={`
+            bg-background-content border-1 rounded-12
+            ${isMaxLargeDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
+          `}
+            >
+              <div className={`${isMaxLargeDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
+                <h2>Grundinformation</h2>
+              </div>
+
+              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+                <AboutErrand />
+                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
+                <Applicant owners={applicants} setOwners={setApplicants} />
+                <OtherParties owners={otherParties} setOwners={setOtherParties} />
+              </div>
+
+              <div className={`${isMaxLargeDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
+                <h2>Ärendeuppgifter</h2>
+              </div>
+
+              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+                <ExternalCircumstances />
+                <PersonalInformation />
+                <MedicalOpinion />
+              </div>
+
+              <FileUploadComponent />
+            </section>
+          </section>
+        </main>
+        {isMaxLargeDevice && (
+          <div className="flex flex-col px-12 py-16">
+            <SaveErrandButton owners={applicants.concat(otherParties)} />
           </div>
-        }
-      ></PageHeader>
-
-      <div className="grow shrink overflow-y-hidden">
-        <div className="flex justify-end w-full h-full">
-          <div className="flex justify-center overflow-y-auto w-full grow max-lg:mr-[5.6rem]">
-            <main className="flex-grow flex justify-center px-24 max-w-[108rem] h-fit w-full pb-40">
-              <section className="w-full">
-                <header className="flex justify-between mt-md w-full pt-8">
-                  <div className="flex-grow">
-                    <h1 className="text-h3-sm md:text-h3-md xl:text-h2-lg mb-0 break-words">
-                      Ärende {errand.errandNumber}
-                    </h1>
-                  </div>
-                  <div className="flex gap-md">
-                    <SaveErrandButton owners={applicants.concat(otherParties)} />
-                  </div>
-                </header>
-
-                <section className="bg-transparent pt-24 pb-4">
-                  <div className="py-12 bg-transparent">
-                    <div className="border-1 rounded-12 bg-background-content">
-                      <MenuBar className="pt-[1rem] pl-[1.6rem]" current={current}>
-                        <MenuBar.Item>
-                          <button onClick={() => setCurrent(0)}>Rapporterat</button>
-                        </MenuBar.Item>
-                        <MenuBar.Item>
-                          <button onClick={() => setCurrent(1)}>Meddelanden</button>
-                        </MenuBar.Item>
-                        <MenuBar.Item>
-                          <button onClick={() => setCurrent(2)}>Bilagor</button>
-                        </MenuBar.Item>
-                      </MenuBar>
-                      <Divider />
-                      <div className="pt-22 pl-5">
-                        {current === 0 && (
-                          <>
-                            <div className="w-full py-[1.5rem] px-32">
-                              <h2>Grundinformation</h2>
-                            </div>
-
-                            <AboutErrand />
-                            <HealthCareStaff />
-                            <Applicant owners={applicants} setOwners={setApplicants} />
-                            <OtherParties owners={otherParties} setOwners={setOtherParties} />
-                            <div className="w-full pb-[2rem] pt-[5rem] px-32">
-                              <h2>Ärendeuppgifter</h2>
-                            </div>
-                            <ExternalCircumstances />
-                            <PersonalInformation />
-                            <MedicalOpinion />
-                          </>
-                        )}
-                        {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
-                        {current === 2 && <FileUploadComponent />}
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </section>
-            </main>
-          </div>
-        </div>
+        )}
       </div>
     </FormProvider>
   );

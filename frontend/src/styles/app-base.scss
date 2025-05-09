@@ -21,3 +21,10 @@ body {
 .main-container {
   flex: 1 0 auto;
 }
+
+.mobileVersion {
+  .sk-disclosure-body {
+    @apply max-md:!mx-10;
+    @apply max-md:!p-0;
+  }
+}

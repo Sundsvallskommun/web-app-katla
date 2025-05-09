@@ -9,14 +9,6 @@ export const APIS = [
     version: '3.0',
   },
   {
-    name: 'businessengagements',
-    version: '3.0',
-  },
-  {
-    name: 'legalentity',
-    version: '2.0',
-  },
-  {
     name: 'case-data',
     version: '11.0',
   },
