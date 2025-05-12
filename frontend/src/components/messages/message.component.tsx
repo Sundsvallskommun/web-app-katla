@@ -142,10 +142,10 @@ export const CasedataMessagesTab: React.FC<{
   useEffect(() => {
     if (messages && messageTree) {
       if (sortMessages === 1) {
-        const filteredMessages = messages.filter((message) => message.direction === 'INBOUND');
+        const filteredMessages = messages.filter((message) => message.direction === 'OUTBOUND');
         setSortedMessages(filteredMessages);
       } else if (sortMessages === 2) {
-        const filteredMessages = messages.filter((message) => message.direction === 'OUTBOUND');
+        const filteredMessages = messages.filter((message) => message.direction === 'INBOUND');
         setSortedMessages(filteredMessages);
       } else {
         setSortedMessages(messageTree);
@@ -248,8 +248,8 @@ export const CasedataMessagesTab: React.FC<{
                       </p>
                       <div className="flex text-small gap-16">
                         {dayjs(selectedMessage?.sent).format('YYYY-MM-DD HH:mm')}
-                        <Divider className="m-2" orientation="vertical" />
-                        {selectedMessage && getMessageType(selectedMessage)}
+                        {/* <Divider className="m-2" orientation="vertical" />
+                        {selectedMessage && getMessageType(selectedMessage)} */}
                       </div>
                     </div>
                   </div>

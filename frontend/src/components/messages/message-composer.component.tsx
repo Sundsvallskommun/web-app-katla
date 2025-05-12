@@ -4,7 +4,7 @@ import { IErrand } from '@interfaces/errand';
 import { MessageResponse } from '@interfaces/message';
 import { User } from '@interfaces/user';
 import { validateAction } from '@services/casedata-errand-service';
-import { renderMessageWithTemplates, sendMessage } from '@services/casedata-message-service';
+import { renderMessageWithTemplates, sendCasedataMessage, sendMessage } from '@services/casedata-message-service';
 import { Button, Input, Spinner, TextEditor, useConfirm, useSnackbar } from '@sk-web-gui/react';
 import Quill from 'quill';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -176,14 +176,14 @@ export const MessageComposer: React.FC<{
   };
 
   const onSubmit = async (data: CasedataMessageTabFormModel) => {
-    console.log('onSubmit', data);
-    const apiCall = sendMessage;
+    // console.log('onSubmit', data);
+    // const apiCall = sendMessage;
     setIsLoading(true);
 
     //const renderedHtml = await renderMessageWithTemplates(data.messageBody);
     //data.messageBody = renderedHtml.html;
 
-    apiCall(municipalityId, errand, data)
+    sendCasedataMessage(municipalityId, errand, data)
       .then(() => {
         toastMessage({
           position: 'bottom',
@@ -216,6 +216,9 @@ export const MessageComposer: React.FC<{
   //     console.log('Editor HTML content: ', htmlContent);
   //   }
   // };
+
+  // console.log('isloading', isLoading);
+  // console.log('!allowed', !allowed);
 
   return (
     <>
@@ -254,7 +257,7 @@ export const MessageComposer: React.FC<{
             // onClick={handleSendSubmit}
             variant="primary"
             color="primary"
-            disabled={isLoading || !allowed}
+            // disabled={isLoading || !allowed}
             leftIcon={isLoading ? <Spinner size={2} className="mr-sm" /> : <></>}
           >
             Skicka meddelande

@@ -8,6 +8,7 @@ import { ApiResponse, apiService } from '@services/api-service';
 import { base64Decode } from '@services/helper-service';
 import { toBase64 } from '@utils/toBase64';
 import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CasedataMessageTabFormModel {
   contactMeans: 'email' | 'sms' | 'webmessage' | 'digitalmail' | 'paper';
@@ -389,4 +390,38 @@ export const renderMessageWithTemplates: (inData: string) => Promise<{ html: str
     .catch(() => {
       throw new Error('Något gick fel när mallen skulle renderas');
     });
+};
+
+
+export const sendCasedataMessage: (
+  municipalityId: string,
+  errand: IErrand,
+  data: CasedataMessageTabFormModel
+) => Promise<boolean> = async (municipalityId, errand, data) => {
+  console.log('data', data); // Add this line to log the data
+    const messageData: MessageResponse = {
+      message: data.messageBodyPlaintext,
+      errandId: errand.id.toString(),
+      // municipalityId: municipalityId,
+      direction: 'INBOUND',
+      subject: "Hello world",
+      //messageType: "webmessage"
+      firstName: "Test",
+      lastName: "Testsson",
+      messageId: uuidv4(),
+    };
+    console.log('messageData', messageData); // Add this line to log the messageData
+    return apiService
+      .post<boolean, MessageResponse>(`casedata/${municipalityId}/errand/${errand.id}/messages`, messageData, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(() => {
+        return true;
+      })
+      .catch((e) => {
+        console.error('Something went wrong when sending message for errand:', errand);
+        throw e;
+      });
+  
+  //return Promise.all(msgPromises).then((results) => results.every((r) => r));
 };

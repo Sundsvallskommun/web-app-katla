@@ -362,7 +362,6 @@ export class MessageController {
     const errandsUrl = `${messageDto.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${messageDto.errandId}`;
     const baseURL = apiURL(this.SERVICE);
     const errandData = await this.apiService.get<ErrandDTO>({ url: errandsUrl, baseURL }, req.user);
-    console.log('errandData', errandData.data);
     let url;
     let message: WebMessageRequest;
     const MESSAGE_ID = generateMessageId();
@@ -412,6 +411,26 @@ export class MessageController {
     const baseURL = apiURL(this.SERVICE);
     const res = await this.apiService.get<IMessageResponse[]>({ url, baseURL }, req.user).catch(e => {
       logger.error('Error when fetching messages for errand: ', errandId);
+      throw e;
+    });
+    return { data: res.data, message: 'success' };
+  }
+
+  @Post('/casedata/:municipalityId/errand/:errandId/messages')
+  @OpenAPI({ summary: 'Stores a message to a errand' })
+  @UseBefore(authMiddleware)
+  @ResponseSchema(MessageResponse)
+  async sendErrandMessages(
+    @Req() req: RequestWithUser,
+    @Param('errandId') errandId: string,
+    @Param('municipalityId') municipalityId: string,
+    @Res() response: IMessageResponse[],
+  ): Promise<{ data: IMessageResponse[]; message: string }> {
+    console.log('sendErrandMessages', req.body);
+    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/messages`;
+    const baseURL = apiURL(this.SERVICE);
+    const res = await this.apiService.post<IMessageResponse[], Partial<RequestWithUser>>({ url, baseURL, data: req.body }, req.user).catch(e => {
+      logger.error('Error storing message for errand: ', errandId);
       throw e;
     });
     return { data: res.data, message: 'success' };
