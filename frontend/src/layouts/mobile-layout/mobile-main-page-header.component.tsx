@@ -61,7 +61,7 @@ export const MobileMainPageHeader: React.FC<MobileMainPageHeaderProps> = ({
         </div>
       </div>
 
-      {children && <div className="flex-1 overflow-scroll">{children}</div>}
+      {children && <div className="flex-1 overflow-scroll bg-background-content">{children}</div>}
     </div>
   );
 };

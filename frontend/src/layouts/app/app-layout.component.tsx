@@ -1,12 +1,15 @@
 'use client';
 
+import LoaderFullScreen from '@components/loader/loader-fullscreen';
 import { AppWrapper } from '@contexts/app.context';
+import store from '@services/storage-service';
+import { getMe } from '@services/user-service';
 import { ColorSchemeMode, GuiProvider } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import utc from 'dayjs/plugin/utc';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 dayjs.extend(utc);
 dayjs.locale('sv');
@@ -34,21 +37,20 @@ interface ClientApplicationProps {
 }
 
 const AppLayout = ({ children }: ClientApplicationProps) => {
-  //const colorScheme = useLocalStorage(useShallow((state) => state.colorScheme));
-  // const getMe = useUserStore((state) => state.getMe);
-  // const [mounted, setMounted] = useState(false);
+  const colorScheme = store.get('colorScheme');
+  const [mounted, setMounted] = useState(false);
 
-  // useEffect(() => {
-  //   getMe();
-  //   setMounted(true);
-  // }, [getMe, setMounted]);
+  useEffect(() => {
+    getMe();
+    setMounted(true);
+  }, [setMounted]);
 
-  // if (!mounted) {
-  //   return <LoaderFullScreen />;
-  // }
+  if (!mounted) {
+    return <LoaderFullScreen />;
+  }
 
   return (
-    <GuiProvider colorScheme={'light' as ColorSchemeMode}>
+    <GuiProvider colorScheme={colorScheme as ColorSchemeMode}>
       <AppWrapper>{children}</AppWrapper>
     </GuiProvider>
   ); //change to colorScheme

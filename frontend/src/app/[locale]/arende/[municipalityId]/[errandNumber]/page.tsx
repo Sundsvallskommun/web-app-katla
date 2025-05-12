@@ -1,5 +1,5 @@
 'use client';
-import { RegisterHeader } from '@app/[locale]/registrera/register-errand-header.component';
+import { ErrandHeader } from '@components/errand-header/errand-header.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
 import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
@@ -101,9 +101,9 @@ const Arende: React.FC = () => {
 
   return (
     <FormProvider {...method}>
-      <RegisterHeader />
+      <ErrandHeader />
 
-      <div className="flex flex-col w-full overflow-hidden">
+      <div className="flex flex-col w-full overflow-hidden bg-background-100">
         <main
           className={`
         flex-grow flex justify-center

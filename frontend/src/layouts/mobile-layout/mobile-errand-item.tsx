@@ -18,22 +18,22 @@ const MobileErrandItem: React.FC<ErrandItemProps> = ({ errand }) => {
             className="text-white font-arial text-md lining-nums proportional-nums w-fit max-w-full py-[0.6rem] px-[1.2rem] rounded-[1.2rem] text-center"
           />
 
-          <div className="text-primary-900 font-arial text-xl font-bold lining-nums proportional-nums leading-[2.8rem] pt-[1.2rem]">
+          <div className="font-arial text-xl font-bold lining-nums proportional-nums leading-[2.8rem] pt-[1.2rem]">
             {getCaseShortLabels()[errand.caseType as FTCaseType] ?? ''}
           </div>
 
           <div className="flex flex-col items-start gap-1.5 pt-[2.4rem] flex-1">
-            <div className="text-primary-900 font-arial text-base lining-nums proportional-nums leading-[2.4rem]">
+            <div className=" font-arial text-base lining-nums proportional-nums leading-[2.4rem]">
               <span className="font-[700]">Ärendetyp:</span> {errand.label}
             </div>
-            <div className="text-primary-900 font-arial text-base lining-nums proportional-nums leading-[2.4rem]">
+            <div className="font-arial text-base lining-nums proportional-nums leading-[2.4rem]">
               <span className="font-[700]">Registrerat</span> {errand.created}
             </div>
           </div>
         </div>
 
         <Button
-          className="flex items-center justify-center p-[1.2rem] bg-white"
+          className="flex items-center justify-center p-[1.2rem]"
           iconButton={true}
           type="button"
           size="lg"
