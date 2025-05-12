@@ -353,6 +353,7 @@ export const StakeholderList: React.FC<{
             key={index}
             isEditable={true}
             roles={owner.roles}
+            availableRoles={roles}
             userName={owner.adAccount}
             firstName={owner.firstName}
             lastName={owner.lastName}

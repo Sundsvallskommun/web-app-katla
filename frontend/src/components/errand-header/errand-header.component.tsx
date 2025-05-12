@@ -1,6 +1,6 @@
 'use client';
 
-import { Logo, Divider, Button, Link } from '@sk-web-gui/react';
+import { Logo, Divider, Button, Link, cx } from '@sk-web-gui/react';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { UserMenu } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
@@ -20,7 +20,9 @@ export const ErrandHeader: React.FC = () => {
         <Logo variant="symbol" className={isMaxLargeDevice ? 'h-32' : 'h-40'} />
       </a>
       <Divider orientation="vertical" className="mx-[2.4rem]" />
-      {!errand.errandNumber ? <strong className="text-large">Nytt ärende</strong> : <strong className="text-large">{`Ärende ${errand.errandNumber}`}</strong>}
+      {!isMaxLargeDevice && (
+        <strong className="text-large">{!errand.errandNumber ? 'Nytt ärende' : `Ärende ${errand.errandNumber}`}</strong>
+      )}
     </div>
   );
 
@@ -65,11 +67,10 @@ export const ErrandHeader: React.FC = () => {
   return (
     <>
       <nav
-        className={
-          isMaxLargeDevice ?
-            'w-full h-[7rem] px-[1.2rem] py-[1.2rem] flex justify-between items-center bg-background-DEFAULT shadow-100 relative z-10'
-          : 'w-full h-[7rem] px-24 flex justify-between items-center bg-background-DEFAULT shadow-100 relative z-10'
-        }
+        className={cx(
+          'w-full h-[7rem] flex items-center bg-background-DEFAULT shadow-100 relative z-10',
+          isMaxLargeDevice ? 'p-[1.2rem] gap-[2.4rem]' : 'px-24 justify-between'
+        )}
       >
         {LogoPart}
         {RightPart}
