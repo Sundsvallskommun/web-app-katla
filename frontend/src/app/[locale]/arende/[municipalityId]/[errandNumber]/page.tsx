@@ -80,7 +80,7 @@ const Arende: React.FC = () => {
           setApplicants(applicants);
 
           const otherParties = res.errand.stakeholders
-            .filter((s) => s.roles.some((r) => [Role.FELLOW_APPLICANT, Role.CONTACT_PERSON].includes(r)))
+            .filter((s) => s.roles.some((r) => [Role.FELLOW_APPLICANT, Role.CONTACT_PERSON, Role.DOCTOR].includes(r)))
             .map((person) => ({
               ...person,
               newEmail: person.emails[0]?.value,
