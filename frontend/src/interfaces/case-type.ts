@@ -1,11 +1,4 @@
 export enum FTCaseType {
-  PARATRANSIT = 'PARATRANSIT',
-  PARATRANSIT_CHANGE = 'PARATRANSIT_CHANGE',
-  PARATRANSIT_RENEWAL = 'PARATRANSIT_RENEWAL',
-  PARATRANSIT_NATIONAL = 'PARATRANSIT_NATIONAL',
-  PARATRANSIT_NATIONAL_RENEWAL = 'PARATRANSIT_NATIONAL_RENEWAL',
-  PARATRANSIT_RIAK = 'PARATRANSIT_RIAK',
-  PARATRANSIT_BUS_CARD = 'PARATRANSIT_BUS_CARD',
   PARATRANSIT_NOTIFICATION = 'PARATRANSIT_NOTIFICATION',
   PARATRANSIT_NOTIFICATION_CHANGE = 'PARATRANSIT_NOTIFICATION_CHANGE',
   PARATRANSIT_NOTIFICATION_RENEWAL = 'PARATRANSIT_NOTIFICATION_RENEWAL',
@@ -16,13 +9,6 @@ export enum FTCaseType {
 }
 
 export const FTCaseLabel: Record<FTCaseType, string> = {
-  PARATRANSIT: 'Ansökan av färdtjänst',
-  PARATRANSIT_RENEWAL: 'Ansökan om fortsatt färdtjänst',
-  PARATRANSIT_CHANGE: 'Ansökan om förändring av insatser',
-  PARATRANSIT_NATIONAL: 'Ansökan om riksfärdtjänst',
-  PARATRANSIT_NATIONAL_RENEWAL: 'Ansökan om fortsatt riksfärdtjänst',
-  PARATRANSIT_RIAK: 'Ansökan om RIAK',
-  PARATRANSIT_BUS_CARD: 'Ansökan om busskort',
   PARATRANSIT_NOTIFICATION: 'Anmälan av färdtjänst',
   PARATRANSIT_NOTIFICATION_CHANGE: 'Anmälan om förändring av insatser',
   PARATRANSIT_NOTIFICATION_RENEWAL: 'Anmälan om fortsatt färdtjänst',
@@ -32,13 +18,6 @@ export const FTCaseLabel: Record<FTCaseType, string> = {
   PARATRANSIT_NOTIFICATION_BUS_CARD: 'Anmälan om busskort',
 };
 export const getCaseLabels = (): Record<FTCaseType, string> => ({
-  [FTCaseType.PARATRANSIT]: FTCaseLabel.PARATRANSIT,
-  [FTCaseType.PARATRANSIT_CHANGE]: FTCaseLabel.PARATRANSIT_CHANGE,
-  [FTCaseType.PARATRANSIT_RENEWAL]: FTCaseLabel.PARATRANSIT_RENEWAL,
-  [FTCaseType.PARATRANSIT_NATIONAL]: FTCaseLabel.PARATRANSIT_NATIONAL,
-  [FTCaseType.PARATRANSIT_NATIONAL_RENEWAL]: FTCaseLabel.PARATRANSIT_NATIONAL_RENEWAL,
-  [FTCaseType.PARATRANSIT_RIAK]: FTCaseLabel.PARATRANSIT_RIAK,
-  [FTCaseType.PARATRANSIT_BUS_CARD]: FTCaseLabel.PARATRANSIT_BUS_CARD,
   [FTCaseType.PARATRANSIT_NOTIFICATION]: FTCaseLabel.PARATRANSIT_NOTIFICATION,
   [FTCaseType.PARATRANSIT_NOTIFICATION_CHANGE]: FTCaseLabel.PARATRANSIT_NOTIFICATION_CHANGE,
   [FTCaseType.PARATRANSIT_NOTIFICATION_RENEWAL]: FTCaseLabel.PARATRANSIT_NOTIFICATION_RENEWAL,
@@ -49,13 +28,6 @@ export const getCaseLabels = (): Record<FTCaseType, string> => ({
 });
 
 export const getCaseShortLabels = (): Record<FTCaseType, string> => ({
-  [FTCaseType.PARATRANSIT]: 'Ansökan färdtjänst',
-  [FTCaseType.PARATRANSIT_RENEWAL]: 'Ansökan fortsatt färdtjänst',
-  [FTCaseType.PARATRANSIT_CHANGE]: 'Ansökan förändring insatser',
-  [FTCaseType.PARATRANSIT_NATIONAL]: 'Ansökan riksfärdtjänst',
-  [FTCaseType.PARATRANSIT_NATIONAL_RENEWAL]: 'Ansökan fortsatt riksfärdtjänst',
-  [FTCaseType.PARATRANSIT_RIAK]: 'Ansökan RIAK',
-  [FTCaseType.PARATRANSIT_BUS_CARD]: 'Ansökan busskort',
   [FTCaseType.PARATRANSIT_NOTIFICATION]: 'Anmälan färdtjänst',
   [FTCaseType.PARATRANSIT_NOTIFICATION_CHANGE]: 'Anmälan förändring insatser',
   [FTCaseType.PARATRANSIT_NOTIFICATION_RENEWAL]: 'Anmälan fortsatt färdtjänst',
