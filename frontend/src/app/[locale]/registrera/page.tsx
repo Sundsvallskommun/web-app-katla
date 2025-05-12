@@ -1,5 +1,6 @@
 'use client';
 import { CancelRegistrationButton } from '@components/cancel-registration-button.component';
+import { ErrandHeader } from '@components/errand-header/errand-header.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
 import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
@@ -17,7 +18,6 @@ import { getMe } from '@services/user-service';
 import { useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { RegisterHeader } from './register-errand-header.component';
 
 const Registrera: React.FC = () => {
   const method = useForm<IErrand>();
@@ -36,9 +36,9 @@ const Registrera: React.FC = () => {
 
   return (
     <FormProvider {...method}>
-      <RegisterHeader />
+      <ErrandHeader />
 
-      <div className="flex flex-col w-full overflow-hidden">
+      <div className="flex flex-col w-full overflow-hidden bg-background-100">
         <main
           className={`
             flex-grow flex justify-center

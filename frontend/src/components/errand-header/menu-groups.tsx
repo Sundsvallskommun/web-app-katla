@@ -1,5 +1,6 @@
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Link, MenuItemGroup, PopupMenu } from '@sk-web-gui/react';
+import { ColorSchemeItems } from './color-scheme-items.component';
 
 export const menuGroups: MenuItemGroup[] = [
   {
@@ -16,7 +17,9 @@ export const menuGroups: MenuItemGroup[] = [
                   <LucideIcon name="chevron-right" />
                 </span>
               </PopupMenu.Button>
-              <PopupMenu.Panel>{/* <ColorSchemeItems /> TODO */}</PopupMenu.Panel>
+              <PopupMenu.Panel>
+                <ColorSchemeItems />
+              </PopupMenu.Panel>
             </PopupMenu>
           </PopupMenu.Item>
         ),
