@@ -5,13 +5,11 @@ import { AppWrapper } from '@contexts/app.context';
 import store from '@services/storage-service';
 import { getMe } from '@services/user-service';
 import { ColorSchemeMode, GuiProvider } from '@sk-web-gui/react';
-import { useLocalStorage } from '@utils/use-localstorage.hook';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import utc from 'dayjs/plugin/utc';
 import { ReactNode, useEffect, useState } from 'react';
-import { useShallow } from 'zustand/react/shallow';
 
 dayjs.extend(utc);
 dayjs.locale('sv');
@@ -45,7 +43,7 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
   useEffect(() => {
     getMe();
     setMounted(true);
-  }, [getMe, setMounted]);
+  }, [setMounted]);
 
   if (!mounted) {
     return <LoaderFullScreen />;
