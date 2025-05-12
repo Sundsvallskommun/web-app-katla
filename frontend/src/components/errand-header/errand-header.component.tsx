@@ -16,11 +16,13 @@ export const ErrandHeader: React.FC = () => {
 
   const LogoPart = (
     <div className="flex items-center flex-shrink-0">
-      <a href={`${process.env.NEXT_PUBLIC_BASEPATH}`} className="flex-shrink-0">
+      <a href={`${process.env.NEXT_PUBLIC_BASE_PATH}`} className="flex-shrink-0">
         <Logo variant="symbol" className={isMaxLargeDevice ? 'h-32' : 'h-40'} />
       </a>
       <Divider orientation="vertical" className="mx-[2.4rem]" />
-      {!errand.errandNumber ? <strong className="text-large">Nytt ärende</strong> : <strong className="text-large">{`Ärende ${errand.errandNumber}`}</strong>}
+      {!errand.errandNumber ?
+        <strong className="text-large">Nytt ärende</strong>
+      : <strong className="text-large">{`Ärende ${errand.errandNumber}`}</strong>}
     </div>
   );
 
@@ -48,7 +50,7 @@ export const ErrandHeader: React.FC = () => {
 
       <Divider orientation="vertical" />
 
-      <Link href={`${process.env.NEXT_PUBLIC_BASEPATH}/registrera`} target="_blank">
+      <Link href={`${process.env.NEXT_PUBLIC_BASE_PATH}/registrera`} target="_blank">
         <Button
           color="primary"
           variant="tertiary"
