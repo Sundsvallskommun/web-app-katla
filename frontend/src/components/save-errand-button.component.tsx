@@ -1,6 +1,7 @@
 'use client';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
+import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
@@ -10,8 +11,7 @@ import { useFormContext, UseFormReturn } from 'react-hook-form';
 
 export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const toastMessage = useSnackbar();
-  const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
-
+  const { municipalityId, setErrand, isLoading, setIsLoading, errand, user } = useContext(AppContext);
   const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const onSubmit = async () => {
@@ -107,12 +107,16 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
     }
   };
 
+  const isUserErrandReport = () => {
+    return errand?.stakeholders?.some((s) => s.roles.includes(Role.REPORTER) && s.adAccount === user.username);
+  };
+
   return (
     <Button
       variant="primary"
       color="vattjom"
       onClick={onSubmit}
-      disabled={isLoading}
+      disabled={isLoading || !isUserErrandReport()}
       rightIcon={isLoading ? <Spinner size={2} /> : undefined}
     >
       Spara ärende

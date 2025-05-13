@@ -7,17 +7,21 @@ import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, Disclosure, useThemeQueries, isArray } from '@sk-web-gui/react';
 import { useContext, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { usePathname } from 'next/navigation';
 
 export const HealthCareStaff: React.FC<{
   staff?: CasedataOwnerOrContact[];
   setStaff: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-}> = ({ setStaff }) => {
+}> = ({ staff, setStaff }) => {
   const [doneMark, setDoneMark] = useState(false);
   const { user } = useContext(AppContext);
   const { isMaxLargeDevice } = useThemeQueries();
-  const { control, getValues, watch, setValue } = useForm<CasedataOwnerOrContact>({
-    mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
-    defaultValues: {
+  const pathname = usePathname();
+  const isOnRegisterPage = pathname?.includes('/registrera');
+  const hasStaff = Array.isArray(staff) && staff.length > 0;
+  const { control, getValues, setValue } = useForm<CasedataOwnerOrContact>({
+    mode: 'onChange',
+    defaultValues: staff?.[0] ?? {
       firstName: '',
       lastName: '',
       street: '',
@@ -31,16 +35,6 @@ export const HealthCareStaff: React.FC<{
     },
   });
 
-  const username = watch('adAccount');
-  const firstName = watch(`firstName`);
-  const lastName = watch(`lastName`);
-  const street = watch(`street`);
-  const city = watch(`city`);
-  const emails = watch(`emails`);
-  const phoneNumbers = watch(`phoneNumbers`);
-  const personNumber = watch(`personalNumber`);
-  const roles = watch('roles');
-
   const { append: appendPhonenumber } = useFieldArray({
     control,
     name: `phoneNumbers`,
@@ -49,6 +43,9 @@ export const HealthCareStaff: React.FC<{
   const { append: appendEmail } = useFieldArray({ control, name: 'emails' });
 
   useEffect(() => {
+    // Endast hämta från AD om vi är på registrera och ingen vårdpersonal finns
+    if (!isOnRegisterPage || (staff && staff.length > 0)) return;
+
     if (!user?.username) {
       console.warn('user.username is missing:', user);
       return;
@@ -67,18 +64,11 @@ export const HealthCareStaff: React.FC<{
           setValue(`roles`, [Role.REPORTER], { shouldDirty: true });
           setValue(`newRole`, Role.REPORTER, { shouldDirty: true });
           setValue(`stakeholderType`, 'PERSON', { shouldDirty: true });
-          if (res.phone) {
-            appendPhonenumber({ value: res.phone });
-          }
-          if (res.workPhone) {
-            appendPhonenumber({ value: res.workPhone });
-          }
-          if (res.email) {
-            appendEmail({ value: res.email });
-          }
-          if (res.loginName) {
-            setValue('adAccount', res.loginName);
-          }
+          if (res.phone) appendPhonenumber({ value: res.phone });
+          if (res.workPhone) appendPhonenumber({ value: res.workPhone });
+          if (res.email) appendEmail({ value: res.email });
+          if (res.loginName) setValue('adAccount', res.loginName);
+
           const formData = getValues();
           setStaff([formData]);
         }
@@ -88,7 +78,7 @@ export const HealthCareStaff: React.FC<{
       });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, staff, isOnRegisterPage]);
 
   return (
     <Disclosure
@@ -104,21 +94,22 @@ export const HealthCareStaff: React.FC<{
         <div className={`${isMaxLargeDevice ? '' : 'px-16'}`}>
           <p>Vårdpersonal är den person som initierat ärendet och vår primära kontakt när ärendet handläggs.</p>
 
-          {firstName &&
-            lastName && ( // TEMP
+          {hasStaff &&
+            staff!.map((person, index) => (
               <DisplayCard
+                key={index}
                 isEditable={false}
-                userName={username}
-                personalNumber={personNumber}
-                street={street}
-                city={city}
-                newEmail={emails?.[0]?.value}
-                newPhoneNumber={phoneNumbers?.[0]?.value}
-                roles={roles}
-                firstName={firstName}
-                lastName={lastName}
+                userName={person.adAccount}
+                personalNumber={person.personalNumber}
+                street={person.street}
+                city={person.city}
+                newEmail={person.newEmail || person.emails?.[0]?.value}
+                newPhoneNumber={person.newPhoneNumber || person.phoneNumbers?.[0]?.value}
+                roles={person.roles}
+                firstName={person.firstName}
+                lastName={person.lastName}
               />
-            )}
+            ))}
         </div>
       </div>
       <div className={`${isMaxLargeDevice ? 'mt-24' : 'mt-24 px-16'}`}>
