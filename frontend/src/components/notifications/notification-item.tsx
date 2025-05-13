@@ -7,15 +7,14 @@ import NextLink from 'next/link';
 import { useContext } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
 
-const iconConfigByDescription = {
+const iconConfig = {
   'Meddelande mottaget': { icon: 'message-circle', defaultColor: 'gronsta' },
   'Parkering av ärendet har upphört': { icon: 'bell-ring', defaultColor: 'juniskar' },
   'Ärende uppdaterat': { icon: 'bell-ring', defaultColor: 'juniskar' },
   'En bilaga har lagts till i ärendet.': { icon: 'file', defaultColor: 'vattjom' },
   'Notering skapad': { avatar: true, defaultColor: 'juniskar' },
+  default: { icon: 'bell', defaultColor: 'vattjom' },
 };
-
-const defaultIconConfig = { icon: 'bell', defaultColor: 'vattjom' };
 
 const labelBySubType: Record<string, string> = {
   ATTACHMENT: 'Ny bilaga',
@@ -28,8 +27,7 @@ const labelBySubType: Record<string, string> = {
 };
 
 const renderIcon = (notification: Notification) => {
-  const config =
-    iconConfigByDescription[notification.description as keyof typeof iconConfigByDescription] ?? defaultIconConfig;
+  const config = iconConfig[notification.description as keyof typeof iconConfig] ?? iconConfig.default;
   const color = notification.acknowledged ? 'primary' : config.defaultColor;
 
   if ('avatar' in config && config.avatar) {
