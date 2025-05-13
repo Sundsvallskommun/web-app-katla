@@ -49,25 +49,7 @@ export const ACCEPTED_UPLOAD_FILETYPES = [
   ...documentMimeTypes,
 ];
 
-export type AttachmentCategory =
-  | 'APPLICATION_SQUARE_PLACE'
-  | 'OEP_APPLICATION'
-  | 'RECEIVED_CONTRACT'
-  | 'CONTRACT_DRAFT'
-  | 'CORPORATE_TAX_CARD'
-  | 'LEASE_REQUEST'
-  | 'REQUEST_TO_BUY_SMALL_HOUSE_PLOT'
-  | 'INQUIRY_LAND_SALE'
-  | 'LAND_PURCHASE_REQUEST'
-  | 'RECEIVED_MAP'
-  | 'MEX_PROTOCOL'
-  | 'ROAD_ALLOWANCE_APPROVAL'
-  | 'PREVIOUS_AGREEMENT'
-  | 'TERMINATION_OF_HUNTING_RIGHTS'
-  | 'OTHER_ATTACHMENT'
-  | 'OTHER';
-
-export type PTAttachmentCategory =
+export type FTAttachmentCategory =
   | 'PASSPORT_PHOTO'
   | 'MEDICAL_CONFIRMATION'
   | 'SIGNATURE'
@@ -75,27 +57,10 @@ export type PTAttachmentCategory =
   | 'UNKNOWN'
   | 'ERRAND_SCANNED_APPLICATION'
   | 'SERVICE_RECEIPT'
-  | 'OTHER_ATTACHMENT';
+  | 'OTHER_ATTACHMENT'
+  | 'MEDICAL_OPINION';
 
-export enum AttachmentLabels {
-  'APPLICATION_SQUARE_PLACE' = 'Ansökan torgplats',
-  'OEP_APPLICATION' = 'Ansökan',
-  'RECEIVED_CONTRACT' = 'Avtal inkommit',
-  'CONTRACT_DRAFT' = 'Avtalsutkast',
-  'CORPORATE_TAX_CARD' = 'F-skattesedel',
-  'LEASE_REQUEST' = 'Förfrågan arrende',
-  'REQUEST_TO_BUY_SMALL_HOUSE_PLOT' = 'Förfrågan köpa småhustomt',
-  'INQUIRY_LAND_SALE' = 'Förfrågan markförsäljning',
-  'LAND_PURCHASE_REQUEST' = 'Förfrågan markköp',
-  'ROAD_ALLOWANCE_APPROVAL' = 'Godkännande för vägbidrag',
-  'RECEIVED_MAP' = 'Karta inkommen',
-  'MEX_PROTOCOL' = 'Protokoll',
-  'PREVIOUS_AGREEMENT' = 'Tidigare avtal',
-  'TERMINATION_OF_HUNTING_RIGHTS' = 'Uppsägning jakträtt',
-  'OTHER' = 'Övrigt',
-}
-
-export enum PTAttachmentLabels {
+export enum FTAttachmentLabels {
   'PASSPORT_PHOTO' = 'Passfoto',
   'MEDICAL_CONFIRMATION' = 'Läkarintyg',
   'SIGNATURE' = 'Underskrift',
@@ -103,48 +68,10 @@ export enum PTAttachmentLabels {
   'ERRAND_SCANNED_APPLICATION' = 'Ärende (Skannad ansökan)',
   'SERVICE_RECEIPT' = 'Delgivningskvitto',
   'OTHER_ATTACHMENT' = 'Övriga bilagor',
+  'MEDICAL_OPINION' = 'Medicinskt utlåtande',
 }
 
-export const getAttachmentKey: (label: string) => AttachmentCategory | undefined = (label) => {
-  switch (label) {
-    case 'Ansökan torgplats':
-      return 'APPLICATION_SQUARE_PLACE';
-    case 'Ansökan':
-      return 'OEP_APPLICATION';
-    case 'Avtal inkommit':
-      return 'RECEIVED_CONTRACT';
-    case 'Avtalsutkast':
-      return 'CONTRACT_DRAFT';
-    case 'F-skattesedel':
-      return 'CORPORATE_TAX_CARD';
-    case 'Förfrågan arrende':
-      return 'LEASE_REQUEST';
-    case 'Förfrågan köpa småhustomt':
-      return 'REQUEST_TO_BUY_SMALL_HOUSE_PLOT';
-    case 'Förfrågan markförsäljning':
-      return 'INQUIRY_LAND_SALE';
-    case 'Förfrågan markköp':
-      return 'LAND_PURCHASE_REQUEST';
-    case 'Godkännande för vägbidrag':
-      return 'ROAD_ALLOWANCE_APPROVAL';
-    case 'Karta inkommen':
-      return 'RECEIVED_MAP';
-    case 'Protokoll':
-      return 'MEX_PROTOCOL';
-    case 'Tidigare avtal':
-      return 'PREVIOUS_AGREEMENT';
-    case 'Uppsägning jakträtt':
-      return 'TERMINATION_OF_HUNTING_RIGHTS';
-    case 'Övriga bilagor':
-      return 'OTHER_ATTACHMENT';
-    case 'Övrigt':
-      return 'OTHER';
-    default:
-      return undefined;
-  }
-};
-
-export const getPTAttachmentKey: (label: string) => PTAttachmentCategory | undefined = (label) => {
+export const getFTAttachmentKey: (label: string) => FTAttachmentCategory | undefined = (label) => {
   switch (label) {
     case 'Passfoto':
       return 'PASSPORT_PHOTO';
@@ -160,13 +87,15 @@ export const getPTAttachmentKey: (label: string) => PTAttachmentCategory | undef
       return 'SERVICE_RECEIPT';
     case 'Övriga bilagor':
       return 'OTHER_ATTACHMENT';
+      case 'Medicinskt utlåtande':
+        return 'MEDICAL_OPINION';
     default:
       return undefined;
   }
 };
 
 export const getAttachmentLabel = (attachment: Attachment) =>
-  PTAttachmentLabels[attachment?.category as keyof typeof PTAttachmentLabels] || 'Okänt';
+  FTAttachmentLabels[attachment?.category as keyof typeof FTAttachmentLabels] || 'Okänt';
 
 export const getImageAspect: (attachment: Attachment) => number | undefined = (attachment) =>
   attachment?.category === 'PASSPORT_PHOTO' ? 3 / 4
@@ -176,16 +105,16 @@ export const getImageAspect: (attachment: Attachment) => number | undefined = (a
   : attachment?.category === 'UNKNOWN' ? undefined
   : undefined;
 
-const uniqueAttachments: AttachmentCategory[] = [];
-const uniquePTAttachments: PTAttachmentCategory[] = ['PASSPORT_PHOTO', 'SIGNATURE'];
+ const uniqueAttachments: FTAttachmentCategory[] = [];
+const uniquePTAttachments: FTAttachmentCategory[] = ['PASSPORT_PHOTO', 'SIGNATURE'];
 
-export const onlyOneAllowed: (cat: PTAttachmentCategory) => boolean = (cat: PTAttachmentCategory) =>
-  uniquePTAttachments.includes(cat as PTAttachmentCategory);
+export const onlyOneAllowed: (cat: FTAttachmentCategory) => boolean = (cat: FTAttachmentCategory) =>
+  uniquePTAttachments.includes(cat as FTAttachmentCategory);
 
 export const validateAttachmentsForUtredning: (errand: IErrand) => boolean = (errand) => {
   // Errand may only have max one passport photo and max one signature before moving to Utredning phase
   const uniqueAttachmentsOnlyOnce = uniqueAttachments.every(
-    (u) => errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === u).length < 2
+    (u) => errand.attachments.filter((a) => (a.category as FTAttachmentCategory) === u).length < 2
   );
   return uniqueAttachmentsOnlyOnce;
 };
@@ -213,7 +142,7 @@ export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFi
         ending: attachment.extension,
         category: attachment.category,
         note: attachment.note,
-        ...attachment.extraParameters, // Lägg till extra parametrar om de finns
+        ...attachment.extraParameters,
       },
     };
   });

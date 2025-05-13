@@ -1,5 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { deleteAttachment, PTAttachmentLabels } from '@services/casedata-attachment-service';
+import { deleteAttachment, FTAttachmentLabels } from '@services/casedata-attachment-service';
 import { CustomOnChangeEventUploadFile, FileUpload, Switch, UploadFile } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -18,10 +18,9 @@ const FileUploadComponent: React.FC = () => {
         ...e.target.value.map((file) => ({
           ...file,
           id: '',
-          meta: { ...file.meta, category: Object.keys(PTAttachmentLabels)[0] },
+          meta: { ...file.meta, category: Object.keys(FTAttachmentLabels)[0] },
         }))
       );
-      console.log(updatedFiles);
       setValue('attachments', updatedFiles);
     }
   };
@@ -41,7 +40,6 @@ const FileUploadComponent: React.FC = () => {
 
   const handleOnChangeCategory = (file: UploadFile) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     const updatedFiles = files.map((f) => (f === file ? { ...f, meta: { ...f.meta, category: e.target.value } } : f));
-    console.log('Updated files with category:', updatedFiles);
     setValue('attachments', updatedFiles);
   };
 
@@ -69,7 +67,7 @@ const FileUploadComponent: React.FC = () => {
                 },
               }}
               categoryProps={{
-                categories: PTAttachmentLabels,
+                categories: FTAttachmentLabels,
                 selectProps: {
                   onChange: handleOnChangeCategory(file),
                 },
