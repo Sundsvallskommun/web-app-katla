@@ -16,8 +16,18 @@ const iconConfig = {
   default: { icon: 'bell', defaultColor: 'vattjom' },
 };
 
+const labelBySubType: Record<string, string> = {
+  ATTACHMENT: 'Ny bilaga',
+  DECISION: 'Nytt beslut',
+  ERRAND: 'Ärende uppdaterat',
+  MESSAGE: 'Nytt meddelande',
+  NOTE: 'Ny kommentar/anteckning',
+  SYSTEM: 'Fasbyte',
+  SUSPENSION: 'Parkering upphört',
+};
+
 const renderIcon = (notification: Notification) => {
-  const config = iconConfig[notification.description as keyof typeof iconConfig] || iconConfig.default;
+  const config = iconConfig[notification.description as keyof typeof iconConfig] ?? iconConfig.default;
   const color = notification.acknowledged ? 'primary' : config.defaultColor;
 
   if ('avatar' in config && config.avatar) {
@@ -68,6 +78,7 @@ const renderIcon = (notification: Notification) => {
 export const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
   const { municipalityId, setNotifications } = useContext(AppContext);
   const toastMessage = useSnackbar();
+  const subTypeLabel = notification.subType?.toUpperCase() && labelBySubType[notification.subType?.toUpperCase()];
 
   return (
     <div className="p-16 flex gap-12 items-start justify-between text-small">
@@ -102,7 +113,10 @@ export const NotificationItem: React.FC<{ notification: Notification }> = ({ not
             {notification.errandNumber || 'Till ärendet'}
           </NextLink>
         </div>
-        <div>Från {notification.createdByFullName || notification.createdBy || '(okänt)'}</div>
+        <div>Från {notification.createdByFullName || notification.createdBy || '(Okänt)'}</div>
+        {subTypeLabel ?
+          <div>Händelse: {subTypeLabel}</div>
+        : null}
       </div>
       <span className="whitespace-nowrap">{prettyTime(notification.created)}</span>
       {!notification.acknowledged ?
