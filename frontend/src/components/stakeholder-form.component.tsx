@@ -123,8 +123,15 @@ export const StakeholderFormModal: React.FC<{
           <FormLabel>Roll*</FormLabel>
           <Select
             className="w-full"
+            invalid={!!errors.roles}
             value={watch('roles')?.[0] ?? ''}
-            onChange={(e) => setValue('roles', [e.target.value as Role], { shouldDirty: true })}
+            onChange={(e) => {
+              const value = e.target.value as Role;
+              setValue('roles', value ? [value] : [], {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }}
           >
             {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
             {roles.map((role) => (
@@ -133,6 +140,7 @@ export const StakeholderFormModal: React.FC<{
               </Select.Option>
             ))}
           </Select>
+          {errors.roles && <div className="text-error text-md mt-1">{errors.roles.message}</div>}
         </div>
       </Modal.Content>
 

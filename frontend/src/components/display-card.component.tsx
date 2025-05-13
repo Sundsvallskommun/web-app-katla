@@ -7,6 +7,7 @@ import { StakeholderFormModal } from './stakeholder-form.component';
 export const DisplayCard: React.FC<{
   isEditable: boolean;
   roles: Role[];
+  availableRoles: Role[];
   userName?: string;
   firstName: string;
   lastName: string;
@@ -29,6 +30,7 @@ export const DisplayCard: React.FC<{
 }> = ({
   isEditable,
   roles,
+  availableRoles,
   userName,
   firstName,
   lastName,
@@ -114,7 +116,7 @@ export const DisplayCard: React.FC<{
             city,
             roles,
           }}
-          roles={roles}
+          roles={availableRoles}
           onSubmit={(data) => {
             onUpdate?.({
               newEmail: data.newEmail,

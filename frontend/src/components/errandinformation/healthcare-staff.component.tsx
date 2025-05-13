@@ -106,6 +106,7 @@ export const HealthCareStaff: React.FC<{
                 newEmail={person.newEmail || person.emails?.[0]?.value}
                 newPhoneNumber={person.newPhoneNumber || person.phoneNumbers?.[0]?.value}
                 roles={person.roles}
+                availableRoles={[Role.REPORTER]}
                 firstName={person.firstName}
                 lastName={person.lastName}
               />
