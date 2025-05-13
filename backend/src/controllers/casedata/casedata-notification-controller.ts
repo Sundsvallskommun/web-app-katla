@@ -59,6 +59,9 @@ export class CasedataNotificationDto implements CasedataNotification {
   @IsOptional()
   @IsString()
   errandNumber?: string;
+  @IsOptional()
+  @IsString()
+  subType?: string;
 }
 
 export class PatchNotificationDto implements PatchNotification {

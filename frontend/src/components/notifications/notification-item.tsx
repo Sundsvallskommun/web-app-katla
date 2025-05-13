@@ -7,17 +7,29 @@ import NextLink from 'next/link';
 import { useContext } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
 
-const iconConfig = {
+const iconConfigByDescription = {
   'Meddelande mottaget': { icon: 'message-circle', defaultColor: 'gronsta' },
   'Parkering av ärendet har upphört': { icon: 'bell-ring', defaultColor: 'juniskar' },
   'Ärende uppdaterat': { icon: 'bell-ring', defaultColor: 'juniskar' },
   'En bilaga har lagts till i ärendet.': { icon: 'file', defaultColor: 'vattjom' },
   'Notering skapad': { avatar: true, defaultColor: 'juniskar' },
-  default: { icon: 'bell', defaultColor: 'vattjom' },
+};
+
+const defaultIconConfig = { icon: 'bell', defaultColor: 'vattjom' };
+
+const labelBySubType: Record<string, string> = {
+  ATTACHMENT: 'Ny bilaga',
+  DECISION: 'Nytt beslut',
+  ERRAND: 'Ärende uppdaterat',
+  MESSAGE: 'Nytt meddelande',
+  NOTE: 'Ny kommentar/anteckning',
+  SYSTEM: 'Fasbyte',
+  SUSPENSION: 'Parkering upphört',
 };
 
 const renderIcon = (notification: Notification) => {
-  const config = iconConfig[notification.description as keyof typeof iconConfig] || iconConfig.default;
+  const config =
+    iconConfigByDescription[notification.description as keyof typeof iconConfigByDescription] ?? defaultIconConfig;
   const color = notification.acknowledged ? 'primary' : config.defaultColor;
 
   if ('avatar' in config && config.avatar) {
@@ -102,7 +114,12 @@ export const NotificationItem: React.FC<{ notification: Notification }> = ({ not
             {notification.errandNumber || 'Till ärendet'}
           </NextLink>
         </div>
-        <div>Från {notification.createdByFullName || notification.createdBy || '(okänt)'}</div>
+        <div>Från {notification.createdByFullName || notification.createdBy || '(Okänt)'}</div>
+        {(() => {
+          const key = notification.subType?.toUpperCase();
+          const label = key && labelBySubType[key];
+          return label ? <div>Händelse: {label}</div> : null;
+        })()}
       </div>
       <span className="whitespace-nowrap">{prettyTime(notification.created)}</span>
       {!notification.acknowledged ?
