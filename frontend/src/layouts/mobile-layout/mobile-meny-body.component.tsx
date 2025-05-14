@@ -1,6 +1,6 @@
 import { getMenuGroups } from '@components/errand-header/menu-groups';
 import { AppContext } from '@contexts/app-context-interface';
-import { Avatar, Button, Divider, Link, UserMenu } from '@sk-web-gui/react';
+import { Button, Divider, Link, UserMenu } from '@sk-web-gui/react';
 import React, { useContext } from 'react';
 
 interface MobileMenuBodyProps {
