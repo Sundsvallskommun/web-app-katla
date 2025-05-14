@@ -1,14 +1,19 @@
 import { CasedataStatusLabelComponent } from '@components/ongoing-errands/components/casedata-status-label.component';
+import { AppContext } from '@contexts/app-context-interface';
 import { FTCaseType, getCaseShortLabels } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import { findStatusLabelForStatusKey } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button } from '@sk-web-gui/react';
+import { useContext } from 'react';
 interface ErrandItemProps {
   errand: IErrand;
 }
 
 const MobileErrandItem: React.FC<ErrandItemProps> = ({ errand }) => {
+  const { municipalityId } = useContext(AppContext);
+  const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${municipalityId}/${errand.errandNumber}`;
+
   return (
     <div className="py-4">
       <div className="flex min-h-[8rem] items-end self-stretch rounded-[20px] border border-opacity-30 pt-[2.0rem] pb-[1.2rem] pl-[2.0rem] pr-[0.8rem] gap-4">
@@ -40,6 +45,9 @@ const MobileErrandItem: React.FC<ErrandItemProps> = ({ errand }) => {
           leftIcon={<LucideIcon name="arrow-right" />}
           color="primary"
           variant="tertiary"
+          onClick={() => {
+            window.location.href = url;
+          }}
         />
       </div>
     </div>

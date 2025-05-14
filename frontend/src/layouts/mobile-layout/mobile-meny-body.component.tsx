@@ -1,5 +1,6 @@
+import { getMenuGroups } from '@components/errand-header/menu-groups';
 import { AppContext } from '@contexts/app-context-interface';
-import { Avatar, Button, Divider, Link } from '@sk-web-gui/react';
+import { Avatar, Button, Divider, Link, UserMenu } from '@sk-web-gui/react';
 import React, { useContext } from 'react';
 
 interface MobileMenuBodyProps {
@@ -13,12 +14,13 @@ export const MobileMenuBody: React.FC<MobileMenuBodyProps> = ({ children, onNewC
   return (
     <div className="flex flex-col w-full bg-vattjom-background-200 p-[1.2rem]">
       <div className="flex items-center gap-[1.2rem]">
-        <Avatar
-          data-cy="avatar-aside"
-          className="flex-none"
-          size="md"
+        <UserMenu
           initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
-          color="vattjom"
+          menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
+          menuGroups={getMenuGroups(false)}
+          buttonSize="md"
+          className="flex-shrink-0"
+          buttonRounded={false}
         />
         <span className="leading-tight h-fit font-bold mb-0" data-cy="userinfo">
           {user.firstName} {user.lastName}

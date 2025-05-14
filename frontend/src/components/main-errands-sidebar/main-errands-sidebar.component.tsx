@@ -1,19 +1,17 @@
+import { getMenuGroups } from '@components/errand-header/menu-groups';
 import { LogoutButton } from '@components/logout-button.component';
 import { NotificationsBell } from '@components/notifications/notifications-bell';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
+import { AppContext } from '@contexts/app-context-interface';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
+import { Button, cx, Divider, Logo, UserMenu } from '@sk-web-gui/react';
 import NextLink from 'next/link';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { appConfig } from 'src/config/app-config';
 
 interface SidebarProps {
   open: boolean;
   setOpen: (state: boolean) => void;
-  user: {
-    firstName: string;
-    lastName: string;
-  };
   applicationName: string;
   applicationEnvironment: string;
   isNotificationEnabled: boolean;
@@ -21,13 +19,8 @@ interface SidebarProps {
   children: React.ReactNode;
 }
 
-export const MainErrandsSidebar: React.FC<SidebarProps> = ({
-  open,
-  setOpen,
-  children,
-  user,
-  applicationEnvironment,
-}) => {
+export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, children, applicationEnvironment }) => {
+  const { user } = useContext(AppContext);
   const MainTitle = (open: boolean) => (
     <NextLink href="/" className="no-underline" aria-label={`Go to homepage`}>
       <Logo
@@ -40,7 +33,6 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
   );
 
   const [showNotifications, setShowNotifications] = useState(false);
-
   return (
     <aside
       data-cy="overview-aside"
@@ -61,12 +53,13 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         >
           {open && (
             <div className="flex gap-12 justify-between items-center">
-              <Avatar
-                data-cy="avatar-aside"
-                className="flex-none"
-                size="md"
+              <UserMenu
                 initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
-                color="vattjom"
+                menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
+                menuGroups={getMenuGroups(false)}
+                buttonSize="md"
+                className="flex-shrink-0"
+                buttonRounded={false}
               />
               <span className="leading-tight h-fit font-bold mb-0" data-cy="userinfo">
                 {user.firstName} {user.lastName}

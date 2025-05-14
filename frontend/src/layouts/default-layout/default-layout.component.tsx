@@ -21,10 +21,7 @@ interface DefaultLayoutProps {
 
 export default function DefaultLayout({ children }: DefaultLayoutProps) {
   const { t } = useTranslation();
-
   const [open, setOpen] = useState(true);
-
-  const { user } = useContext(AppContext);
   const casedataFilterForm = useForm<CaseDataFilter>({ defaultValues: CaseStatusValues });
 
   return (
@@ -34,10 +31,6 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
           <MainErrandsSidebar
             open={open}
             setOpen={setOpen}
-            user={{
-              firstName: user.firstName,
-              lastName: user.lastName,
-            }}
             applicationName="Färdtjänst"
             applicationEnvironment={''}
             isNotificationEnabled={false}
