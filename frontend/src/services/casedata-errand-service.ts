@@ -520,7 +520,6 @@ const createApiErrandData: (data: Partial<IErrand>) => Partial<RegisterErrandDat
   const stakeholders = makeStakeholdersList(data);
   const e: Partial<RegisterErrandData> = {
     ...(data.id && { id: data.id?.toString() }),
-    ...(data.errandNumber && { errandNumber: data.errandNumber }),
     ...(data.priority && { priority: ApiPriority[data.priority as keyof typeof ApiPriority] }),
     ...(data.caseType && { caseType: data.caseType }),
     ...(data.channel && { channel: ApiChannels[data.channel as keyof typeof ApiChannels] }),
@@ -564,8 +563,8 @@ export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Pro
           result.errandId = errandData.id;
           return result;
         })
-        .catch(() => {
-          console.error('Something went wrong when patching errand');
+        .catch((e) => {
+          console.error('Something went wrong when patching errand', e);
           return result;
         })
     : apiService

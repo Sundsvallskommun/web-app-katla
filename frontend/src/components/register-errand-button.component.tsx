@@ -48,7 +48,6 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
       if (res.errandId) {
         const e = await getErrand(municipalityId, res.errandId);
         if (e.errand && e.errand.errandNumber) {
-          // Hantera nya bilagor
           if (newAttachments.length > 0) {
             await sendAttachments(
               municipalityId,
@@ -65,7 +64,6 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
             );
           }
 
-          // Hantera befintliga bilagor
           if (existingAttachments.length > 0) {
             await Promise.all(
               existingAttachments.map(async (attachment) => {
@@ -107,9 +105,6 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
       setIsLoading(false);
     }
   };
-
-  // Logik för att kontrollera om sökande finns, annars vill vi eventuellt inte kunna skapa ett ärende.
-  // const hasApplicant = useMemo(() => owners.some((owner) => owner.roles.includes(Role.APPLICANT)), [owners]); //disabled={!hasApplicant}
 
   return (
     <div className="flex mb-0 w-full">
