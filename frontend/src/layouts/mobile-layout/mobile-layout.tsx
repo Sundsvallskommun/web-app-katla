@@ -25,7 +25,6 @@ const MobileLayout: React.FC = () => {
     tableForm,
     ownerFilter,
     setOwnerFilter,
-    numberOfFilters,
     sidebarLabel,
   } = useOngoingCaseDataErrands();
 
@@ -41,20 +40,17 @@ const MobileLayout: React.FC = () => {
             openMenu={openMenu}
             setOpenMenu={setOpenMenu}
           >
-            <MobileErrandsList
-            filterForm={filterForm}
-            tableForm={tableForm}
-            ownerFilter={ownerFilter}
-            setOwnerFilter={setOwnerFilter}
-            numberOfFilters={numberOfFilters}
-                sidebarLabel={sidebarLabel}
-             />
+            <MobileErrandsList tableForm={tableForm} sidebarLabel={sidebarLabel} />
           </MobileMainPageHeader>
         )}
 
         {openSearch && (
-          <MobilePage open={openSearch} setOpen={setOpenSearch} lucideIconName="search" title="Sök">
-            <MobileSearchBody onDone={() => setOpenSearch(false)} />
+          <MobilePage open={openSearch} setOpen={setOpenSearch} lucideIconName="search" title="Sök / Filter">
+            <MobileSearchBody
+              ownerFilter={ownerFilter}
+              setOwnerFilter={setOwnerFilter}
+              onDone={() => setOpenSearch(false)}
+            />
           </MobilePage>
         )}
 

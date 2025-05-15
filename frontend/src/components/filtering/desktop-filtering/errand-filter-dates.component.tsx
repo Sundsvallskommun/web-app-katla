@@ -29,7 +29,7 @@ export const CasedataFilterDates: React.FC = () => {
         variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
         size={isMaxLargeDevice ? 'md' : 'sm'}
-        className={isMaxLargeDevice ? 'max-md:w-full flex justify-between items-center text-left' : 'max-md:w-full'}
+        className={isMaxLargeDevice ? 'w-full flex justify-between items-center text-left' : 'max-md:w-full'}
       >
         Tidsperiod
       </PopupMenu.Button>
