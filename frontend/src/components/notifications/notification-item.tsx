@@ -16,6 +16,11 @@ const iconConfig = {
   default: { icon: 'bell', defaultColor: 'vattjom' },
 };
 
+const senderFallback = (name?: string): string => {
+  if (!name || name.toUpperCase() === 'UNKNOWN') return 'Okänd';
+  return name;
+};
+
 const labelBySubType: Record<string, string> = {
   ATTACHMENT: 'Ny bilaga',
   DECISION: 'Nytt beslut',
@@ -119,7 +124,7 @@ export const NotificationItem: React.FC<{ notification: Notification }> = ({ not
             {notification.errandNumber || 'Till ärendet'}
           </NextLink>
         </div>
-        <div>Från {notification.createdByFullName || notification.createdBy || '(Okänt)'}</div>
+        <div>Från: {senderFallback(notification.createdByFullName || notification.createdBy)}</div>
         {subTypeLabel ?
           <div>Händelse: {subTypeLabel}</div>
         : null}

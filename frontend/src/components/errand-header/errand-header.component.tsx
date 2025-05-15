@@ -7,7 +7,7 @@ import { useContext, useState } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import { useThemeQueries } from '@sk-web-gui/react';
-import { menuGroups } from '@components/errand-header/menu-groups';
+import { getMenuGroups } from '@components/errand-header/menu-groups';
 
 export const ErrandHeader: React.FC = () => {
   const { user, errand } = useContext(AppContext);
@@ -27,12 +27,12 @@ export const ErrandHeader: React.FC = () => {
   );
 
   const RightPart = (
-    <div className="flex items-center flex-shrink-0 gap-[2.4rem]">
+    <div className="flex items-right flex-shrink-0 gap-[2.4rem]">
       <UserMenu
         initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
         menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
         menuSubTitle=""
-        menuGroups={menuGroups}
+        menuGroups={getMenuGroups(true)}
         buttonSize={isMaxLargeDevice ? 'sm' : 'md'}
         className="flex-shrink-0"
         buttonRounded={false}
@@ -69,7 +69,7 @@ export const ErrandHeader: React.FC = () => {
       <nav
         className={cx(
           'w-full h-[7rem] flex items-center bg-background-DEFAULT shadow-100 relative z-10',
-          isMaxLargeDevice ? 'p-[1.2rem] gap-[2.4rem]' : 'px-24 justify-between'
+          isMaxLargeDevice ? 'p-[1.2rem] gap-[2.4rem] justify-between' : 'px-24 justify-between'
         )}
       >
         {LogoPart}
