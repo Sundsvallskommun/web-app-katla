@@ -1,34 +1,22 @@
-import { CaseDataFilter } from '@components/filtering/errand-filter';
-import CaseDataFilteringMobile from '@components/filtering/mobile-filtering/errand-filtering-mobile.component';
 import { AppContext } from '@contexts/app-context-interface';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Spinner } from '@sk-web-gui/react';
+import { Spinner } from '@sk-web-gui/react';
 import { useDebounceEffect } from '@utils/useDebounceEffect';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
-import { useContext, useRef, useState } from 'react';
-import { FormProvider, UseFormReturn } from 'react-hook-form';
+import { useContext, useRef } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 import MobileErrandItem from './mobile-errand-item';
-import { MobilePage } from './moible-page.component';
+import { CasedataFilterTags } from '@components/filtering/desktop-filtering/casedata-filter-tags.component';
 
 interface MobileErrandsListProps {
-  filterForm: UseFormReturn<CaseDataFilter, unknown, undefined>;
   tableForm: UseFormReturn<TableForm, unknown, undefined>;
-  ownerFilter: boolean;
-  setOwnerFilter: (b: boolean) => void;
-  numberOfFilters: number;
   sidebarLabel: string;
 }
 
 export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
-  filterForm,
   tableForm,
-  ownerFilter,
-  setOwnerFilter,
-  numberOfFilters,
   sidebarLabel,
 }) => {
   const { errands, isLoading, setIsLoading } = useContext(AppContext);
-  const [filterOpen, setFilterOpen] = useState(false);
 
   const handleLoadMore = () => {
     setIsLoading(true);
@@ -71,22 +59,13 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
     <div className="w-full p-[1rem] py-[1.6rem] relative">
       <div className="flex justify-between items-center mb-4">
         <div className="text-xl font-bold">{sidebarLabel || 'Ärenden'}</div>
-        <div>
-          <Button
-            size="md"
-            variant="primary"
-            color="vattjom"
-            inverted={true}
-            className="flex items-center py-[0.8rem] pl-[1.6rem] pr-[1.8rem]"
-            onClick={() => setFilterOpen(true)}
-          >
-            <LucideIcon name="list-filter" color="vattjom" size="1.8rem" />
-            <span className="text-vattjom-text ml-2">Filter{numberOfFilters > 0 ? ` (${numberOfFilters})` : ''}</span>
-          </Button>
-        </div>
       </div>
+      <div className="pt-[1.2rem] pb-[0.5rem]">
+        Valda filter och sökord
+      </div>
+      <CasedataFilterTags />
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pt-[1.2rem]">
         {errands.errands.map((errand) => {
           return <MobileErrandItem key={errand.id} errand={errand} />;
         })}
@@ -95,20 +74,6 @@ export const MobileErrandsList: React.FC<MobileErrandsListProps> = ({
       <div className="mt-4 flex justify-center items-center">
         {isLoading && <Spinner className="flex items-center" />}
       </div>
-
-      {filterOpen ?
-        <MobilePage open={filterOpen} setOpen={setFilterOpen} lucideIconName="list-filter" title="Filter">
-          <FormProvider {...filterForm}>
-            <CaseDataFilteringMobile
-              ownerFilterHandler={setOwnerFilter}
-              ownerFilter={ownerFilter}
-              errands={errands?.errands || []}
-              open={filterOpen} 
-              setOpen={setFilterOpen}
-            />
-          </FormProvider>
-        </MobilePage>
-      : null}
     </div>
   );
 };
