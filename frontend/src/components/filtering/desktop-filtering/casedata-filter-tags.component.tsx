@@ -20,7 +20,7 @@ import { CaseDataFilter, CaseDataValues } from '../errand-filter';
 export const CasedataFilterTags: React.FC<{ mobileOverviewPage?: boolean }> = (mobileOverviewPage) => {
   const { control, setValue, reset } = useFormContext<CaseDataFilter>();
   const values = useWatch({ control });
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   const types = values.caseType ?? [];
   const statuses = values.status ?? [];
@@ -68,7 +68,7 @@ export const CasedataFilterTags: React.FC<{ mobileOverviewPage?: boolean }> = (m
 
   return (
     <div className="flex gap-8 flex-wrap justify-start">
-      {isMaxLargeDevice && query && mobileOverviewPage && (
+      {isMaxMediumDevice && query && mobileOverviewPage && (
         <Chip
           className="bg-gronsta-background-200 hover:bg-gronsta-background-200"
           data-cy="tag-query"

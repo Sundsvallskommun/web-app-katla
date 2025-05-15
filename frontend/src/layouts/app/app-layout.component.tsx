@@ -4,7 +4,7 @@ import LoaderFullScreen from '@components/loader/loader-fullscreen';
 import { AppWrapper } from '@contexts/app.context';
 import store from '@services/storage-service';
 import { getMe } from '@services/user-service';
-import { ColorSchemeMode, GuiProvider } from '@sk-web-gui/react';
+import { ColorSchemeMode, defaultTheme, GuiProvider } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
 import updateLocale from 'dayjs/plugin/updateLocale';
@@ -40,6 +40,8 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
   const colorScheme = store.get('colorScheme');
   const [mounted, setMounted] = useState(false);
 
+  const theme = {...defaultTheme, screens: {...defaultTheme.screens, 'medium-device-max': '800px', 'large-device-max': '960px',}};
+
   useEffect(() => {
     getMe();
     setMounted(true);
@@ -50,10 +52,10 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
   }
 
   return (
-    <GuiProvider colorScheme={colorScheme as ColorSchemeMode}>
+    <GuiProvider theme={theme} colorScheme={colorScheme as ColorSchemeMode}>
       <AppWrapper>{children}</AppWrapper>
     </GuiProvider>
-  ); //change to colorScheme
+  );
 };
 
 export default AppLayout;

@@ -45,7 +45,7 @@ export const DisplayCard: React.FC<{
   onUpdate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   return (
     <div className="border-1 rounded-12 bg-background-content w-full max-w-[52.5rem] my-15">
@@ -56,7 +56,7 @@ export const DisplayCard: React.FC<{
       </div>
       <div className="px-[1rem]">
         <p className="text-[1.6rem] font-semibold">{firstName + ' ' + lastName}</p>
-        <div className={`flex text-md mb-10 ${isMaxLargeDevice ? 'flex-col' : 'flex-row'}`}>
+        <div className={`flex text-md mb-10 ${isMaxMediumDevice ? 'flex-col' : 'flex-row'}`}>
           {userName && <div className="mr-30">{userName}</div>}
 
           <div className="flex flex-col mr-10">

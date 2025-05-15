@@ -8,16 +8,16 @@ import { CaseTypeFilter } from '../errand-filter';
 export const CasedataFilterCaseType: React.FC = () => {
   const { register } = useFormContext<CaseTypeFilter>();
   const [query, setQuery] = useState<string>('');
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   return (
     <PopupMenu>
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
         data-cy="Ärendetyp-filter"
-        variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
+        variant={isMaxMediumDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
-        size={isMaxLargeDevice ? 'md' : 'sm'}
-        className={isMaxLargeDevice ? 'w-full flex justify-between items-center text-left' : 'w-full'}
+        size={isMaxMediumDevice ? 'md' : 'sm'}
+        className={isMaxMediumDevice ? 'w-full flex justify-between items-center text-left' : 'w-full'}
       >
         <span>Ärendetyp</span>
       </PopupMenu.Button>

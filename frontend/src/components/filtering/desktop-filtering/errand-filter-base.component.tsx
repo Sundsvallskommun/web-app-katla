@@ -13,17 +13,17 @@ interface Props {
 }
 
 export const CasedataFilterBase: React.FC<Props> = ({ ownerFilterHandler, ownerFilter = true }) => {
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   const { sidebarLabel } = useContext(AppContext);
 
-  const layoutWrapperClass = isMaxLargeDevice ? 'flex-col' : 'flex-row gap-[1.6rem] items-center';
+  const layoutWrapperClass = isMaxMediumDevice ? 'flex-col' : 'flex-row gap-[1.6rem] items-center';
 
   const filterContainerClass = cx(
     'w-full flex justify-start items-center gap-[0.4rem] rounded-groups',
-    isMaxLargeDevice ? 'flex-col' : 'flex-row flex-wrap bg-background-200 p-[1rem]'
+    isMaxMediumDevice ? 'flex-col' : 'flex-row flex-wrap bg-background-200 p-[1rem]'
   );
 
-  const filterItemClass = isMaxLargeDevice ? 'relative w-full mb-24' : 'relative w-auto';
+  const filterItemClass = isMaxMediumDevice ? 'relative w-full mb-24' : 'relative w-auto';
 
   return (
     <div className={`flex w-full ${layoutWrapperClass}`}>
@@ -47,7 +47,7 @@ export const CasedataFilterBase: React.FC<Props> = ({ ownerFilterHandler, ownerF
         </div>
       </div>
 
-      <div className={isMaxLargeDevice ? 'mb-24 flex justify-center w-full' : 'min-w-fit'}>
+      <div className={isMaxMediumDevice ? 'mb-24 flex justify-center w-full' : 'min-w-fit'}>
         <Checkbox data-cy="myErrands-filter" checked={!!ownerFilter} onChange={() => ownerFilterHandler(!ownerFilter)}>
           Mina ärenden
         </Checkbox>

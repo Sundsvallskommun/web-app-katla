@@ -10,7 +10,7 @@ import { useContext, useEffect } from 'react';
 
 const Oversikt: React.FC = () => {
   const { setMunicipalityId, setUser } = useContext(AppContext);
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   useEffect(() => {
     setMunicipalityId(process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '');
@@ -20,7 +20,7 @@ const Oversikt: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return isMaxLargeDevice ?
+  return isMaxMediumDevice ?
       <MobileLayout />
     : <DefaultLayout>
         <OngoingCaseDataErrands />

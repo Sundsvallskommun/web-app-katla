@@ -3,9 +3,9 @@
 import { CasedataFilterSidebarStatusSelector } from '@components/filtering/desktop-filtering/errand-filter-sidebarstatus-selector.component';
 import { CaseDataFilter, CaseStatusValues } from '@components/filtering/errand-filter';
 import { MainErrandsSidebar } from '@components/main-errands-sidebar/main-errands-sidebar.component';
-import { CookieConsent, Link } from '@sk-web-gui/react';
+import { CookieConsent, Link, useThemeQueries } from '@sk-web-gui/react';
 import NextLink from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -20,8 +20,27 @@ interface DefaultLayoutProps {
 
 export default function DefaultLayout({ children }: DefaultLayoutProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(true);
+  const { isMaxLargeDevice: initialIsMaxLargeDevice } = useThemeQueries();
+  const [isMaxLargeDevice, setIsMaxLargeDevice] = useState(initialIsMaxLargeDevice);
+  const [open, setOpen] = useState(initialIsMaxLargeDevice ? false : true);
   const casedataFilterForm = useForm<CaseDataFilter>({ defaultValues: CaseStatusValues });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isLarge = window.innerWidth <= 960;
+      setIsMaxLargeDevice(isLarge);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    setOpen(isMaxLargeDevice ? false : true);
+  }, [isMaxLargeDevice]);
 
   return (
     <>

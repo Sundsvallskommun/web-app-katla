@@ -6,16 +6,16 @@ import { CaseChannelFilter } from '../errand-filter';
 
 export const CasedataFilterChannel: React.FC = () => {
   const { register } = useFormContext<CaseChannelFilter>();
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   return (
     <PopupMenu>
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
         data-cy="Channel-filter"
-        variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
+        variant={isMaxMediumDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
-        size={isMaxLargeDevice ? 'md' : 'sm'}
-        className={isMaxLargeDevice ? 'w-full flex justify-between items-center text-left' : 'max-md:w-full'}
+        size={isMaxMediumDevice ? 'md' : 'sm'}
+        className={isMaxMediumDevice ? 'w-full flex justify-between items-center text-left' : 'max-md:w-full'}
       >
         Inkom via
       </PopupMenu.Button>
