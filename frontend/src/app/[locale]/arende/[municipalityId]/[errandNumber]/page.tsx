@@ -8,10 +8,12 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
+import { RegisterErrandButton } from '@components/register-errand-button.component';
 import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
+import { ErrandStatus } from '@interfaces/errand-status';
 import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
@@ -124,6 +126,9 @@ const Arende: React.FC = () => {
               {!isMaxMediumDevice && (
                 <div className="flex gap-x-md">
                   <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                  {errand?.status?.statusType === ErrandStatus.Utkast && (
+                    <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                  )}
                 </div>
               )}
             </header>
@@ -162,6 +167,9 @@ const Arende: React.FC = () => {
         {isMaxMediumDevice && (
           <div className="flex flex-col px-12 py-16">
             <SaveErrandButton owners={applicants.concat(otherParties)} />
+            {errand?.status?.statusType === ErrandStatus.Utkast && (
+              <RegisterErrandButton owners={applicants.concat(otherParties)} />
+            )}
           </div>
         )}
       </div>
