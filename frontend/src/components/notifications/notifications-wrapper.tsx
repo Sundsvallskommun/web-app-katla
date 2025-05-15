@@ -20,7 +20,7 @@ export const NotificationsWrapper: React.FC<{
   withSidebar?: boolean;
 }> = ({ show, setShow, withSidebar = true }) => {
   const { municipalityId, notifications, setNotifications } = useContext(AppContext);
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   useEffect(() => {
     if (municipalityId) {
@@ -40,7 +40,7 @@ export const NotificationsWrapper: React.FC<{
 
   return (
     <>
-      {show && !isMaxLargeDevice && (
+      {show && !isMaxMediumDevice && (
         <div
           className={cx(
             'fixed top-0 bottom-0 h-full bg-primitives-overlay-darken-6 transition-opacity duration-150 z-[10]',
@@ -53,7 +53,7 @@ export const NotificationsWrapper: React.FC<{
         <div
           className={cx(
             'fixed top-0 right-0 bottom-0 bg-background-content z-[20] transition-all ease-in-out duration-150',
-            isMaxLargeDevice ? 'w-full left-0'
+            isMaxMediumDevice ? 'w-full left-0'
             : withSidebar ? 'w-[48rem] left-[32rem]'
             : 'w-[48rem] left-[5.6rem]'
           )}

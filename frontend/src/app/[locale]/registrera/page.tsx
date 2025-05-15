@@ -25,7 +25,7 @@ const Registrera: React.FC = () => {
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
   const { setMunicipalityId, setUser } = useContext(AppContext);
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   useEffect(() => {
     setMunicipalityId(process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '');
@@ -42,22 +42,22 @@ const Registrera: React.FC = () => {
         <main
           className={`
             flex-grow flex justify-center
-            ${isMaxLargeDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
-            ${isMaxLargeDevice ? 'pt-[1.6rem]' : 'pt-24'}
-            ${isMaxLargeDevice ? '' : 'pb-40'}
+            ${isMaxMediumDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
+            ${isMaxMediumDevice ? 'pt-[1.6rem]' : 'pt-24'}
+            ${isMaxMediumDevice ? '' : 'pb-40'}
             w-full
           `}
         >
-          <section className={`w-full ${!isMaxLargeDevice ? 'max-w-[108rem]' : ''}`}>
+          <section className={`w-full ${!isMaxMediumDevice ? 'max-w-[108rem]' : ''}`}>
             <header
               className={`
                 flex justify-between items-center
-                ${isMaxLargeDevice ? '' : 'mt-md pt-8 mb-[3.2rem]'}
+                ${isMaxMediumDevice ? '' : 'mt-md pt-8 mb-[3.2rem]'}
               `}
             >
               <h1 className={'text-h2-lg'}>Nytt ärende</h1>
 
-              {!isMaxLargeDevice && (
+              {!isMaxMediumDevice && (
                 <div className="flex gap-x-md">
                   <CancelRegistrationButton />
                   <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
@@ -69,23 +69,23 @@ const Registrera: React.FC = () => {
             <section
               className={`
                 bg-background-content border-1 rounded-12
-                ${isMaxLargeDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
+                ${isMaxMediumDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
               `}
             >
-              <div className={`${isMaxLargeDevice ? 'mb-[2.0rem]' : 'w-full py-[1.5rem] px-32'}`}>
+              <div className={`${isMaxMediumDevice ? 'mb-[2.0rem]' : 'w-full py-[1.5rem] px-32'}`}>
                 <h2>Grundinformation</h2>
               </div>
-              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+              <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
                 <AboutErrand />
                 <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
                 <Applicant owners={applicants} setOwners={setApplicants} />
                 <OtherParties owners={otherParties} setOwners={setOtherParties} />
               </div>
 
-              <div className={`${isMaxLargeDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
+              <div className={`${isMaxMediumDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
                 <h2>Ärendeuppgifter</h2>
               </div>
-              <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
+              <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
                 <ExternalCircumstances />
                 <PersonalInformation />
                 <MedicalOpinion />
@@ -95,7 +95,7 @@ const Registrera: React.FC = () => {
             </section>
           </section>
         </main>
-        {isMaxLargeDevice && (
+        {isMaxMediumDevice && (
           <div className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 pt-16">
             <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
             <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />

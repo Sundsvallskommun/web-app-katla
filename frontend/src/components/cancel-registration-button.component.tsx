@@ -6,13 +6,13 @@ import { useContext, useState } from 'react';
 export const CancelRegistrationButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { isLoading } = useContext(AppContext);
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   const openHandler = () => {
     setIsOpen(!isOpen);
   };
 
   const handleClick = () => {
-    if (isMaxLargeDevice) {
+    if (isMaxMediumDevice) {
       if (window.history.length > 1) {
         window.history.back();
       } else {

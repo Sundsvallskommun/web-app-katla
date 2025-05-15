@@ -11,16 +11,16 @@ import { getMenuGroups } from '@components/errand-header/menu-groups';
 
 export const ErrandHeader: React.FC = () => {
   const { user, errand } = useContext(AppContext);
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const LogoPart = (
     <div className="flex items-center flex-shrink-0">
       <a href={`${process.env.NEXT_PUBLIC_BASE_PATH}`} className="flex-shrink-0">
-        <Logo variant="symbol" className={isMaxLargeDevice ? 'h-32' : 'h-40'} />
+        <Logo variant="symbol" className={isMaxMediumDevice ? 'h-32' : 'h-40'} />
       </a>
       <Divider orientation="vertical" className="mx-[2.4rem]" />
-      {!isMaxLargeDevice && (
+      {!isMaxMediumDevice && (
         <strong className="text-large">{!errand.errandNumber ? 'Nytt ärende' : `Ärende ${errand.errandNumber}`}</strong>
       )}
     </div>
@@ -33,7 +33,7 @@ export const ErrandHeader: React.FC = () => {
         menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
         menuSubTitle=""
         menuGroups={getMenuGroups(true)}
-        buttonSize={isMaxLargeDevice ? 'sm' : 'md'}
+        buttonSize={isMaxMediumDevice ? 'sm' : 'md'}
         className="flex-shrink-0"
         buttonRounded={false}
       />
@@ -41,7 +41,7 @@ export const ErrandHeader: React.FC = () => {
       <Button
         variant="tertiary"
         iconButton
-        size={isMaxLargeDevice ? 'sm' : 'md'}
+        size={isMaxMediumDevice ? 'sm' : 'md'}
         onClick={() => setShowNotifications(true)}
         className="flex-shrink-0"
       >
@@ -54,7 +54,7 @@ export const ErrandHeader: React.FC = () => {
         <Button
           color="primary"
           variant="tertiary"
-          size={isMaxLargeDevice ? 'sm' : 'md'}
+          size={isMaxMediumDevice ? 'sm' : 'md'}
           rightIcon={<LucideIcon name="external-link" />}
           className="flex-shrink-0"
         >
@@ -69,14 +69,14 @@ export const ErrandHeader: React.FC = () => {
       <nav
         className={cx(
           'w-full h-[7rem] flex items-center bg-background-DEFAULT shadow-100 relative z-10',
-          isMaxLargeDevice ? 'p-[1.2rem] gap-[2.4rem] justify-between' : 'px-24 justify-between'
+          isMaxMediumDevice ? 'p-[1.2rem] gap-[2.4rem] justify-between' : 'px-24 justify-between'
         )}
       >
         {LogoPart}
         {RightPart}
       </nav>
 
-      {showNotifications && isMaxLargeDevice ?
+      {showNotifications && isMaxMediumDevice ?
         <div className="fixed inset-0 z-50 bg-vattjom-background-200">
           <div className="h-[7rem] px-[1.6rem] py-[1.6rem] flex items-center justify-between bg-background-DEFAULT shadow-lg">
             <div className="flex items-center gap-12 text-h4-sm">
