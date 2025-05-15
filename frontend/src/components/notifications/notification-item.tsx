@@ -25,6 +25,12 @@ const labelBySubType: Record<string, string> = {
   SYSTEM: 'Fasbyte',
   SUSPENSION: 'Parkering upphört',
 };
+const surfaceColor: Record<string, string> = {
+  juniskar: 'bg-juniskar-surface-accent',
+  gronsta: 'bg-gronsta-surface-accent',
+  vattjom: 'bg-vattjom-surface-accent',
+  bjornstigen: 'bg-bjornstigen-surface-accent',
+};
 
 const renderIcon = (notification: Notification) => {
   const config = iconConfig[notification.description as keyof typeof iconConfig] ?? iconConfig.default;
@@ -32,7 +38,7 @@ const renderIcon = (notification: Notification) => {
 
   if ('avatar' in config && config.avatar) {
     return (
-      <div className={cx(`w-[4rem] h-[4rem] rounded-12 flex items-center justify-center bg-${color}-surface-accent`)}>
+      <div className={cx(`w-[4rem] h-[4rem] rounded-12 flex items-center justify-center`, surfaceColor[color])}>
         <Avatar
           data-cy="avatar-aside"
           className="flex-none"
@@ -48,7 +54,7 @@ const renderIcon = (notification: Notification) => {
     <div
       className={cx(
         `w-[4rem] h-[4rem] rounded-12 flex items-center justify-center ${
-          notification.acknowledged ? 'bg-tertiary-surface' : `bg-${color}-surface-accent`
+          notification.acknowledged ? 'bg-tertiary-surface' : surfaceColor[color]
         }`
       )}
     >
