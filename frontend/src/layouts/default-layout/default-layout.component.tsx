@@ -27,7 +27,7 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
 
   useEffect(() => {
     const handleResize = () => {
-      const isLarge = window.innerWidth <= 960;
+      const isLarge = window.innerWidth <= 1080;
       setIsMaxLargeDevice(isLarge);
     };
 
