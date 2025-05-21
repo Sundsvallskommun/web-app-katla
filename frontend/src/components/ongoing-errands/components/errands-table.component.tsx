@@ -68,7 +68,7 @@ export const ErrandsTable: React.FC = () => {
           window.open(url, '_blank');
           return false;
         }}
-        className="cursor-pointer hover:bg-gray-50"
+        className="cursor-pointer"
       >
         <Table.HeaderColumn scope="row" className="w-full w-max-[15rem] whitespace-nowrap text-ellipsis table-caption">
           <CasedataStatusLabelComponent
