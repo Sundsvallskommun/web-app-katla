@@ -50,43 +50,18 @@ export const ACCEPTED_UPLOAD_FILETYPES = [
 ];
 
 export type FTAttachmentCategory =
-  | 'PASSPORT_PHOTO'
   | 'MEDICAL_CONFIRMATION'
-  | 'SIGNATURE'
-  | 'POLICE_REPORT'
-  | 'UNKNOWN'
-  | 'ERRAND_SCANNED_APPLICATION'
-  | 'SERVICE_RECEIPT'
-  | 'OTHER_ATTACHMENT'
   | 'MEDICAL_OPINION';
 
 export enum FTAttachmentLabels {
-  'PASSPORT_PHOTO' = 'Passfoto',
   'MEDICAL_CONFIRMATION' = 'Läkarintyg',
-  'SIGNATURE' = 'Underskrift',
-  'POLICE_REPORT' = 'Polisanmälan',
-  'ERRAND_SCANNED_APPLICATION' = 'Ärende (Skannad ansökan)',
-  'SERVICE_RECEIPT' = 'Delgivningskvitto',
-  'OTHER_ATTACHMENT' = 'Övriga bilagor',
   'MEDICAL_OPINION' = 'Medicinskt utlåtande',
 }
 
 export const getFTAttachmentKey: (label: string) => FTAttachmentCategory | undefined = (label) => {
   switch (label) {
-    case 'Passfoto':
-      return 'PASSPORT_PHOTO';
     case 'Läkarintyg':
       return 'MEDICAL_CONFIRMATION';
-    case 'Underskrift':
-      return 'SIGNATURE';
-    case 'Polisanmälan':
-      return 'POLICE_REPORT';
-    case 'Ärende (Skannad ansökan)':
-      return 'ERRAND_SCANNED_APPLICATION';
-    case 'Delgivningskvitto':
-      return 'SERVICE_RECEIPT';
-    case 'Övriga bilagor':
-      return 'OTHER_ATTACHMENT';
       case 'Medicinskt utlåtande':
         return 'MEDICAL_OPINION';
     default:
@@ -106,10 +81,6 @@ export const getImageAspect: (attachment: Attachment) => number | undefined = (a
   : undefined;
 
  const uniqueAttachments: FTAttachmentCategory[] = [];
-const uniquePTAttachments: FTAttachmentCategory[] = ['PASSPORT_PHOTO', 'SIGNATURE'];
-
-export const onlyOneAllowed: (cat: FTAttachmentCategory) => boolean = (cat: FTAttachmentCategory) =>
-  uniquePTAttachments.includes(cat as FTAttachmentCategory);
 
 export const validateAttachmentsForUtredning: (errand: IErrand) => boolean = (errand) => {
   // Errand may only have max one passport photo and max one signature before moving to Utredning phase

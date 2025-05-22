@@ -48,13 +48,7 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
         <div className="flex grow w-full">
           <MainErrandsSidebar
             open={open}
-            setOpen={setOpen}
-            applicationName="Färdtjänst"
-            applicationEnvironment={''}
-            isNotificationEnabled={false}
-            onFilterChange={function (): void {
-              throw new Error('Function not implemented.');
-            }}
+            setOpen={setOpen}            
           >
             <FormProvider {...casedataFilterForm}>
               <CasedataFilterSidebarStatusSelector iconButton={!open} />
