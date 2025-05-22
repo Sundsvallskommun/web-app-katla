@@ -8,6 +8,7 @@ import { appURL } from '@utils/app-url';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { appConfig } from 'src/config/app-config';
 import { capitalize } from 'underscore.string';
 
 // Turn on/off automatic login
@@ -86,8 +87,8 @@ const Login: React.FC = () => {
         <div className="flex items-center justify-center min-h-screen">
           <div className="max-w-5xl w-full flex flex-col text-light-primary bg-inverted-background-content p-20 shadow-lg text-left">
             <div className="mb-14">
-              <h1 className="mb-10 text-xl">{process.env.NEXT_PUBLIC_APP_NAME}</h1>
-              <p className="my-0">{t('login:description')}</p>
+              <h1 className="mb-10 text-xl">{appConfig.applicationName}</h1>
+              {/* <p className="my-0">{t('login:description')}</p> */}
             </div>
 
             <Button inverted onClick={() => onLogin()} ref={initalFocus} data-cy="loginButton">
@@ -104,7 +105,6 @@ const Login: React.FC = () => {
 
 function LoginPage() {
   return (
-    // You could have a loading skeleton as the `fallback` too
     <Suspense>
       <Login />
     </Suspense>

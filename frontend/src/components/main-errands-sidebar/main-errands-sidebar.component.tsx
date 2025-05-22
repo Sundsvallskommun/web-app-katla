@@ -7,19 +7,16 @@ import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, cx, Divider, Logo, UserMenu } from '@sk-web-gui/react';
 import NextLink from 'next/link';
 import { useContext, useState } from 'react';
+import { getApplicationEnvironment } from '@services/application-service';
 import { appConfig } from 'src/config/app-config';
 
 interface SidebarProps {
   open: boolean;
   setOpen: (state: boolean) => void;
-  applicationName: string;
-  applicationEnvironment: string;
-  isNotificationEnabled: boolean;
-  onFilterChange: () => void;
   children: React.ReactNode;
 }
 
-export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, children, applicationEnvironment }) => {
+export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, children }) => {
   const { user } = useContext(AppContext);
   const MainTitle = (open: boolean) => (
     <NextLink href="/" className="no-underline" aria-label={`Go to homepage`}>
@@ -27,7 +24,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, chil
         className={cx(open ? '' : 'w-[2.8rem]')}
         variant={open ? 'service' : 'symbol'}
         title={'Draken'}
-        subtitle={appConfig.applicationName + (applicationEnvironment ? ` ${applicationEnvironment}` : '')}
+        subtitle={`${appConfig.applicationName} ` + ` ${getApplicationEnvironment()}`}
       />
     </NextLink>
   );
