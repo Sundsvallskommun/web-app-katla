@@ -29,6 +29,7 @@ const Arende: React.FC = () => {
   const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
+  const [forbidden, setForbidden] = useState(false);
   const { setMunicipalityId, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 
   const pathName = usePathname();
@@ -47,6 +48,10 @@ const Arende: React.FC = () => {
         setUser(user);
 
         const res = await getErrandByErrandNumber(municipality, errandNumber);
+
+        if (res.error) {
+          setForbidden(true);
+        }
 
         if (res.errand) {
           setErrand(res.errand);
@@ -101,79 +106,109 @@ const Arende: React.FC = () => {
   }, []);
 
   return (
-    <FormProvider {...method}>
-      <ErrandHeader />
+    <>
+      {forbidden ?
+        <>
+          <ErrandHeader />
 
-      <div className="flex flex-col w-full overflow-hidden bg-background-100">
-        <main
-          className={`
+          <div className="flex flex-col h-screen w-full overflow-hidden bg-background-100">
+            <main
+              className={`
         flex-grow flex justify-center
         ${isMaxMediumDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
         ${isMaxMediumDevice ? 'pt-[1.6rem]' : 'pt-24'}
         ${isMaxMediumDevice ? '' : 'pb-40'}
         w-full
       `}
-        >
-          <section className={`w-full ${!isMaxMediumDevice ? 'max-w-[108rem]' : ''}`}>
-            <header
+            >
+              <section className={`w-full ${!isMaxMediumDevice ? 'max-w-[108rem]' : ''}`}>
+                <header
+                  className={`
+            flex justify-center items-center
+            ${isMaxMediumDevice ? '' : 'mt-md pt-8 mb-[3.2rem]'}
+          `}
+                >
+                  <h1 className="text-h2-lg">Ärende {errandNumber} kunde inte hämtas</h1>
+                </header>
+              </section>
+            </main>
+          </div>
+        </>
+      : <FormProvider {...method}>
+          <ErrandHeader />
+
+          <div className="flex flex-col w-full overflow-hidden bg-background-100">
+            <main
               className={`
+        flex-grow flex justify-center
+        ${isMaxMediumDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
+        ${isMaxMediumDevice ? 'pt-[1.6rem]' : 'pt-24'}
+        ${isMaxMediumDevice ? '' : 'pb-40'}
+        w-full
+      `}
+            >
+              <section className={`w-full ${!isMaxMediumDevice ? 'max-w-[108rem]' : ''}`}>
+                <header
+                  className={`
             flex justify-between items-center
             ${isMaxMediumDevice ? '' : 'mt-md pt-8 mb-[3.2rem]'}
           `}
-            >
-              <h1 className="text-h2-lg">Ärende {errand?.errandNumber}</h1>
+                >
+                  <h1 className="text-h2-lg">Ärende {errand?.errandNumber}</h1>
 
-              {!isMaxMediumDevice && (
-                <div className="flex gap-x-md">
-                  <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
-                  {errand?.status?.statusType === ErrandStatus.Utkast && (
-                    <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                  {!isMaxMediumDevice && (
+                    <div className="flex gap-x-md">
+                      <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                      {errand?.status?.statusType === ErrandStatus.Utkast && (
+                        <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-            </header>
+                </header>
 
-            <section
-              className={`
+                <section
+                  className={`
             bg-background-content border-1 rounded-12
             ${isMaxMediumDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
           `}
-            >
-              <div className={`${isMaxMediumDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
-                <h2>Grundinformation</h2>
-              </div>
+                >
+                  <div className={`${isMaxMediumDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
+                    <h2>Grundinformation</h2>
+                  </div>
 
-              <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
-                <AboutErrand />
-                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
-                <Applicant owners={applicants} setOwners={setApplicants} />
-                <OtherParties owners={otherParties} setOwners={setOtherParties} />
-              </div>
+                  <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
+                    <AboutErrand />
+                    <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
+                    <Applicant owners={applicants} setOwners={setApplicants} />
+                    <OtherParties owners={otherParties} setOwners={setOtherParties} />
+                  </div>
 
-              <div className={`${isMaxMediumDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
-                <h2>Ärendeuppgifter</h2>
-              </div>
+                  <div className={`${isMaxMediumDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
+                    <h2>Ärendeuppgifter</h2>
+                  </div>
 
-              <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
-                <ExternalCircumstances />
-                <PersonalInformation />
-                <MedicalOpinion />
-              </div>
+                  <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
+                    <ExternalCircumstances />
+                    <PersonalInformation />
+                    <MedicalOpinion />
+                  </div>
 
-              <FileUploadComponent />
-            </section>
-          </section>
-        </main>
-        {isMaxMediumDevice && (
-          <div className="flex flex-col px-12 py-16">
-            <SaveErrandButton owners={applicants.concat(otherParties)} />
-            {errand?.status?.statusType === ErrandStatus.Utkast && (
-              <RegisterErrandButton owners={applicants.concat(otherParties)} />
+                  <FileUploadComponent />
+                </section>
+              </section>
+            </main>
+            {isMaxMediumDevice && (
+              <div className="flex flex-col px-12 py-16">
+                <SaveErrandButton owners={applicants.concat(otherParties)} />
+                {errand?.status?.statusType === ErrandStatus.Utkast && (
+                  <RegisterErrandButton owners={applicants.concat(otherParties)} />
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
-    </FormProvider>
+        </FormProvider>
+      }
+    </>
   );
 };
 
