@@ -99,7 +99,6 @@ export class CaseDataErrandController {
   ): Promise<SingleErrandResponseData> {
     const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands?filter=errandNumber:'${errandNumber}'`;
     const baseURL = apiURL(this.SERVICE);
-    console.log('Fetching errand by errand number:', url);
     const errandResponse = await this.apiService.get<PageErrandDTO>({ url, baseURL }, req.user);
     validateCaseTypes(errandResponse.data.content);
     const errandData = errandResponse.data.content[0];
