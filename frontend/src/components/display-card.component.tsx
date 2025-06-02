@@ -55,19 +55,21 @@ export const DisplayCard: React.FC<{
         </strong>
       </div>
       <div className="px-[1rem]">
-        <p className="text-[1.6rem] font-semibold">{firstName + ' ' + lastName}</p>
+        <p className="text-[1.6rem] font-semibold">
+          {firstName + ' ' + lastName}
+          {userName && ` (${userName})`}
+        </p>
         <div className={`flex text-md mb-10 ${isMaxMediumDevice ? 'flex-col' : 'flex-row'}`}>
-          {userName && <div className="mr-30">{userName}</div>}
-
-          <div className="flex flex-col mr-10">
-            <div className={!personalNumber ? 'italic text-text-secondary' : ''}>
-              {personalNumber || 'Personnummer saknas'}
+          {!roles.includes(Role.REPORTER) && (
+            <div className="flex flex-col mr-10">
+              <div className={!personalNumber ? 'italic text-text-secondary' : ''}>
+                {personalNumber || 'Personnummer saknas'}
+              </div>
+              <div className={!(street?.trim() && city?.trim()) ? 'italic text-text-secondary' : ''}>
+                {street?.trim() && city?.trim() ? `${street}, ${city}` : 'Adress saknas'}
+              </div>
             </div>
-            <div className={!(street?.trim() && city?.trim()) ? 'italic text-text-secondary' : ''}>
-              {street?.trim() && city?.trim() ? `${street}, ${city}` : 'Adress saknas'}
-            </div>
-          </div>
-
+          )}
           <div className="flex flex-col">
             <div className={!newEmail?.trim() ? 'italic text-text-secondary' : ''}>
               {newEmail?.trim() || 'E-post saknas'}

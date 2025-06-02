@@ -207,7 +207,7 @@ export const StakeholderList: React.FC<{
 
           <Input
             className="w-full"
-            {...register('personalNumber', { required: 'Personnummer är obligatoriskt' })}
+            {...register('personalNumber')}
             readOnly={fetchedSsn}
             invalid={!!errors.personalNumber}
           />
