@@ -1,5 +1,5 @@
 import NextLink from 'next/link';
-import { Badge, Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
+import { Button, Callout, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { AppContext } from '@contexts/app-context-interface';
@@ -85,15 +85,13 @@ export const ErrandsTable: React.FC = () => {
 
         <Table.Column>
           <>
-            <Badge
-              className="w-[0.8rem] h-[0.8rem] mr-2"
+            <Callout
               color={
                 errand.priority === Priority.HIGH ? 'error'
                 : errand.priority === Priority.MEDIUM ?
                   'warning'
                 : 'vattjom'
               }
-              rounded
             />
             {errand.priority}
           </>

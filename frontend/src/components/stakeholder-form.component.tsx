@@ -1,5 +1,5 @@
 import { Button, FormLabel, Input, Modal } from '@sk-web-gui/react';
-import { useForm } from 'react-hook-form';
+import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { stakeholderSchema } from '@utils/validation-schema';
 import { Role, RoleDisplayNames } from '@interfaces/role';
@@ -35,7 +35,7 @@ export const StakeholderFormModal: React.FC<{
     reset,
   } = useForm<StakeholderFormValues>({
     mode: 'onSubmit',
-    resolver: yupResolver(stakeholderSchema),
+    resolver: yupResolver(stakeholderSchema) as Resolver<StakeholderFormValues>,
     defaultValues: initialValues ?? {
       ssn: '',
       firstName: '',

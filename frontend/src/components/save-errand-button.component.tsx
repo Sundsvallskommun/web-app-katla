@@ -114,7 +114,7 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
       disabled={isLoading}
       rightIcon={isLoading ? <Spinner size={2} /> : undefined}
     >
-      Skicka in ärende
+      Uppdatera ärende
     </Button>
   );
 };
