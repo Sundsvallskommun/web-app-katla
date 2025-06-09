@@ -134,7 +134,7 @@ export const ErrandsTable: React.FC = () => {
           </div>
         </div> */}
 
-      <Table data-cy="main-casedata-table" dense={rowHeight === 'dense'} aria-describedby="errandTableCaption">
+      <Table data-cy="main-table" dense={rowHeight === 'dense'} aria-describedby="errandTableCaption">
         <>
           <Table.Header>
             {headers}
