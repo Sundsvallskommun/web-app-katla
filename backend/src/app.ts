@@ -47,6 +47,7 @@ import ApiService from './services/api.service';
 import { authorizeGroups, getPermissions, getRole } from './services/authorization.service';
 import { additionalConverters } from './utils/custom-validation-classes';
 import { isValidUrl } from './utils/util';
+import type { SchemaObject, ReferenceObject } from 'openapi3-ts';
 
 const corsWhitelist = ORIGIN.split(',');
 
@@ -364,7 +365,7 @@ class App {
     const storage = getMetadataArgsStorage();
     const spec = routingControllersToSpec(storage, routingControllersOptions, {
       components: {
-        schemas: schemas as { [schema: string]: unknown },
+        schemas: schemas as { [schema: string]: SchemaObject | ReferenceObject },
         securitySchemes: {
           basicAuth: {
             scheme: 'basic',

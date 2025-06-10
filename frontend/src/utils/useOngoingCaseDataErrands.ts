@@ -23,7 +23,7 @@ export interface TableForm {
 export const useOngoingCaseDataErrands = () => {
   const filterForm = useForm<CaseDataFilter>({ defaultValues: CaseDataValues });
   const { isMaxMediumDevice } = useThemeQueries();
-  const tableForm = useForm<TableForm>({
+  const tableForm = useForm<TableForm, unknown, undefined>({
     defaultValues: {
       sortColumn: 'updated',
       sortOrder: 'desc',
