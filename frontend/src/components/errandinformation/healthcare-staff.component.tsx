@@ -44,12 +44,7 @@ export const HealthCareStaff: React.FC<{
 
   useEffect(() => {
     // Endast hämta från AD om vi är på registrera och ingen vårdpersonal finns
-    if (!isOnRegisterPage || (staff && staff.length > 0)) return;
-
-    if (!user?.username) {
-      console.warn('user.username is missing:', user);
-      return;
-    }
+    if (!user?.username || !isOnRegisterPage || (staff && staff.length > 0)) return;
 
     searchADUser(user.username)
       .then((res) => {

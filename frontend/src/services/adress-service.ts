@@ -105,7 +105,6 @@ export const searchADUser: (username: string, domain?: string) => Promise<Addres
   if (!domain) {
     domain = 'PERSONAL';
   }
-
   return await apiService
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .get<any>(`portalpersondata/${domain}/${username}`)

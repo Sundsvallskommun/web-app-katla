@@ -72,7 +72,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, chil
         </div>
         <Divider className={cx(open ? '' : 'w-[4rem] mx-auto')} />
         <div className="py-10 w-full ">
-          <LogoutButton collapsed={!open} />
+          <LogoutButton collapsed={!open} data-cy="logout-button" />
         </div>
 
         <div
@@ -80,6 +80,7 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, chil
         >
           <Button
             color="primary"
+            data-cy="toggle-sidebar"
             size={'md'}
             variant="tertiary"
             aria-label={open ? 'Stäng sidomeny' : 'Öppna sidomeny'}

@@ -108,6 +108,7 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
 
   return (
     <Button
+      data-cy="update-draft-errand-button"
       variant="primary"
       color="vattjom"
       onClick={onSubmit}

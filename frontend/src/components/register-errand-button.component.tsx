@@ -109,6 +109,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
   return (
     <div className="flex mb-0 w-full">
       <Button
+        data-cy="register-errand-button"
         variant="primary"
         color="vattjom"
         className="w-full"
@@ -120,7 +121,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
       </Button>
 
       {isOpen && (
-        <Dialog className="max-w-[36rem]" show={isOpen}>
+        <Dialog data-cy="confirm-register-dialog" className="max-w-[36rem]" show={isOpen}>
           <Dialog.Content className="flex flex-col items-center justify-center text-center">
             <LucideIcon color="vattjom" name="inbox" size={32} />
             <div className="text-h4">Registrera ärende</div>

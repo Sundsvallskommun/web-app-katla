@@ -73,7 +73,10 @@ export const NotificationsWrapper: React.FC<{
             </Button>
           </div>
 
-          <section className="flex flex-col gap-24 overflow-y-auto max-h-[calc(100vh-8rem)] px-24 pb-24 pt-0">
+          <section
+            data-cy="notifications-panel"
+            className="flex flex-col gap-24 overflow-y-auto max-h-[calc(100vh-8rem)] px-24 pb-24 pt-0"
+          >
             <div className="flex flex-col gap-4">
               <Divider.Section>
                 <div className="flex gap-sm items-center">
@@ -81,7 +84,7 @@ export const NotificationsWrapper: React.FC<{
                 </div>
               </Divider.Section>
               {newNotifications.length > 0 ?
-                <ul>
+                <ul data-cy="notifications-list">
                   {newNotifications.map((notification) => (
                     <li key={notification.id}>
                       <NotificationItem notification={notification} />

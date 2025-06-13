@@ -1,9 +1,13 @@
 import { defineConfig } from 'cypress';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || '').replace(/\/$/, '');
 export default defineConfig({
   e2e: {
     // supportFile: false,
-    baseUrl: `http://localhost:${process.env.PORT || '3000'}${process.env.NEXT_PUBLIC_BASE_PATH || ''}`,
+    baseUrl: `http://localhost:${process.env.PORT || '3000'}${basePath}`,
     env: {
       apiUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
       application_name: `${process.env.NEXT_PUBLIC_APPLICATION}`,

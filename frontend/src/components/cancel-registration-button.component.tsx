@@ -24,10 +24,16 @@ export const CancelRegistrationButton: React.FC = () => {
   };
   return (
     <>
-      <Button variant="secondary" color="vattjom" disabled={isLoading} onClick={openHandler}>
+      <Button
+        data-cy="cancel-errand-button"
+        variant="secondary"
+        color="vattjom"
+        disabled={isLoading}
+        onClick={openHandler}
+      >
         Avbryt
       </Button>
-      <Dialog className="max-w-[36rem]" show={isOpen}>
+      <Dialog data-cy="cancel-registration-dialog" className="max-w-[36rem]" show={isOpen}>
         <Dialog.Content className="flex flex-col items-center justify-center text-center">
           <LucideIcon color="vattjom" name="hand" size={32} />
           <div className="text-h4">Avbryt registrering</div>
@@ -37,10 +43,20 @@ export const CancelRegistrationButton: React.FC = () => {
           </div>
         </Dialog.Content>
         <Dialog.Buttons className="flex justify-center gap-7">
-          <Button className="w-[12.8rem]" variant="secondary" onClick={openHandler}>
+          <Button
+            data-cy="no-cancel-registation-button"
+            className="w-[12.8rem]"
+            variant="secondary"
+            onClick={openHandler}
+          >
             Nej
           </Button>
-          <Button className="w-[12.8rem]" variant="primary" onClick={handleClick}>
+          <Button
+            data-cy="confirm-cancel-registation-button"
+            className="w-[12.8rem]"
+            variant="primary"
+            onClick={handleClick}
+          >
             Ja
           </Button>
         </Dialog.Buttons>
