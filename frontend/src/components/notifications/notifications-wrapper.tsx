@@ -21,6 +21,7 @@ export const NotificationsWrapper: React.FC<{
 }> = ({ show, setShow, withSidebar = true }) => {
   const { municipalityId, notifications, setNotifications } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
+  const { user } = useContext(AppContext);
 
   useEffect(() => {
     if (municipalityId) {
@@ -35,8 +36,15 @@ export const NotificationsWrapper: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId]);
 
-  const acknowledgedNotifications = sortByCreated(notifications.filter((n) => n.acknowledged));
-  const newNotifications = sortByCreated(notifications.filter((n) => !n.acknowledged));
+  const filteredNotifications = notifications.filter((n) => {
+    const createdBy = (n.createdBy || '').toLowerCase();
+    const currentUser = (user?.username || '').toLowerCase();
+
+    return !(n.subType === 'SYSTEM' && (createdBy === currentUser || createdBy === 'unknown'));
+  });
+
+  const acknowledgedNotifications = sortByCreated(filteredNotifications.filter((n) => n.acknowledged));
+  const newNotifications = sortByCreated(filteredNotifications.filter((n) => !n.acknowledged));
 
   return (
     <>
