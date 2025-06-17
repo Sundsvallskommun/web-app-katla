@@ -1,18 +1,10 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { Notification } from '@interfaces/notification';
 import { getCasedataNotifications } from '@services/casedata-notification-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, cx, useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect } from 'react';
 import { NotificationItem } from './notification-item';
-
-const sortByCreated = (notifications: Notification[]) => {
-  return notifications.sort((a, b) => {
-    const dateA = new Date(a.created);
-    const dateB = new Date(b.created);
-    return dateB.getTime() - dateA.getTime();
-  });
-};
+import { getFilteredNotifications, sortByCreatedDesc } from './notification-utils';
 
 export const NotificationsWrapper: React.FC<{
   show: boolean;
@@ -36,15 +28,10 @@ export const NotificationsWrapper: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId]);
 
-  const filteredNotifications = notifications.filter((n) => {
-    const createdBy = (n.createdBy || '').toLowerCase();
-    const currentUser = (user?.username || '').toLowerCase();
+  const filteredNotifications = getFilteredNotifications(notifications, user?.username || '');
 
-    return !(n.subType === 'SYSTEM' && (createdBy === currentUser || createdBy === 'unknown'));
-  });
-
-  const acknowledgedNotifications = sortByCreated(filteredNotifications.filter((n) => n.acknowledged));
-  const newNotifications = sortByCreated(filteredNotifications.filter((n) => !n.acknowledged));
+  const acknowledgedNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => n.acknowledged));
+  const newNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => !n.acknowledged));
 
   return (
     <>
