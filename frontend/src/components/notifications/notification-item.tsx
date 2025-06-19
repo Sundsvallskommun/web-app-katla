@@ -6,6 +6,7 @@ import { Avatar, cx, useSnackbar } from '@sk-web-gui/react';
 import NextLink from 'next/link';
 import { useContext } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
+import { labelBySubType } from './notification-utils';
 
 const iconConfig = {
   'Meddelande mottaget': { icon: 'message-circle', defaultColor: 'gronsta' },
@@ -21,15 +22,6 @@ const senderFallback = (name?: string): string => {
   return name;
 };
 
-const labelBySubType: Record<string, string> = {
-  ATTACHMENT: 'Ny bilaga',
-  DECISION: 'Nytt beslut',
-  ERRAND: 'Ärende uppdaterat',
-  MESSAGE: 'Nytt meddelande',
-  NOTE: 'Ny kommentar/anteckning',
-  SYSTEM: 'Fasbyte',
-  SUSPENSION: 'Parkering upphört',
-};
 const surfaceColor: Record<string, string> = {
   juniskar: 'bg-juniskar-surface-accent',
   gronsta: 'bg-gronsta-surface-accent',

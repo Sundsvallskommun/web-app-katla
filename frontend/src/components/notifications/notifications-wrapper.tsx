@@ -1,18 +1,10 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { Notification } from '@interfaces/notification';
 import { getCasedataNotifications } from '@services/casedata-notification-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, cx, useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect } from 'react';
 import { NotificationItem } from './notification-item';
-
-const sortByCreated = (notifications: Notification[]) => {
-  return notifications.sort((a, b) => {
-    const dateA = new Date(a.created);
-    const dateB = new Date(b.created);
-    return dateB.getTime() - dateA.getTime();
-  });
-};
+import { getFilteredNotifications, sortByCreatedDesc } from './notification-utils';
 
 export const NotificationsWrapper: React.FC<{
   show: boolean;
@@ -21,6 +13,7 @@ export const NotificationsWrapper: React.FC<{
 }> = ({ show, setShow, withSidebar = true }) => {
   const { municipalityId, notifications, setNotifications } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
+  const { user } = useContext(AppContext);
 
   useEffect(() => {
     if (municipalityId) {
@@ -35,8 +28,10 @@ export const NotificationsWrapper: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId]);
 
-  const acknowledgedNotifications = sortByCreated(notifications.filter((n) => n.acknowledged));
-  const newNotifications = sortByCreated(notifications.filter((n) => !n.acknowledged));
+  const filteredNotifications = getFilteredNotifications(notifications, user?.username || '');
+
+  const acknowledgedNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => n.acknowledged));
+  const newNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => !n.acknowledged));
 
   return (
     <>
