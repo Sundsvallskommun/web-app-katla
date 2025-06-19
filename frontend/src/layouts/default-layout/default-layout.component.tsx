@@ -3,7 +3,7 @@
 import { CasedataFilterSidebarStatusSelector } from '@components/filtering/desktop-filtering/errand-filter-sidebarstatus-selector.component';
 import { CaseDataFilter, CaseStatusValues } from '@components/filtering/errand-filter';
 import { MainErrandsSidebar } from '@components/main-errands-sidebar/main-errands-sidebar.component';
-import { CookieConsent, Link, useThemeQueries } from '@sk-web-gui/react';
+import { Button, CookieConsent, Link, useThemeQueries } from '@sk-web-gui/react';
 import NextLink from 'next/link';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -46,10 +46,7 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
     <>
       <div className="min-h-screen w-full">
         <div className="flex grow w-full">
-          <MainErrandsSidebar
-            open={open}
-            setOpen={setOpen}            
-          >
+          <MainErrandsSidebar open={open} setOpen={setOpen}>
             <FormProvider {...casedataFilterForm}>
               <CasedataFilterSidebarStatusSelector iconButton={!open} />
             </FormProvider>
@@ -62,8 +59,8 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
         body={
           <p>
             {t('layout:cookies.description')}{' '}
-            <NextLink href="/kakor" passHref legacyBehavior>
-              <Link>{t('layout:cookies.read_more')}</Link>
+            <NextLink href="/kakor" passHref>
+              <Button variant={'link'}>{t('layout:cookies.read_more')}</Button>
             </NextLink>
           </p>
         }

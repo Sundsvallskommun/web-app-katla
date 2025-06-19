@@ -57,7 +57,13 @@ export const StakeholderFormModal: React.FC<{
   }, [initialValues, reset]);
 
   return (
-    <Modal className="w-full max-w-[48rem]" show={show} onClose={onClose} label="Lägg till person manuellt">
+    <Modal
+      data-cy="manual-person-modal"
+      className="w-full max-w-[48rem]"
+      show={show}
+      onClose={onClose}
+      label="Lägg till person manuellt"
+    >
       <Modal.Content>
         <FormLabel>Personnummer*</FormLabel>
         <Input {...register('ssn')} name="ssn" invalid={!!errors.ssn} readOnly={true} />
@@ -122,6 +128,7 @@ export const StakeholderFormModal: React.FC<{
         <div className="flex flex-col">
           <FormLabel>Roll*</FormLabel>
           <Select
+            data-cy="modal-stakeholder-role-select"
             className="w-full"
             invalid={!!errors.roles}
             value={watch('roles')?.[0] ?? ''}
@@ -145,10 +152,10 @@ export const StakeholderFormModal: React.FC<{
       </Modal.Content>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
+        <Button data-cy="modal-cancel-person-button" variant="secondary" onClick={onClose}>
           Avbryt
         </Button>
-        <Button variant="primary" onClick={handleSubmit(onSubmit)}>
+        <Button data-cy="modal-add-person-button" variant="primary" onClick={handleSubmit(onSubmit)}>
           Lägg till
         </Button>
       </Modal.Footer>

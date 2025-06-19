@@ -15,14 +15,17 @@ export const OtherParties: React.FC<{
     <Disclosure
       icon={<LucideIcon name="users" />}
       header="Övriga parter"
-      open={owners.length > 0}
+      open={true}
       variant="alt"
       className="w-full mobileVersion"
       label={doneMark ? 'Komplett' : ''}
       labelColor={'gronsta'}
     >
       <p>En part kan vara en kontaktperson, läkare eller en anhörig vars roll är viktig för ärendet.</p>
-      <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
+      <div data-cy="otherparties-disclosure">
+        <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
+      </div>
+
       <div className="mt-24">
         <Checkbox
           onClick={() => {

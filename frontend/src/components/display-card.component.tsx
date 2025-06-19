@@ -26,6 +26,7 @@ export const DisplayCard: React.FC<{
     zip?: string;
     city?: string;
     careof?: string;
+    role?: Role[];
   }) => void;
 }> = ({
   isEditable,
@@ -127,6 +128,7 @@ export const DisplayCard: React.FC<{
               zip: data.zip,
               city: data.city,
               careof: data.careof,
+              role: data.roles,
             });
             setIsOpen(false);
           }}

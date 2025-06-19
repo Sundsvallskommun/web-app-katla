@@ -1,3 +1,6 @@
+import { mockMe } from './mockMe';
+import { mockProtectedInfo } from './mockProtectedInfo';
+
 export const emptyMockErrands = {
   data: {
     content: [],
@@ -237,7 +240,7 @@ export const mockErrands_base = {
         created: '2024-05-27T13:47:05.957991+02:00',
         updated: '2024-05-27T13:48:10.724662+02:00',
         errandNumber: 'MEX-2024-000312',
-        caseType: 'PARATRANSIT_NOTIFICATION_NATIONAL_RENEWAL',
+        caseType: 'PARATRANSIT_NOTIFICATION_RIAK',
         priority: 'LOW',
         caseTitleAddition: 'Faktura',
         phase: 'Uppföljning',
@@ -409,7 +412,7 @@ export const mockErrands_base = {
         created: '2024-05-23T07:49:25.967724+02:00',
         updated: '2024-05-23T07:50:07.19612+02:00',
         errandNumber: 'MEX-2024-000302',
-        caseType: 'PARATRANSIT_NOTIFICATION_NATIONAL_RENEWAL',
+        caseType: 'PARATRANSIT_NOTIFICATION_BUS_CARD',
         channel: 'WEB_UI',
         priority: 'HIGH',
         description: 'testar eskalering',
@@ -548,7 +551,7 @@ export const mockErrands_base = {
         created: '2024-05-21T13:58:09.104064+02:00',
         updated: '2024-05-22T08:30:56.829645+02:00',
         errandNumber: 'MEX-2024-000298',
-        caseType: 'PARATRANSIT_NOTIFICATION_NATIONAL_RENEWAL',
+        caseType: 'PARATRANSIT_NOTIFICATION_CHANGE',
         priority: 'MEDIUM',
         caseTitleAddition: 'Faktura',
         phase: 'Aktualisering',
@@ -679,4 +682,183 @@ export const mockErrands_base = {
     empty: false,
   },
   message: 'success',
+};
+
+export const mockErrands_FT_draft = {
+  data: {
+    id: 2557,
+    version: 1,
+    errandNumber: 'PRH-2025-000484',
+    municipalityId: '2281',
+    namespace: 'SBK_PARKING_PERMIT',
+    caseType: 'PARATRANSIT_NOTIFICATION',
+    priority: 'MEDIUM',
+    caseTitleAddition: 'Anmälan av färdtjänst',
+    status: {
+      statusType: 'Utkast',
+      created: '2025-06-13T08:08:38.426946+02:00',
+    },
+    statuses: [
+      {
+        statusType: 'Utkast',
+        created: '2025-06-13T08:08:38.426967+02:00',
+      },
+    ],
+    processId: 'dbeb998c-481c-11f0-be55-0242c0a82002',
+    stakeholders: [
+      {
+        id: 5748,
+        version: 0,
+        municipalityId: '2281',
+        namespace: 'SBK_PARKING_PERMIT',
+        type: 'PERSON',
+        firstName: mockMe.data.firstName,
+        lastName: mockMe.data.lastName,
+        personId: mockProtectedInfo.personId,
+        organizationName: '',
+        adAccount: mockProtectedInfo.username,
+        roles: ['REPORTER'],
+        addresses: [
+          {
+            addressCategory: 'POSTAL_ADDRESS',
+            street: '',
+            postalCode: '',
+            city: '',
+            careOf: '',
+            apartmentNumber: '',
+          },
+        ],
+        contactInformation: [
+          {
+            contactType: 'PHONE',
+            value: mockProtectedInfo.phoneNumbers.swedish,
+          },
+          {
+            contactType: 'PHONE',
+            value: '',
+          },
+          {
+            contactType: 'EMAIL',
+            value: mockProtectedInfo.emails.user,
+          },
+        ],
+        extraParameters: {},
+        created: '2025-06-13T08:08:43.357034+02:00',
+        updated: '2025-06-13T08:08:43.357039+02:00',
+      },
+    ],
+    facilities: [],
+    notifications: [],
+    decisions: [],
+    notes: [],
+    labels: [],
+    relatesTo: [],
+    createdByClient: 'testClient',
+    updatedByClient: 'testClient',
+    createdBy: mockProtectedInfo.username,
+    updatedBy: mockProtectedInfo.username,
+    suspension: {},
+    extraParameters: [],
+    created: '2025-06-13T08:08:43.354852+02:00',
+    updated: '2025-06-13T08:08:43.515371+02:00',
+  },
+  message: 'Errand created',
+};
+
+export const mockErrands_FT_registered = {
+  data: {
+    id: 2557,
+    version: 1,
+    errandNumber: 'PRH-2025-000484',
+    municipalityId: '2281',
+    namespace: 'SBK_PARKING_PERMIT',
+    caseType: 'PARATRANSIT_NOTIFICATION',
+    priority: 'MEDIUM',
+    caseTitleAddition: 'Anmälan av färdtjänst',
+    status: {
+      statusType: 'Ärende inkommit',
+      created: '2025-06-13T08:08:38.426946+02:00',
+    },
+    statuses: [
+      {
+        statusType: 'Utkast',
+        created: '2025-06-13T08:08:38.426967+02:00',
+      },
+      {
+        statusType: 'Ärende inkommit',
+        created: '2025-06-13T09:50:32.885805+02:00',
+      },
+    ],
+    processId: 'dbeb998c-481c-11f0-be55-0242c0a82002',
+    stakeholders: [
+      {
+        id: 5748,
+        version: 0,
+        municipalityId: '2281',
+        namespace: 'SBK_PARKING_PERMIT',
+        type: 'PERSON',
+        firstName: mockMe.data.firstName,
+        lastName: mockMe.data.lastName,
+        personId: mockProtectedInfo.personId,
+        organizationName: '',
+        adAccount: mockProtectedInfo.username,
+        roles: ['REPORTER'],
+        addresses: [
+          {
+            addressCategory: 'POSTAL_ADDRESS',
+            street: '',
+            postalCode: '',
+            city: '',
+            careOf: '',
+            apartmentNumber: '',
+          },
+        ],
+        contactInformation: [
+          {
+            contactType: 'PHONE',
+            value: mockProtectedInfo.phoneNumbers.swedish,
+          },
+          {
+            contactType: 'PHONE',
+            value: '',
+          },
+          {
+            contactType: 'EMAIL',
+            value: mockProtectedInfo.emails.user,
+          },
+        ],
+        extraParameters: {},
+        created: '2025-06-13T08:08:43.357034+02:00',
+        updated: '2025-06-13T08:08:43.357039+02:00',
+      },
+    ],
+    facilities: [],
+    notifications: [],
+    decisions: [],
+    notes: [],
+    labels: [],
+    relatesTo: [],
+    createdByClient: 'testClient',
+    updatedByClient: 'testClient',
+    createdBy: mockProtectedInfo.username,
+    updatedBy: mockProtectedInfo.username,
+    suspension: {},
+    extraParameters: [
+      {
+        key: 'process.displayPhase',
+        values: ['Registrerad'],
+      },
+      {
+        key: 'process.phaseAction',
+        values: ['UNKNOWN'],
+      },
+      {
+        key: 'process.phaseStatus',
+        values: ['WAITING'],
+      },
+    ],
+    created: '2025-06-13T08:08:43.354852+02:00',
+    updated: '2025-06-13T08:08:43.515371+02:00',
+  },
+  message: 'Errand created',
 };

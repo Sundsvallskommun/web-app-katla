@@ -13,8 +13,9 @@ export const NotificationsBell = (props: { toggleShow: () => void }) => {
   return (
     <Button
       role="menuitem"
-      size={'md'}
-      aria-label={'Notifieringar'}
+      size="md"
+      aria-label="Notifieringar"
+      data-cy="notifications-toggle"
       onClick={() => {
         props.toggleShow();
       }}
