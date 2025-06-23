@@ -33,7 +33,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
 
     console.log('data', data);
 
-    data.channel = Channels.WEB_UI; //Change to correct channel when available
+    data.channel = Channels.ESERVICE_KATLA;
     data.stakeholders = owners;
     data.status = {
       statusType: ErrandStatus.ArendeInkommit,
