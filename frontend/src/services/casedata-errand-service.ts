@@ -162,7 +162,7 @@ export const getPriorityLabels = () => ({
 
 export const emptyErrand: Partial<IErrand> = {
   caseType: '',
-  channel: Channels.WEB_UI,
+  channel: Channels.ESERVICE_KATLA,
   description: '',
   municipalityId: '2281',
   phase: ErrandPhase.aktualisering,
@@ -188,7 +188,7 @@ export const mapErrandToIErrand: (e: ApiErrand, municipalityId: string) => IErra
       status: e.status,
       statuses: e.statuses,
       phase: e.phase,
-      channel: e.channel ? Channels[e.channel as keyof typeof Channels] : Channels.WEB_UI,
+      channel: e.channel ? Channels[e.channel as keyof typeof Channels] : Channels.ESERVICE_KATLA,
       municipalityId: e.municipalityId || municipalityId,
       stakeholders: e.stakeholders.map(stakeholder2Contact),
       facilities: e.facilities,

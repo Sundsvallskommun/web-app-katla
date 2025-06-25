@@ -1,4 +1,4 @@
-import { Channels } from '@interfaces/channels'; // Anpassa efter din enum eller interface
+import { Channels } from '@interfaces/channels';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, PopupMenu, useThemeQueries } from '@sk-web-gui/react';
 import { useFormContext } from 'react-hook-form';
