@@ -12,6 +12,7 @@ import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
+import { scrollToFirstError } from './errand-buttons-utils';
 
 export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -19,7 +20,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const openHandler = () => {
     setIsOpen(!isOpen);
@@ -27,6 +28,14 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
 
   const onSubmit = async () => {
     setIsLoading(true);
+
+    const isValid = await trigger();
+    if (!isValid) {
+      setIsLoading(false);
+      setIsOpen(false);
+      scrollToFirstError(formState.errors);
+      return;
+    }
 
     const data = getValues() as IErrand & { attachments: UploadFile[] };
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);

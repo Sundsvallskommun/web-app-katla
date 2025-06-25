@@ -21,7 +21,7 @@ export const getFilteredNotifications = (notifications: Notification[], currentU
     const subType = getNotificationKey(n);
     const createdBy = (n.createdBy || '').toLowerCase();
 
-    return !(subType === 'SYSTEM' && (createdBy === username || createdBy === 'unknown'));
+    return subType !== 'SYSTEM' && createdBy !== username;
   });
 };
 

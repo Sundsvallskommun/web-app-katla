@@ -8,8 +8,8 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
-import { RegisterErrandButton } from '@components/register-errand-button.component';
-import { SaveErrandButton } from '@components/save-errand-button.component';
+import { RegisterErrandButton } from '@components/errand-buttons/register-errand-button.component';
+import { SaveErrandButton } from '@components/errand-buttons/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
@@ -18,6 +18,7 @@ import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
+import { EXTRAPARAMETER_SEPARATOR } from '@services/casedata-extra-parameters-service';
 import { getMe } from '@services/user-service';
 import { useThemeQueries } from '@sk-web-gui/react';
 import { usePathname } from 'next/navigation';
@@ -56,6 +57,20 @@ const Arende: React.FC = () => {
         if (res.errand) {
           setErrand(res.errand);
           method.reset(res.errand);
+
+          res.errand.extraParameters?.forEach((param) => {
+            const key = param.key.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+            const values = param.values;
+
+            if (!Array.isArray(values)) return;
+
+            const valueToSet =
+              values.length > 1 ? values
+              : values.length === 1 ? values[0]
+              : '';
+
+            method.setValue(key as any, valueToSet);
+          });
 
           if (res.errand.attachments) {
             const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
