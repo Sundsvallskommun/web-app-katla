@@ -40,8 +40,6 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     const data = getValues() as IErrand & { attachments: UploadFile[] };
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
 
-    console.log('data', data);
-
     data.channel = Channels.WEB_UI; //Change to correct channel when available
     data.stakeholders = owners;
     data.status = {

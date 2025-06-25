@@ -40,7 +40,7 @@ export const notificationRiak_UppgiftFieldTemplate: UppgiftField[] = [
   {
     field: 'personal.tripPeriodStart',
     value: '',
-    label: 'Reseperiod – från',
+    label: 'Reseperiod - från',
     formField: {
       type: 'date',
     },
@@ -49,7 +49,7 @@ export const notificationRiak_UppgiftFieldTemplate: UppgiftField[] = [
   {
     field: 'personal.tripPeriodEnd',
     value: '',
-    label: 'Reseperiod – till',
+    label: 'Reseperiod - till',
     formField: {
       type: 'date',
     },

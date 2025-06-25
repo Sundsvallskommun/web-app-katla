@@ -9,7 +9,7 @@ import {
   Textarea,
   useThemeQueries,
 } from '@sk-web-gui/react';
-import { FieldErrors, get, useFormContext } from 'react-hook-form';
+import { Controller, FieldErrors, get, useFormContext } from 'react-hook-form';
 import { EXTRAPARAMETER_SEPARATOR, UppgiftField } from '@services/casedata-extra-parameters-service';
 import { useEffect } from 'react';
 
@@ -19,6 +19,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     watch,
     setValue,
     getValues,
+    control,
     setError,
     clearErrors,
     formState: { errors },
@@ -53,40 +54,44 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
   const formFieldClassName = 'flex flex-col w-full pt-10';
   const fieldDescriptionClassName = 'pt-8 w-full flex flex-col text-md leading-[1.8rem] font-normal font-[Arial]';
-  //TODO: Implement error handling.
+
   const ErrorMessage = ({ error }: { error?: string }) =>
     error ? <span className="text-error text-md">{error}</span> : null;
 
   function getConditionalValidationRules(
     field: UppgiftField,
-    watch: (field: string) => any
+    getValues: () => any
   ): { validate?: (value: any) => true | string } {
     if (!field.dependsOn) return {};
-
-    const shouldValidate = field.dependsOn.some((dep) => {
-      const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
-      const depValue = watch(depName);
-      return depValue === dep.value;
-    });
-
-    if (!shouldValidate) return {};
 
     const message =
       field.dependsOn.find((dep) => dep.validationMessage)?.validationMessage || 'Detta fält är obligatoriskt';
 
     return {
-      validate: (value: any) => (value !== undefined && value !== null && String(value).trim() !== '') || message,
+      validate: (value: any) => {
+        const allValues = getValues();
+        const shouldValidate = field.dependsOn?.some((dep) => {
+          const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+          const depValue = allValues[depName];
+          return Array.isArray(depValue) ? depValue.includes(dep.value) : depValue === dep.value;
+        });
+
+        if (!shouldValidate) return true;
+
+        return value !== undefined && value !== null && String(value).trim() !== '' ? true : message;
+      },
     };
   }
 
   function validateAndSetError(
     field: UppgiftField,
-    watch: (field: string) => any,
+    getValues: () => Record<string, any>,
     setError: (name: string, error: { type: string; message?: string }) => void,
+    clearErrors: (name: string) => void,
     name: string,
     value: any
   ) {
-    const rules = getConditionalValidationRules(field, watch);
+    const rules = getConditionalValidationRules(field, getValues);
     if (rules.validate) {
       const result = rules.validate(value);
       if (result !== true) {
@@ -157,40 +162,29 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         </div>
       )}
 
-      {field.formField.type === 'checkbox' && (
+      {field.formField.type === 'checkbox' && 'options' in field.formField && (
         <div className={formFieldClassName}>
-          <div className={`flex ${isMaxMediumDevice ? 'flex-col' : 'flex-row'} w-full gap-10`}>
-            {field.formField.options.map((option, i) => {
-              const raw = watch(name);
-              const selectedValues = Array.isArray(raw) ? raw : [];
-              const isChecked = selectedValues.includes(option.value);
-
-              const handleChange = () => {
-                const current = getValues(name);
-                const currentValues = Array.isArray(current) ? current : [];
-                const newValue =
-                  isChecked ?
-                    currentValues.filter((v: string) => v !== option.value)
-                  : [...currentValues, option.value];
-
-                setValue(name, newValue, { shouldDirty: true });
-                validateAndSetError(field, watch, setError, name, newValue);
-              };
-
-              return (
-                <Checkbox
-                  key={`${option.value}-${i}`}
-                  checked={isChecked}
-                  onChange={handleChange}
-                  value={option.value}
-                  name={name}
-                  className="flex items-center whitespace-nowrap"
-                >
-                  {option.label}
-                </Checkbox>
-              );
-            })}
-          </div>
+          <Controller
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: controllerField }) => (
+              <Checkbox.Group
+                value={controllerField.value || []}
+                onChange={(val) => {
+                  controllerField.onChange(val);
+                  validateAndSetError(field, getValues, setError, clearErrors, name, val);
+                }}
+                direction={isMaxMediumDevice ? 'column' : 'row'}
+              >
+                {(field.formField as { options: { label: string; value: string }[] }).options.map((option, i) => (
+                  <Checkbox key={`${option.value}-${i}`} value={option.value}>
+                    {option.label}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+            )}
+          />
           {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
           <ErrorMessage error={error} />
         </div>
@@ -204,7 +198,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
             onChange={(e) => {
               const selectedDate = e.target?.value ?? '';
               setValue(name, selectedDate, { shouldDirty: true });
-              validateAndSetError(field, watch, setError, name, selectedDate);
+              validateAndSetError(field, getValues, setError, clearErrors, name, selectedDate);
             }}
             className="w-full"
             aria-label={field.label}
