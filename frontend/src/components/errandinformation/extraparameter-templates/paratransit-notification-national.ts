@@ -98,7 +98,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftField[] = [
   {
     field: 'personal.travelPeriodFrom',
     value: '',
-    label: 'Ange perioden för resan/resorna – från',
+    label: 'Ange perioden för resan/resorna - från',
     formField: {
       type: 'date',
     },
@@ -107,7 +107,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftField[] = [
   {
     field: 'personal.travelPeriodTo',
     value: '',
-    label: 'Ange perioden för resan/resorna – till',
+    label: 'Ange perioden för resan/resorna - till',
     formField: {
       type: 'date',
     },
@@ -204,13 +204,24 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftField[] = [
     section: 'Medicinskt utlåtande',
   },
   {
-    field: 'medical.certifyInformation',
+    field: 'medical.certifiedByLicensedPersonnel',
     value: '',
+    description: 'Med legitimerad personal avses personal med minst sjuksköterskeutbildning och giltig legitimation.',
     label: 'Jag intygar som legitimerad personal, att uppgifterna är riktiga',
-    description: 'Med legitimerad personal menas en person med minst sjuksköterska utbildning',
     formField: {
-      type: 'checkbox',
-      options: [{ label: 'Jag är legitimerad', value: 'LICENSED', name: 'certifyInformation' }],
+      type: 'radio',
+      options: [
+        {
+          label: 'Ja, jag är legitimerad och intygar att uppgifterna är riktiga',
+          value: 'LICENSED',
+          name: 'certification',
+        },
+        {
+          label: 'Nej, jag är inte legitimerad',
+          value: 'NOT_LICENSED',
+          name: 'certification',
+        },
+      ],
     },
     section: 'Medicinskt utlåtande',
   },

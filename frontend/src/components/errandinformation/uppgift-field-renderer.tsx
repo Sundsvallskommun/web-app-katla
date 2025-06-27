@@ -9,7 +9,7 @@ import {
   Textarea,
   useThemeQueries,
 } from '@sk-web-gui/react';
-import { Controller, FieldErrors, get, useFormContext } from 'react-hook-form';
+import { Controller, get, useFormContext } from 'react-hook-form';
 import { EXTRAPARAMETER_SEPARATOR, UppgiftField } from '@services/casedata-extra-parameters-service';
 import { useEffect } from 'react';
 
@@ -150,9 +150,16 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
       {field.formField.type === 'radio' && (
         <div className={formFieldClassName}>
-          <RadioButton.Group inline={!isMaxMediumDevice} defaultValue={field.formField.options[0]?.value}>
+          <RadioButton.Group inline={!isMaxMediumDevice}>
             {field.formField.options.map((o, i) => (
-              <RadioButton key={`${o.value}-${i}`} value={o.value} {...register(name, validationRules)}>
+              <RadioButton
+                key={`${o.value}-${i}`}
+                value={o.value}
+                {...register(name, {
+                  ...validationRules,
+                  required: 'Vänligen välj ett alternativ.',
+                })}
+              >
                 {o.label}
               </RadioButton>
             ))}
@@ -167,7 +174,20 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
           <Controller
             name={name}
             control={control}
-            rules={validationRules}
+            rules={{
+              ...validationRules,
+              validate: (value: any) => {
+                const hasSelection = Array.isArray(value) && value.length > 0;
+                const conditionalValidation = getConditionalValidationRules(field, getValues).validate;
+
+                if (conditionalValidation) {
+                  const conditionalResult = conditionalValidation(value);
+                  if (conditionalResult !== true) return conditionalResult;
+                }
+
+                return hasSelection ? true : 'Vänligen välj minst ett alternativ.';
+              },
+            }}
             render={({ field: controllerField }) => (
               <Checkbox.Group
                 value={controllerField.value || []}
