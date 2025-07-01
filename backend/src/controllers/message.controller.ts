@@ -187,7 +187,7 @@ const MESSAGE_SUBJECT = 'Meddelande gällande er ansökan om parkeringstillstån
 @Controller()
 export class MessageController {
   private apiService = new ApiService();
-  SERVICE = `case-data/11.0`;
+  SERVICE = `case-data/11.5`;
   MESSAGING_SERVICE = `messaging/7.0`;
 
   @Post('/casedata/:municipalityId/message/decision')
@@ -357,7 +357,6 @@ export class MessageController {
     @UploadedFiles('files', { options: fileUploadOptions, required: false }) files: Express.Multer.File[],
     @Body() messageDto: MessageDto,
   ): Promise<{ data: AgnosticMessageResponse; message: string }> {
-    console.log()
     await validateRequestBody(MessageDto, messageDto);
     const errandsUrl = `${messageDto.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${messageDto.errandId}`;
     const baseURL = apiURL(this.SERVICE);
@@ -366,33 +365,33 @@ export class MessageController {
     let message: WebMessageRequest;
     const MESSAGE_ID = generateMessageId();
     // if (errandData.data.externalCaseId) {
-      url = `${this.MESSAGING_SERVICE}/${municipalityId}/webmessage`;
-      const attachments = files.map(file => {
-        return {
-          base64Data: file.buffer.toString('base64'),
-          fileName: file.originalname,
-          mimeType: file.mimetype,
-        } as WebMessageAttachment;
-      });
-      message = {
-        party: {
-          ...(getOwnerStakeholder(errandData.data).personId && { partyId: getOwnerStakeholder(errandData.data).personId }),
-          // externalReferences: [
-          //   {
-          //     key: 'flowInstanceId',
-          //     value: errandData.data.externalCaseId,
-          //   },
-          // ],
-        },
-        // sender: {
-        //   ...(getHealthcCreStaffStakeholder(errandData.data).adAccount && { userId: getHealthcCreStaffStakeholder(errandData.data).adAccount }),
-        // },
-        message: messageDto.text,
-        dispatch: false,
-      } as WebMessageRequest;
-      if (attachments.length > 0) {
-        message.attachments = attachments;
-      }
+    url = `${this.MESSAGING_SERVICE}/${municipalityId}/webmessage`;
+    const attachments = files.map(file => {
+      return {
+        base64Data: file.buffer.toString('base64'),
+        fileName: file.originalname,
+        mimeType: file.mimetype,
+      } as WebMessageAttachment;
+    });
+    message = {
+      party: {
+        ...(getOwnerStakeholder(errandData.data).personId && { partyId: getOwnerStakeholder(errandData.data).personId }),
+        // externalReferences: [
+        //   {
+        //     key: 'flowInstanceId',
+        //     value: errandData.data.externalCaseId,
+        //   },
+        // ],
+      },
+      // sender: {
+      //   ...(getHealthcCreStaffStakeholder(errandData.data).adAccount && { userId: getHealthcCreStaffStakeholder(errandData.data).adAccount }),
+      // },
+      message: messageDto.text,
+      dispatch: false,
+    } as WebMessageRequest;
+    if (attachments.length > 0) {
+      message.attachments = attachments;
+    }
     // }
     return sendWebMessage(municipalityId, message, req, errandData);
   }
@@ -426,7 +425,6 @@ export class MessageController {
     @Param('municipalityId') municipalityId: string,
     @Res() response: IMessageResponse[],
   ): Promise<{ data: IMessageResponse[]; message: string }> {
-    console.log('sendErrandMessages', req.body);
     const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/messages`;
     const baseURL = apiURL(this.SERVICE);
     const res = await this.apiService.post<IMessageResponse[], Partial<RequestWithUser>>({ url, baseURL, data: req.body }, req.user).catch(e => {

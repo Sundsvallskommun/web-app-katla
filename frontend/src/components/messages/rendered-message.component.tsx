@@ -125,6 +125,10 @@ export const RenderedMessage: React.FC<{
                 <>
                   <LucideIcon name="monitor" size="1.5rem" className="align-sub mx-sm" /> Via e-tjänst
                 </>
+              : message.messageType === 'DRAKEN' ?
+                <>
+                  <LucideIcon name="monitor" size="1.5rem" className="align-sub mx-sm" /> Via Draken
+                </>
               : ''}
             </span>
           </div>

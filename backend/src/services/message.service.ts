@@ -43,7 +43,7 @@ interface SmsMessage {
 }
 
 const NOTIFY_CONTACTS = false;
-const SERVICE = `case-data/11.0`;
+const SERVICE = `case-data/11.5`;
 const MESSAGING_SERVICE = `messaging/7.0`;
 
 export const generateMessageId = () => `<${uuidv4()}@sundsvall.se>`;
@@ -89,7 +89,6 @@ export const sendSms = (municipalityId: string, message: SmsRequest, req: Reques
 export const sendWebMessage = (municipalityId: string, message: WebMessageRequest, req: RequestWithUser, errandData: ApiResponse<ErrandDTO>) => {
   const url = `${MESSAGING_SERVICE}/${municipalityId}/webmessage`;
   const apiService = new ApiService();
-  console.log('Sending web message:', message);
   return apiService
     .post<AgnosticMessageResponse, WebMessageRequest>({ url, data: message }, req.user)
     .then(async (res: ApiResponse<WebMessageResponse>) => {

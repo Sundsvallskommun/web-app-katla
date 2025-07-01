@@ -25,6 +25,7 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   const [closedErrands, setClosedErrands] = useState<ErrandsData>(emptyErrandList);
   const [errand, setErrand] = useState<IErrand>({} as IErrand);
   const [messages, setMessages] = useState<MessageNode[]>([]);
+  const [conversation, setConversation] = useState<MessageNode[]>([]);
   const [messageTree, setMessageTree] = useState<MessageNode[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedErrandStatuses, setSelectedErrandStatuses] = useState<ErrandStatus[]>([ErrandStatus.ArendeInkommit]);
@@ -58,6 +59,9 @@ export function AppWrapper({ children }: { children: ReactNode }) {
 
         messages,
         setMessages: (messages: MessageNode[]) => setMessages(messages),
+
+        conversation,
+        setConversation: (conversation: MessageNode[]) => setConversation(conversation),
 
         messageTree,
         setMessageTree: (messages: MessageNode[]) => setMessageTree(messages),

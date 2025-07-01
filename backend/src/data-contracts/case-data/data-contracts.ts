@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -8,6 +9,43 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
+
+/**
+ * ConversationType model
+ * @example "INTERNAL"
+ */
+export enum ConversationType {
+  INTERNAL = "INTERNAL",
+  EXTERNAL = "EXTERNAL",
+}
+
+/**
+ * An email header
+ * @example "MESSAGE_ID"
+ */
+export enum Header {
+  IN_REPLY_TO = "IN_REPLY_TO",
+  REFERENCES = "REFERENCES",
+  MESSAGE_ID = "MESSAGE_ID",
+}
+
+/** Message classification */
+export enum Classification {
+  INFORMATION = "INFORMATION",
+  COMPLETION_REQUEST = "COMPLETION_REQUEST",
+  OBTAIN_OPINION = "OBTAIN_OPINION",
+  INTERNAL_COMMUNICATION = "INTERNAL_COMMUNICATION",
+  OTHER = "OTHER",
+}
+
+/**
+ * The type of note
+ * @example "INTERNAL"
+ */
+export enum NoteType {
+  INTERNAL = "INTERNAL",
+  PUBLIC = "PUBLIC",
+}
 
 /** A stakeholder may have one or more addresses. For example, one POSTAL_ADDRESS and another INVOICE_ADDRESS. */
 export interface Address {
@@ -238,8 +276,8 @@ export interface Problem {
   type?: string;
   parameters?: Record<string, object>;
   status?: StatusType;
-  title?: string;
   detail?: string;
+  title?: string;
 }
 
 export interface StatusType {
@@ -309,8 +347,8 @@ export interface ThrowableProblem {
   type?: string;
   parameters?: Record<string, object>;
   status?: StatusType;
-  title?: string;
   detail?: string;
+  title?: string;
   suppressed?: {
     stackTrace?: {
       classLoaderName?: string;
@@ -746,7 +784,10 @@ export interface Errand {
 
 /** Extra parameters for the errand */
 export interface ExtraParameter {
-  /** Parameter key */
+  /**
+   * Parameter key
+   * @minLength 1
+   */
   key: string;
   /** Parameter display name */
   displayName?: string;
@@ -824,15 +865,6 @@ export interface Note {
   updated?: string;
 }
 
-/**
- * The type of note
- * @example "INTERNAL"
- */
-export enum NoteType {
-  INTERNAL = 'INTERNAL',
-  PUBLIC = 'PUBLIC',
-}
-
 /** List of notifications connected to this errand */
 export interface Notification {
   /**
@@ -869,6 +901,7 @@ export interface Notification {
   ownerFullName?: string;
   /**
    * Owner id of the notification
+   * @minLength 1
    * @example "AD01"
    */
   ownerId: string;
@@ -884,6 +917,7 @@ export interface Notification {
   createdByFullName?: string;
   /**
    * Type of the notification
+   * @minLength 1
    * @example "CREATE"
    */
   type: string;
@@ -894,6 +928,7 @@ export interface Notification {
   subType?: string;
   /**
    * Description of the notification
+   * @minLength 1
    * @example "Some description of the notification"
    */
   description: string;
@@ -991,15 +1026,6 @@ export interface Suspension {
   suspendedFrom?: string;
 }
 
-/** Message classification */
-export enum Classification {
-  INFORMATION = 'INFORMATION',
-  COMPLETION_REQUEST = 'COMPLETION_REQUEST',
-  OBTAIN_OPINION = 'OBTAIN_OPINION',
-  INTERNAL_COMMUNICATION = 'INTERNAL_COMMUNICATION',
-  OTHER = 'OTHER',
-}
-
 /** List of email headers on the message */
 export interface EmailHeader {
   /** An email header */
@@ -1011,25 +1037,17 @@ export interface EmailHeader {
   values?: string[];
 }
 
-/**
- * An email header
- * @example "MESSAGE_ID"
- */
-export enum Header {
-  IN_REPLY_TO = 'IN_REPLY_TO',
-  REFERENCES = 'REFERENCES',
-  MESSAGE_ID = 'MESSAGE_ID',
-}
-
 /** MessageResponse */
 export interface MessageAttachment {
   /**
    * The attachment (file) content as a BASE64-encoded string
+   * @minLength 1
    * @example "aGVsbG8gd29ybGQK"
    */
   content: string;
   /**
    * The attachment filename
+   * @minLength 1
    * @example "test.txt"
    */
   name: string;
@@ -1127,6 +1145,93 @@ export interface MessageRequest {
    * @example true
    */
   internal?: boolean;
+}
+
+/** Conversation model */
+export interface Conversation {
+  /**
+   * Conversation ID
+   * @example "1aefbbb8-de82-414b-b5d7-ba7c5bbe4506"
+   */
+  id?: string;
+  /**
+   * The message-exchange topic
+   * @minLength 1
+   * @example "The conversation topic"
+   */
+  topic: string;
+  /** ConversationType model */
+  type: ConversationType;
+  relationIds?: string[];
+  participants?: Identifier[];
+  metadata?: KeyValues[];
+}
+
+/** Identifier model */
+export interface Identifier {
+  /**
+   * The conversation identifier type
+   * @pattern ^(adAccount|partyId)$
+   * @example "adAccount"
+   */
+  type?: string;
+  /**
+   * The conversation identifier value
+   * @minLength 1
+   * @example "joe01doe"
+   */
+  value: string;
+}
+
+/** KeyValues model */
+export interface KeyValues {
+  /**
+   * The key
+   * @example "key1"
+   */
+  key?: string;
+  values?: string[];
+}
+
+/** Message model */
+export interface Message {
+  /**
+   * Message ID
+   * @example "1aefbbb8-de82-414b-b5d7-ba7c5bbe4506"
+   */
+  id?: string;
+  /**
+   * The ID of the replied message
+   * @example "1aefbbb8-de82-414b-b5d7-ba7c5bbe4506"
+   */
+  inReplyToMessageId?: string;
+  /**
+   * The timestamp when the message was created.
+   * @format date-time
+   */
+  created?: string;
+  /** Identifier model */
+  createdBy?: Identifier;
+  /**
+   * The content of the message.
+   * @minLength 1
+   * @example "Hello, how can I help you?"
+   */
+  content: string;
+  readBy?: ReadBy[];
+  attachments?: Attachment[];
+}
+
+/** Readby model */
+export interface ReadBy {
+  /** Identifier model */
+  identifier?: Identifier;
+  /**
+   * The timestamp when the message was read.
+   * @format date-time
+   * @example "2023-01-01T12:00:00+01:00"
+   */
+  readAt?: string;
 }
 
 export interface PatchNotification {
@@ -1306,7 +1411,6 @@ export interface PageErrand {
   totalPages?: number;
   /** @format int64 */
   totalElements?: number;
-  pageable?: PageableObject;
   /** @format int32 */
   size?: number;
   content?: Errand[];
@@ -1317,6 +1421,7 @@ export interface PageErrand {
   last?: boolean;
   /** @format int32 */
   numberOfElements?: number;
+  pageable?: PageableObject;
   empty?: boolean;
 }
 
@@ -1324,8 +1429,8 @@ export interface PageableObject {
   /** @format int64 */
   offset?: number;
   sort?: SortObject;
-  paged?: boolean;
   unpaged?: boolean;
+  paged?: boolean;
   /** @format int32 */
   pageNumber?: number;
   /** @format int32 */
@@ -1334,8 +1439,8 @@ export interface PageableObject {
 
 export interface SortObject {
   empty?: boolean;
-  sorted?: boolean;
   unsorted?: boolean;
+  sorted?: boolean;
 }
 
 export interface CommitMetadata {
@@ -1516,14 +1621,33 @@ export interface MessageResponse {
   internal?: boolean;
 }
 
+export interface PageMessage {
+  /** @format int32 */
+  totalPages?: number;
+  /** @format int64 */
+  totalElements?: number;
+  /** @format int32 */
+  size?: number;
+  content?: Message[];
+  /** @format int32 */
+  number?: number;
+  sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
+  /** @format int32 */
+  numberOfElements?: number;
+  pageable?: PageableObject;
+  empty?: boolean;
+}
+
 /**
  * Category of the address
  * @example "RESIDENTIAL"
  */
 export enum AddressAddressCategoryEnum {
-  POSTAL_ADDRESS = 'POSTAL_ADDRESS',
-  INVOICE_ADDRESS = 'INVOICE_ADDRESS',
-  VISITING_ADDRESS = 'VISITING_ADDRESS',
+  POSTAL_ADDRESS = "POSTAL_ADDRESS",
+  INVOICE_ADDRESS = "INVOICE_ADDRESS",
+  VISITING_ADDRESS = "VISITING_ADDRESS",
 }
 
 /**
@@ -1531,9 +1655,9 @@ export enum AddressAddressCategoryEnum {
  * @example "EMAIL"
  */
 export enum ContactInformationContactTypeEnum {
-  CELLPHONE = 'CELLPHONE',
-  PHONE = 'PHONE',
-  EMAIL = 'EMAIL',
+  CELLPHONE = "CELLPHONE",
+  PHONE = "PHONE",
+  EMAIL = "EMAIL",
 }
 
 /**
@@ -1541,8 +1665,8 @@ export enum ContactInformationContactTypeEnum {
  * @example "PERSON"
  */
 export enum StakeholderTypeEnum {
-  PERSON = 'PERSON',
-  ORGANIZATION = 'ORGANIZATION',
+  PERSON = "PERSON",
+  ORGANIZATION = "ORGANIZATION",
 }
 
 /**
@@ -1550,9 +1674,9 @@ export enum StakeholderTypeEnum {
  * @example "APPROVAL"
  */
 export enum DecisionDecisionTypeEnum {
-  RECOMMENDED = 'RECOMMENDED',
-  PROPOSED = 'PROPOSED',
-  FINAL = 'FINAL',
+  RECOMMENDED = "RECOMMENDED",
+  PROPOSED = "PROPOSED",
+  FINAL = "FINAL",
 }
 
 /**
@@ -1560,10 +1684,10 @@ export enum DecisionDecisionTypeEnum {
  * @example "GRANTED"
  */
 export enum DecisionDecisionOutcomeEnum {
-  APPROVAL = 'APPROVAL',
-  REJECTION = 'REJECTION',
-  DISMISSAL = 'DISMISSAL',
-  CANCELLATION = 'CANCELLATION',
+  APPROVAL = "APPROVAL",
+  REJECTION = "REJECTION",
+  DISMISSAL = "DISMISSAL",
+  CANCELLATION = "CANCELLATION",
 }
 
 /**
@@ -1571,11 +1695,12 @@ export enum DecisionDecisionOutcomeEnum {
  * @example "EMAIL"
  */
 export enum ErrandChannelEnum {
-  ESERVICE = 'ESERVICE',
-  EMAIL = 'EMAIL',
-  WEB_UI = 'WEB_UI',
-  MOBILE = 'MOBILE',
-  SYSTEM = 'SYSTEM',
+  ESERVICE = "ESERVICE",
+  ESERVICE_KATLA = "ESERVICE_KATLA",
+  EMAIL = "EMAIL",
+  WEB_UI = "WEB_UI",
+  MOBILE = "MOBILE",
+  SYSTEM = "SYSTEM",
 }
 
 /**
@@ -1584,9 +1709,9 @@ export enum ErrandChannelEnum {
  * @example "HIGH"
  */
 export enum ErrandPriorityEnum {
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
 }
 
 /**
@@ -1594,8 +1719,8 @@ export enum ErrandPriorityEnum {
  * @example "INBOUND"
  */
 export enum MessageRequestDirectionEnum {
-  INBOUND = 'INBOUND',
-  OUTBOUND = 'OUTBOUND',
+  INBOUND = "INBOUND",
+  OUTBOUND = "OUTBOUND",
 }
 
 /**
@@ -1603,9 +1728,9 @@ export enum MessageRequestDirectionEnum {
  * @example "MEDIUM"
  */
 export enum PatchErrandPriorityEnum {
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
 }
 
 /**
@@ -1613,9 +1738,9 @@ export enum PatchErrandPriorityEnum {
  * @example "APPROVAL"
  */
 export enum PatchDecisionDecisionTypeEnum {
-  RECOMMENDED = 'RECOMMENDED',
-  PROPOSED = 'PROPOSED',
-  FINAL = 'FINAL',
+  RECOMMENDED = "RECOMMENDED",
+  PROPOSED = "PROPOSED",
+  FINAL = "FINAL",
 }
 
 /**
@@ -1623,10 +1748,10 @@ export enum PatchDecisionDecisionTypeEnum {
  * @example "GRANTED"
  */
 export enum PatchDecisionDecisionOutcomeEnum {
-  APPROVAL = 'APPROVAL',
-  REJECTION = 'REJECTION',
-  DISMISSAL = 'DISMISSAL',
-  CANCELLATION = 'CANCELLATION',
+  APPROVAL = "APPROVAL",
+  REJECTION = "REJECTION",
+  DISMISSAL = "DISMISSAL",
+  CANCELLATION = "CANCELLATION",
 }
 
 /**
@@ -1634,6 +1759,6 @@ export enum PatchDecisionDecisionOutcomeEnum {
  * @example "INBOUND"
  */
 export enum MessageResponseDirectionEnum {
-  INBOUND = 'INBOUND',
-  OUTBOUND = 'OUTBOUND',
+  INBOUND = "INBOUND",
+  OUTBOUND = "OUTBOUND",
 }

@@ -20,7 +20,7 @@ interface ResponseData {
 @Controller()
 export class CaseDataAttachmentController {
   private apiService = new ApiService();
-  SERVICE = `case-data/11.0`;
+  SERVICE = `case-data/11.5`;
 
   @Post('/casedata/:municipalityId/errands/:errandId/attachments')
   @HttpCode(201)

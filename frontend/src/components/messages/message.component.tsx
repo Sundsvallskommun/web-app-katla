@@ -1,7 +1,8 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { MessageResponse } from '@interfaces/message';
 import { messageAttachment } from '@services/casedata-attachment-service';
-import { isErrandLocked, validateAction } from '@services/casedata-errand-service';
+import { Conversation, getConversationMessages, getConversations } from '@services/casedata-conversation-service';
+import { isErrandLocked } from '@services/casedata-errand-service';
 import { fetchMessages, fetchMessagesTree, setMessageViewStatus } from '@services/casedata-message-service';
 import sanitized from '@services/sanitizer-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
@@ -16,59 +17,66 @@ export const CasedataMessagesTab: React.FC<{
   setUnsaved: (unsaved: boolean) => void;
   update: () => void;
 }> = (props) => {
-  const { municipalityId, errand, messages, messageTree, setMessages, setMessageTree, user } = useContext(AppContext);
+  const { municipalityId, errand, messages, messageTree, setMessages, setMessageTree, conversation, setConversation } =
+    useContext(AppContext);
   const [selectedMessage, setSelectedMessage] = useState<MessageResponse>();
   const [showSelectedMessage, setShowSelectedMessage] = useState(false);
   const [showMessageComposer, setShowMessageComposer] = useState(false);
   const [sortMessages, setSortMessages] = useState<number>(0);
   const [sortedMessages, setSortedMessages] = useState(messages);
   const toastMessage = useSnackbar();
-  const [allowed, setAllowed] = useState(false);
+  const [allMessages, setAllMessages] = useState<MessageResponse[]>([]);
+
   useEffect(() => {
-    const _a = validateAction(errand, user) && !!errand.administrator;
-    setAllowed(_a);
-  }, [user, errand]);
+    const merged = [...(messages || []), ...(conversation || [])];
+    const unique = merged.filter((msg, index, self) => index === self.findIndex((m) => m.messageId === msg.messageId));
+    setAllMessages(unique);
+  }, [messages, conversation]);
 
   const setMessageViewed = (msg: MessageResponse) => {
-    setMessageViewStatus(errand.id.toString(), municipalityId, msg?.messageId || '', true)
-      .then(() =>
-        fetchMessagesTree(municipalityId, errand).catch(() => {
+    if (msg?.conversationId) {
+      console.warn('Not implemented'); //Unsure of how acknowledge for conversation messages will work
+    } else {
+      setMessageViewStatus(errand.id.toString(), municipalityId, msg?.messageId || '', true)
+        .then(() =>
+          fetchMessagesTree(municipalityId, errand).catch(() => {
+            toastMessage({
+              position: 'bottom',
+              closeable: false,
+              message: 'Något gick fel när meddelanden hämtades',
+              status: 'error',
+            });
+          })
+        )
+        .then((result) => {
+          if (Array.isArray(result)) {
+            setMessageTree(result);
+          }
+        })
+        .then(() =>
+          fetchMessages(municipalityId, errand).catch(() => {
+            toastMessage({
+              position: 'bottom',
+              closeable: false,
+              message: 'Något gick fel när meddelanden hämtades',
+              status: 'error',
+            });
+          })
+        )
+        .then((result) => {
+          if (Array.isArray(result)) {
+            setMessages(result);
+          }
+        })
+        .catch(() => {
           toastMessage({
             position: 'bottom',
             closeable: false,
-            message: 'Något gick fel när meddelanden hämtades',
+            message: 'Något gick fel när meddelandets status uppdaterades',
             status: 'error',
           });
-        })
-      )
-      .then((result) => {
-        if (Array.isArray(result)) {
-          setMessageTree(result);
-        }
-      })
-      .then(() =>
-        fetchMessages(municipalityId, errand).catch(() => {
-          toastMessage({
-            position: 'bottom',
-            closeable: false,
-            message: 'Något gick fel när meddelanden hämtades',
-            status: 'error',
-          });
-        })
-      )
-      .then((result) => {
-        if (Array.isArray(result)) {
-          setMessages(result);
-        }
-      })
-      .catch(() => {
-        toastMessage({
-          position: 'bottom',
-          closeable: false,
-          message: 'Något gick fel när meddelandets status uppdaterades',
-          status: 'error',
         });
-      });
+    }
   };
 
   useEffect(() => {
@@ -93,8 +101,32 @@ export const CasedataMessagesTab: React.FC<{
             status: 'error',
           });
         });
+      getConversations(municipalityId, errand.id)
+        .then((res) => {
+          Promise.all(
+            res.data.map((conversation: Conversation) =>
+              getConversationMessages(municipalityId, errand.id, conversation.id ?? '')
+                .then((messages) => {
+                  const allMessages = messages.data
+                    .map((msgRes) =>
+                      Array.isArray(msgRes) ? msgRes
+                      : msgRes ? [msgRes]
+                      : []
+                    )
+                    .flat();
+                  setConversation(allMessages);
+                })
+                .catch((err) => {
+                  console.error('Something went wrong when fetching message', err);
+                })
+            )
+          );
+        })
+        .catch((err) => {
+          console.error('getConversations failed', err);
+        });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId, errand]);
 
   const getSender = (msg: MessageResponse) =>
@@ -124,12 +156,20 @@ export const CasedataMessagesTab: React.FC<{
           <LucideIcon name="mail" size="1.5rem" className="my-1" /> Via digital brevlåda
         </>
       );
-    } else {
+    } else if (msg?.messageType === 'EMAIL') {
       return (
         <>
           <LucideIcon name="mail" size="1.5rem" className="my-1" /> Via e-post
         </>
       );
+    } else if (msg?.messageType === 'DRAKEN') {
+      return (
+        <>
+          <LucideIcon name="mail" size="1.5rem" className="my-1" /> Via Draken
+        </>
+      );
+    } else {
+      return <></>;
     }
   };
 
@@ -140,18 +180,18 @@ export const CasedataMessagesTab: React.FC<{
   );
 
   useEffect(() => {
-    if (messages && messageTree) {
+    if (allMessages && messageTree) {
       if (sortMessages === 1) {
-        const filteredMessages = messages.filter((message) => message.direction === 'OUTBOUND');
+        const filteredMessages = allMessages.filter((message) => message.direction === 'INBOUND');
         setSortedMessages(filteredMessages);
       } else if (sortMessages === 2) {
-        const filteredMessages = messages.filter((message) => message.direction === 'INBOUND');
+        const filteredMessages = allMessages.filter((message) => message.direction === 'OUTBOUND');
         setSortedMessages(filteredMessages);
       } else {
-        setSortedMessages(messageTree);
+        setSortedMessages(allMessages);
       }
     }
-  }, [messages, messageTree, sortMessages]);
+  }, [allMessages, messageTree, sortMessages]);
 
   return (
     <>
@@ -162,11 +202,11 @@ export const CasedataMessagesTab: React.FC<{
           </div>
           <Button
             type="button"
-            disabled={isErrandLocked(errand)} // || !allowed}
+            disabled={isErrandLocked(errand)}
             size="sm"
             variant="primary"
             color="vattjom"
-            inverted={!(isErrandLocked(errand) || !allowed)}
+            inverted={!isErrandLocked(errand)}
             rightIcon={<LucideIcon name="mail" size={18} />}
             onClick={() => {
               setSelectedMessage(undefined);
@@ -248,18 +288,19 @@ export const CasedataMessagesTab: React.FC<{
                       </p>
                       <div className="flex text-small gap-16">
                         {dayjs(selectedMessage?.sent).format('YYYY-MM-DD HH:mm')}
-                        {/* <Divider className="m-2" orientation="vertical" />
-                        {selectedMessage && getMessageType(selectedMessage)} */}
+                        <Divider className="m-2" orientation="vertical" />
+                        {selectedMessage && getMessageType(selectedMessage)}
                       </div>
                     </div>
                   </div>
                   {(
-                    selectedMessage?.direction === 'INBOUND' &&
-                    (selectedMessage.messageType === 'EMAIL' || selectedMessage.messageType === 'WEBMESSAGE')
+                    (selectedMessage?.direction === 'INBOUND' &&
+                      (selectedMessage.messageType === 'EMAIL' || selectedMessage.messageType === 'WEBMESSAGE')) ||
+                    selectedMessage?.conversationId
                   ) ?
                     <Button
                       type="button"
-                      disabled={isErrandLocked(errand) || !allowed}
+                      disabled={isErrandLocked(errand)}
                       size="md"
                       variant="primary"
                       onClick={() => {
@@ -280,8 +321,8 @@ export const CasedataMessagesTab: React.FC<{
                       <Button
                         key={`${a.name}-${idx}`}
                         onClick={() => {
-                          if (selectedMessage?.messageId && a?.attachmentId) {
-                            messageAttachment(municipalityId, errand.id, selectedMessage.messageId, a.attachmentId)
+                          if (selectedMessage?.messageId) {
+                            messageAttachment(municipalityId, errand.id, selectedMessage.messageId, a?.id || '')
                               .then((res) => {
                                 if (res.data.length !== 0) {
                                   const uri = `data:${a.file};base64,${res.data}`;

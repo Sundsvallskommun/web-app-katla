@@ -1,7 +1,6 @@
 import { GenericExtraParameters } from './extra-parameters';
 
 export interface Attachment {
-  attachmentId: string;
   id?: string;
   version?: number;
   created?: string;

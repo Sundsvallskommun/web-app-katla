@@ -1,7 +1,7 @@
 'use client';
 
 import { AppWrapper } from '@contexts/app.context';
-import { ColorSchemeMode, GuiProvider } from '@sk-web-gui/react';
+import { ColorSchemeMode, ConfirmationDialogContextProvider, GuiProvider } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
 import updateLocale from 'dayjs/plugin/updateLocale';
@@ -49,7 +49,9 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
 
   return (
     <GuiProvider colorScheme={'light' as ColorSchemeMode}>
-      <AppWrapper>{children}</AppWrapper>
+      <ConfirmationDialogContextProvider>
+        <AppWrapper>{children}</AppWrapper>
+      </ConfirmationDialogContextProvider>
     </GuiProvider>
   ); //change to colorScheme
 };

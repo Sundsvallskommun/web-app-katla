@@ -49,7 +49,6 @@ export const sendDecisionMessage: (municipalityId: string, errand: IErrand) => P
     });
 };
 
-// Use multipart/form-data
 export const sendMessage: (
   municipalityId: string,
   errand: IErrand,
@@ -57,8 +56,6 @@ export const sendMessage: (
 ) => Promise<boolean> = async (municipalityId, errand, data) => {
   const url =
     data.contactMeans === 'webmessage' ? `casedata/${municipalityId}/webmessage` : `casedata/${municipalityId}/email`;
-
-    console.log('data', data); // Add this line to log the data
 
   const targets = data.contactMeans === 'webmessage' ? [{ value: '' }] : [...data.emails];
   const msgPromises = targets.map(async (target) => {
@@ -398,7 +395,6 @@ export const sendCasedataMessage: (
   errand: IErrand,
   data: CasedataMessageTabFormModel
 ) => Promise<boolean> = async (municipalityId, errand, data) => {
-  console.log('data', data); // Add this line to log the data
     const messageData: MessageResponse = {
       message: data.messageBodyPlaintext,
       errandId: errand.id.toString(),
@@ -410,7 +406,6 @@ export const sendCasedataMessage: (
       lastName: "Testsson",
       messageId: uuidv4(),
     };
-    console.log('messageData', messageData); // Add this line to log the messageData
     return apiService
       .post<boolean, MessageResponse>(`casedata/${municipalityId}/errand/${errand.id}/messages`, messageData, {
         headers: { 'Content-Type': 'application/json' },
@@ -422,6 +417,5 @@ export const sendCasedataMessage: (
         console.error('Something went wrong when sending message for errand:', errand);
         throw e;
       });
-  
-  //return Promise.all(msgPromises).then((results) => results.every((r) => r));
+
 };

@@ -55,7 +55,6 @@ const Arende: React.FC = () => {
           if (res.errand.attachments) {
             const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
             method.setValue('attachments', uploadFiles as unknown as Attachment[]);
-            console.log('Bilagor:', uploadFiles);
           }
 
           const reporter = res.errand.stakeholders.find((s) => s.roles.includes(Role.REPORTER));
