@@ -7,6 +7,7 @@ import { StakeholderFormModal } from './stakeholder-form.component';
 export const DisplayCard: React.FC<{
   isEditable: boolean;
   roles: Role[];
+  availableRoles: Role[];
   userName?: string;
   firstName: string;
   lastName: string;
@@ -25,10 +26,12 @@ export const DisplayCard: React.FC<{
     zip?: string;
     city?: string;
     careof?: string;
+    role?: Role[];
   }) => void;
 }> = ({
   isEditable,
   roles,
+  availableRoles,
   userName,
   firstName,
   lastName,
@@ -43,7 +46,7 @@ export const DisplayCard: React.FC<{
   onUpdate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   return (
     <div className="border-1 rounded-12 bg-background-content w-full max-w-[52.5rem] my-15">
@@ -53,19 +56,21 @@ export const DisplayCard: React.FC<{
         </strong>
       </div>
       <div className="px-[1rem]">
-        <p className="text-[1.6rem] font-semibold">{firstName + ' ' + lastName}</p>
-        <div className={`flex text-md mb-10 ${isMaxLargeDevice ? 'flex-col' : 'flex-row'}`}>
-          {userName && <div className="mr-30">{userName}</div>}
-
-          <div className="flex flex-col mr-10">
-            <div className={!personalNumber ? 'italic text-text-secondary' : ''}>
-              {personalNumber || 'Personnummer saknas'}
+        <p className="text-[1.6rem] font-semibold">
+          {firstName + ' ' + lastName}
+          {userName && ` (${userName})`}
+        </p>
+        <div className={`flex text-md mb-10 ${isMaxMediumDevice ? 'flex-col' : 'flex-row'}`}>
+          {!roles.includes(Role.REPORTER) && (
+            <div className="flex flex-col mr-10">
+              <div className={!personalNumber ? 'italic text-text-secondary' : ''}>
+                {personalNumber || 'Personnummer saknas'}
+              </div>
+              <div className={!(street?.trim() && city?.trim()) ? 'italic text-text-secondary' : ''}>
+                {street?.trim() && city?.trim() ? `${street}, ${city}` : 'Adress saknas'}
+              </div>
             </div>
-            <div className={!(street?.trim() && city?.trim()) ? 'italic text-text-secondary' : ''}>
-              {street?.trim() && city?.trim() ? `${street}, ${city}` : 'Adress saknas'}
-            </div>
-          </div>
-
+          )}
           <div className="flex flex-col">
             <div className={!newEmail?.trim() ? 'italic text-text-secondary' : ''}>
               {newEmail?.trim() || 'E-post saknas'}
@@ -114,7 +119,7 @@ export const DisplayCard: React.FC<{
             city,
             roles,
           }}
-          roles={roles}
+          roles={availableRoles}
           onSubmit={(data) => {
             onUpdate?.({
               newEmail: data.newEmail,
@@ -123,6 +128,7 @@ export const DisplayCard: React.FC<{
               zip: data.zip,
               city: data.city,
               careof: data.careof,
+              role: data.roles,
             });
             setIsOpen(false);
           }}

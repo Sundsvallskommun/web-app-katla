@@ -7,17 +7,17 @@ import { CasePriorityFilter } from '../errand-filter';
 
 export const CasedataFilterPriority: React.FC = () => {
   const { register } = useFormContext<CasePriorityFilter>();
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   return (
     <PopupMenu>
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
         data-cy="Prioritet-filter"
-        variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
+        variant={isMaxMediumDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
-        size={isMaxLargeDevice ? 'md' : 'sm'}
-        className={isMaxLargeDevice ? 'max-md:w-full flex justify-between items-center text-left' : 'max-md:w-full'}
+        size={isMaxMediumDevice ? 'md' : 'sm'}
+        className={isMaxMediumDevice ? 'w-full flex justify-between items-center text-left' : 'max-md:w-full'}
       >
         Prio
       </PopupMenu.Button>

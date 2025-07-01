@@ -8,24 +8,19 @@ import {
   findStatusKeyForStatusLabel,
   newStatuses,
 } from '@services/casedata-errand-service';
-
-import { Chip } from '@sk-web-gui/react';
+import { Channels } from '@interfaces/channels';
+import { Priority } from '@interfaces/priority';
+import { Chip, useThemeQueries } from '@sk-web-gui/react';
+import { useHasTags } from '@utils/has-taggable-filters';
+import dayjs from 'dayjs';
 import React, { useContext, useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { CaseDataFilter, CaseDataValues } from '../errand-filter';
-import { Priority } from '@interfaces/priority';
-import dayjs from 'dayjs';
-import { IErrand } from '@interfaces/errand';
-import { Channels } from '@interfaces/channels';
-import { useHasTags } from '@utils/has-taggable-filters';
 
-interface CasedataFilterTagsProps {
-  errands: IErrand[];
-}
-
-export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
+export const CasedataFilterTags: React.FC<{ mobileOverviewPage?: boolean }> = (mobileOverviewPage) => {
   const { control, setValue, reset } = useFormContext<CaseDataFilter>();
   const values = useWatch({ control });
+  const { isMaxMediumDevice } = useThemeQueries();
 
   const types = values.caseType ?? [];
   const statuses = values.status ?? [];
@@ -36,6 +31,8 @@ export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
     Array.isArray(values.channel) ? values.channel
     : values.channel ? [values.channel]
     : [];
+
+  const query = values.query || '';
 
   const { selectedErrandStatuses } = useContext(AppContext);
 
@@ -66,8 +63,24 @@ export const CasedataFilterTags: React.FC<CasedataFilterTagsProps> = () => {
   }, [selectedErrandStatuses, setValue]);
 
   const hasTags = useHasTags();
+
+  const queryText = () => (query.length > 20 ? `${query.substring(0, 20)}...` : query);
+
   return (
     <div className="flex gap-8 flex-wrap justify-start">
+      {isMaxMediumDevice && query && mobileOverviewPage && (
+        <Chip
+          className="bg-gronsta-background-200 hover:bg-gronsta-background-200"
+          data-cy="tag-query"
+          key={`query-tag`}
+          onClick={() => {
+            setValue('query', '');
+          }}
+        >
+          Sökord:&quot;{queryText()}&quot;
+        </Chip>
+      )}
+
       {types.map((type, typeIndex) => (
         <Chip data-cy="tag-caseType" key={`caseType-${typeIndex}`} onClick={() => handleRemoveType(type)}>
           {findCaseLabelForCaseType(type)}

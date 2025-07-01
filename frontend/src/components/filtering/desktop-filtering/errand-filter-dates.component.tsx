@@ -14,7 +14,7 @@ export const CasedataFilterDates: React.FC = () => {
   const { setValue, watch } = useFormContext<CaseDatesFilter>();
   const [startDate, setStartDate] = useState<string>(watch('startdate'));
   const [endDate, setEndDate] = useState<string>(watch('enddate'));
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   const handleApply = () => {
     setValue('startdate', startDate);
@@ -26,10 +26,10 @@ export const CasedataFilterDates: React.FC = () => {
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
         data-cy="Tidsperiod-filter"
-        variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
+        variant={isMaxMediumDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
-        size={isMaxLargeDevice ? 'md' : 'sm'}
-        className={isMaxLargeDevice ? 'max-md:w-full flex justify-between items-center text-left' : 'max-md:w-full'}
+        size={isMaxMediumDevice ? 'md' : 'sm'}
+        className={isMaxMediumDevice ? 'w-full flex justify-between items-center text-left' : 'max-md:w-full'}
       >
         Tidsperiod
       </PopupMenu.Button>

@@ -96,6 +96,7 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
 
   return (
     <Button
+      data-cy="save-draft-errand-button"
       variant="primary"
       onClick={onSubmit}
       disabled={isLoading}

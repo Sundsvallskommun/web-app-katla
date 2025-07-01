@@ -1,17 +1,17 @@
 'use client';
 import { AppContext } from '@contexts/app-context-interface';
+import { Channels } from '@interfaces/channels';
 import { IErrand } from '@interfaces/errand';
+import { ErrandStatus } from '@interfaces/errand-status';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
-import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Dialog, Spinner, useSnackbar } from '@sk-web-gui/react';
+import { Button, Dialog, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/react';
+import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
-import { UploadFile } from '@sk-web-gui/react';
-import { ErrandStatus } from '@interfaces/errand-status';
 
 export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -31,6 +31,9 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     const data = getValues() as IErrand & { attachments: UploadFile[] };
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
 
+    console.log('data', data);
+
+    data.channel = Channels.ESERVICE_KATLA;
     data.stakeholders = owners;
     data.status = {
       statusType: ErrandStatus.ArendeInkommit,
@@ -45,7 +48,6 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
       if (res.errandId) {
         const e = await getErrand(municipalityId, res.errandId);
         if (e.errand && e.errand.errandNumber) {
-          // Hantera nya bilagor
           if (newAttachments.length > 0) {
             await sendAttachments(
               municipalityId,
@@ -62,7 +64,6 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
             );
           }
 
-          // Hantera befintliga bilagor
           if (existingAttachments.length > 0) {
             await Promise.all(
               existingAttachments.map(async (attachment) => {
@@ -105,17 +106,22 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     }
   };
 
-  // Logik för att kontrollera om sökande finns, annars vill vi eventuellt inte kunna skapa ett ärende.
-  // const hasApplicant = useMemo(() => owners.some((owner) => owner.roles.includes(Role.APPLICANT)), [owners]); //disabled={!hasApplicant}
-
   return (
     <div className="flex mb-0 w-full">
-      <Button variant="primary" color="vattjom" className="w-full" onClick={openHandler}>
+      <Button
+        data-cy="register-errand-button"
+        variant="primary"
+        color="vattjom"
+        className="w-full"
+        onClick={openHandler}
+        disabled={isLoading}
+        rightIcon={isLoading ? <Spinner size={2} /> : undefined}
+      >
         Registrera ärende
       </Button>
 
       {isOpen && (
-        <Dialog className="max-w-[36rem]" show={isOpen}>
+        <Dialog data-cy="confirm-register-dialog" className="max-w-[36rem]" show={isOpen}>
           <Dialog.Content className="flex flex-col items-center justify-center text-center">
             <LucideIcon color="vattjom" name="inbox" size={32} />
             <div className="text-h4">Registrera ärende</div>

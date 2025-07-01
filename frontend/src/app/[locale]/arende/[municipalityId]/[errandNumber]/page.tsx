@@ -1,5 +1,5 @@
 'use client';
-import { RegisterHeader } from '@app/[locale]/registrera/register-errand-header.component';
+import { ErrandHeader } from '@components/errand-header/errand-header.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
 import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
@@ -9,10 +9,12 @@ import { OtherParties } from '@components/errandinformation/other-parties.compon
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { CasedataMessagesTab } from '@components/messages/message.component';
+import { RegisterErrandButton } from '@components/register-errand-button.component';
 import { SaveErrandButton } from '@components/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
+import { ErrandStatus } from '@interfaces/errand-status';
 import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
@@ -29,10 +31,11 @@ const Arende: React.FC = () => {
   const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
+  const [forbidden, setForbidden] = useState(false);
   const { setMunicipalityId, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 
   const pathName = usePathname();
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   const errandNumber = pathName.split('/')[3];
 
   useEffect(() => {
@@ -47,6 +50,10 @@ const Arende: React.FC = () => {
         setUser(user);
 
         const res = await getErrandByErrandNumber(municipality, errandNumber);
+
+        if (res.error) {
+          setForbidden(true);
+        }
 
         if (res.errand) {
           setErrand(res.errand);
@@ -81,7 +88,7 @@ const Arende: React.FC = () => {
           setApplicants(applicants);
 
           const otherParties = res.errand.stakeholders
-            .filter((s) => s.roles.some((r) => [Role.FELLOW_APPLICANT, Role.CONTACT_PERSON].includes(r)))
+            .filter((s) => s.roles.some((r) => [Role.FELLOW_APPLICANT, Role.CONTACT_PERSON, Role.DOCTOR].includes(r)))
             .map((person) => ({
               ...person,
               newEmail: person.emails[0]?.value,
@@ -101,91 +108,81 @@ const Arende: React.FC = () => {
   }, []);
 
   return (
-    <FormProvider {...method}>
-      <RegisterHeader />
+    <>
+      {forbidden ?
+        <>
+          <ErrandHeader />
 
-      <div className="flex flex-col w-full overflow-hidden">
-        <main
-          className={`
+          <div className="flex flex-col h-screen w-full overflow-hidden bg-background-100">
+            <main
+              className={`
         flex-grow flex justify-center
-        ${isMaxLargeDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
-        ${isMaxLargeDevice ? 'pt-[1.6rem]' : 'pt-24'}
-        ${isMaxLargeDevice ? '' : 'pb-40'}
+        ${isMaxMediumDevice ? 'px-[1.6rem] overflow-x-hidden' : 'px-24 overflow-x-auto'}
+        ${isMaxMediumDevice ? 'pt-[1.6rem]' : 'pt-24'}
+        ${isMaxMediumDevice ? '' : 'pb-40'}
         w-full
       `}
-        >
-          <section className={`w-full ${!isMaxLargeDevice ? 'max-w-[108rem]' : ''}`}>
-            <header
-              className={`
-            flex justify-between items-center
-            ${isMaxLargeDevice ? '' : 'mt-md pt-8 mb-[3.2rem]'}
-          `}
             >
               <h1 className="text-h2-lg">Ärende {errand?.errandNumber}</h1>
 
-              {!isMaxLargeDevice && (
+              {!isMaxMediumDevice && (
                 <div className="flex gap-x-md">
                   <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
                 </div>
               )}
-            </header>
 
-            <div className="border-1 rounded-12 bg-background-content">
-              <MenuBar className="py-[1rem] pl-[1.6rem]" current={current}>
-                <MenuBar.Item>
-                  <button onClick={() => setCurrent(0)}>Rapporterat</button>
-                </MenuBar.Item>
-                <MenuBar.Item>
-                  <button onClick={() => setCurrent(1)}>Meddelanden</button>
-                </MenuBar.Item>
-                <MenuBar.Item>
-                  <button onClick={() => setCurrent(2)}>Bilagor</button>
-                </MenuBar.Item>
-              </MenuBar>
-              <Divider />
-              <section
-                className={`
-            ${isMaxLargeDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
+              <div className="border-1 rounded-12 bg-background-content">
+                <MenuBar className="py-[1rem] pl-[1.6rem]" current={current}>
+                  <MenuBar.Item>
+                    <button onClick={() => setCurrent(0)}>Rapporterat</button>
+                  </MenuBar.Item>
+                  <MenuBar.Item>
+                    <button onClick={() => setCurrent(1)}>Meddelanden</button>
+                  </MenuBar.Item>
+                  <MenuBar.Item>
+                    <button onClick={() => setCurrent(2)}>Bilagor</button>
+                  </MenuBar.Item>
+                </MenuBar>
+                <Divider />
+                <section
+                  className={`
+            ${isMaxMediumDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
           `}
-              >
-                {current === 0 && (
-                  <>
-                    <div className={`${isMaxLargeDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
-                      <h2>Grundinformation</h2>
-                    </div>
+                >
+                  {current === 0 && (
+                    <>
+                      <div className={`${isMaxMediumDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
+                        <h2>Grundinformation</h2>
+                      </div>
 
-                    <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
-                      <AboutErrand />
-                      <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
-                      <Applicant owners={applicants} setOwners={setApplicants} />
-                      <OtherParties owners={otherParties} setOwners={setOtherParties} />
-                    </div>
+                      <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
+                        <AboutErrand />
+                        <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
+                        <Applicant owners={applicants} setOwners={setApplicants} />
+                        <OtherParties owners={otherParties} setOwners={setOtherParties} />
+                      </div>
 
-                    <div className={`${isMaxLargeDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
-                      <h2>Ärendeuppgifter</h2>
-                    </div>
+                      <div className={`${isMaxMediumDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
+                        <h2>Ärendeuppgifter</h2>
+                      </div>
 
-                    <div className={`${isMaxLargeDevice ? '' : 'px-32'}`}>
-                      <ExternalCircumstances />
-                      <PersonalInformation />
-                      <MedicalOpinion />
-                    </div>
-                  </>
-                )}
+                      <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
+                        <ExternalCircumstances />
+                        <PersonalInformation />
+                        <MedicalOpinion />
+                      </div>
+                    </>
+                  )}
 
-                {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
-                {current === 2 && <FileUploadComponent />}
-              </section>
-            </div>
-          </section>
-        </main>
-        {isMaxLargeDevice && (
-          <div className="flex flex-col px-12 py-16">
-            <SaveErrandButton owners={applicants.concat(otherParties)} />
+                  {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
+                  {current === 2 && <FileUploadComponent />}
+                </section>
+              </div>
+            </main>
           </div>
-        )}
-      </div>
-    </FormProvider>
+        </>
+      : null}
+    </>
   );
 };
 

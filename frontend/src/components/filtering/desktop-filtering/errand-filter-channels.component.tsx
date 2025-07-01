@@ -1,4 +1,4 @@
-import { Channels } from '@interfaces/channels'; // Anpassa efter din enum eller interface
+import { Channels } from '@interfaces/channels';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Checkbox, PopupMenu, useThemeQueries } from '@sk-web-gui/react';
 import { useFormContext } from 'react-hook-form';
@@ -6,16 +6,16 @@ import { CaseChannelFilter } from '../errand-filter';
 
 export const CasedataFilterChannel: React.FC = () => {
   const { register } = useFormContext<CaseChannelFilter>();
-  const { isMaxLargeDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   return (
     <PopupMenu>
       <PopupMenu.Button
         rightIcon={<LucideIcon name="chevron-down" />}
         data-cy="Channel-filter"
-        variant={isMaxLargeDevice ? 'secondary' : 'tertiary'}
+        variant={isMaxMediumDevice ? 'secondary' : 'tertiary'}
         showBackground={false}
-        size={isMaxLargeDevice ? 'md' : 'sm'}
-        className={isMaxLargeDevice ? 'max-md:w-full flex justify-between items-center text-left' : 'max-md:w-full'}
+        size={isMaxMediumDevice ? 'md' : 'sm'}
+        className={isMaxMediumDevice ? 'w-full flex justify-between items-center text-left' : 'max-md:w-full'}
       >
         Inkom via
       </PopupMenu.Button>

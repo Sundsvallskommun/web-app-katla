@@ -1,5 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { deleteAttachment, PTAttachmentLabels } from '@services/casedata-attachment-service';
+import { deleteAttachment, FTAttachmentLabels } from '@services/casedata-attachment-service';
 import { CustomOnChangeEventUploadFile, FileUpload, Switch, UploadFile } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -18,7 +18,7 @@ const FileUploadComponent: React.FC = () => {
         ...e.target.value.map((file) => ({
           ...file,
           id: '',
-          meta: { ...file.meta, category: Object.keys(PTAttachmentLabels)[0] },
+          meta: { ...file.meta, category: Object.keys(FTAttachmentLabels)[0] },
         }))
       );
       setValue('attachments', updatedFiles);
@@ -48,7 +48,9 @@ const FileUploadComponent: React.FC = () => {
       <div className="w-full pb-[2rem] pt-[5rem] lg:px-32">
         <div className="flex justify-between">
           <h2>Bilagor</h2>
-          <FileUpload.Button onChange={onChange} />
+          <div data-cy="upload-button-wrapper">
+            <FileUpload.Button onChange={onChange} />
+          </div>
         </div>
         <div className="py-[1rem]">
           <Switch value={isEdit.toString()} checked={isEdit} onChange={() => setIsEdit((value) => !value)}>
@@ -57,26 +59,28 @@ const FileUploadComponent: React.FC = () => {
         </div>
         <FileUpload.List isEdit={isEdit}>
           {files.map((file, i) => (
-            <FileUpload.ListItem
-              key={file.file?.name || `file-${i}`}
-              file={file}
-              index={i}
-              nameProps={{
-                inputProps: {
-                  onChange: handleOnChangeName(file),
-                },
-              }}
-              categoryProps={{
-                categories: PTAttachmentLabels,
-                selectProps: {
-                  onChange: handleOnChangeCategory(file),
-                },
-              }}
-              actionsProps={{
-                showRemove: true,
-                onRemove: () => handleRemoveFile(file),
-              }}
-            />
+            <div data-cy={`fileupload-list-item-${i}`}>
+              <FileUpload.ListItem
+                key={file.file?.name || `file-${i}`}
+                file={file}
+                index={i}
+                nameProps={{
+                  inputProps: {
+                    onChange: handleOnChangeName(file),
+                  },
+                }}
+                categoryProps={{
+                  categories: FTAttachmentLabels,
+                  selectProps: {
+                    onChange: handleOnChangeCategory(file),
+                  },
+                }}
+                actionsProps={{
+                  showRemove: true,
+                  onRemove: () => handleRemoveFile(file),
+                }}
+              />
+            </div>
           ))}
         </FileUpload.List>
       </div>

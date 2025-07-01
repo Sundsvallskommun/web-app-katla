@@ -11,7 +11,6 @@ import { useFormContext, UseFormReturn } from 'react-hook-form';
 export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
-
   const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const onSubmit = async () => {
@@ -109,13 +108,14 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
 
   return (
     <Button
+      data-cy="update-draft-errand-button"
       variant="primary"
       color="vattjom"
       onClick={onSubmit}
       disabled={isLoading}
       rightIcon={isLoading ? <Spinner size={2} /> : undefined}
     >
-      Spara ärende
+      Uppdatera ärende
     </Button>
   );
 };

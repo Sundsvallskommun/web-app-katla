@@ -1,37 +1,39 @@
 'use client';
 
-import { Logo, Divider, Button, Link } from '@sk-web-gui/react';
+import { Logo, Divider, Button, Link, cx } from '@sk-web-gui/react';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { UserMenu } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
-import { menuGroups } from './menu-groups';
 import { useThemeQueries } from '@sk-web-gui/react';
+import { getMenuGroups } from '@components/errand-header/menu-groups';
 
-export const RegisterHeader: React.FC = () => {
-  const { user } = useContext(AppContext);
-  const { isMaxLargeDevice } = useThemeQueries();
+export const ErrandHeader: React.FC = () => {
+  const { user, errand } = useContext(AppContext);
+  const { isMaxMediumDevice } = useThemeQueries();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const LogoPart = (
     <div className="flex items-center flex-shrink-0">
-      <a href={`${process.env.NEXT_PUBLIC_BASEPATH}`} className="flex-shrink-0">
-        <Logo variant="symbol" className={isMaxLargeDevice ? 'h-32' : 'h-40'} />
+      <a href={`${process.env.NEXT_PUBLIC_BASE_PATH}`} className="flex-shrink-0">
+        <Logo variant="symbol" className={isMaxMediumDevice ? 'h-32' : 'h-40'} />
       </a>
       <Divider orientation="vertical" className="mx-[2.4rem]" />
-      {!isMaxLargeDevice && <strong className="text-large">Nytt ärende</strong>}
+      {!isMaxMediumDevice && (
+        <strong className="text-large">{!errand.errandNumber ? 'Nytt ärende' : `Ärende ${errand.errandNumber}`}</strong>
+      )}
     </div>
   );
 
   const RightPart = (
-    <div className="flex items-center flex-shrink-0 gap-[2.4rem]">
+    <div className="flex items-right flex-shrink-0 gap-[2.4rem]">
       <UserMenu
         initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
-        menuTitle={`${user.firstName} ${user.lastName}`}
+        menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
         menuSubTitle=""
-        menuGroups={menuGroups}
-        buttonSize={isMaxLargeDevice ? 'sm' : 'md'}
+        menuGroups={getMenuGroups(true)}
+        buttonSize={isMaxMediumDevice ? 'sm' : 'md'}
         className="flex-shrink-0"
         buttonRounded={false}
       />
@@ -39,7 +41,7 @@ export const RegisterHeader: React.FC = () => {
       <Button
         variant="tertiary"
         iconButton
-        size={isMaxLargeDevice ? 'sm' : 'md'}
+        size={isMaxMediumDevice ? 'sm' : 'md'}
         onClick={() => setShowNotifications(true)}
         className="flex-shrink-0"
       >
@@ -48,11 +50,11 @@ export const RegisterHeader: React.FC = () => {
 
       <Divider orientation="vertical" />
 
-      <Link href={`${process.env.NEXT_PUBLIC_BASEPATH}/registrera`} target="_blank">
+      <Link href={`${process.env.NEXT_PUBLIC_BASE_PATH}/registrera`} target="_blank">
         <Button
           color="primary"
           variant="tertiary"
-          size={isMaxLargeDevice ? 'sm' : 'md'}
+          size={isMaxMediumDevice ? 'sm' : 'md'}
           rightIcon={<LucideIcon name="external-link" />}
           className="flex-shrink-0"
         >
@@ -65,19 +67,18 @@ export const RegisterHeader: React.FC = () => {
   return (
     <>
       <nav
-        className={
-          isMaxLargeDevice ?
-            'w-full h-[7rem] px-[1.2rem] py-[1.2rem] flex justify-between items-center bg-white shadow-100 relative z-10'
-          : 'w-full h-[7rem] px-24 flex justify-between items-center bg-white shadow-100 relative z-10'
-        }
+        className={cx(
+          'w-full h-[7rem] flex items-center bg-background-DEFAULT shadow-100 relative z-10',
+          isMaxMediumDevice ? 'p-[1.2rem] gap-[2.4rem] justify-between' : 'px-24 justify-between'
+        )}
       >
         {LogoPart}
         {RightPart}
       </nav>
 
-      {showNotifications && isMaxLargeDevice ?
+      {showNotifications && isMaxMediumDevice ?
         <div className="fixed inset-0 z-50 bg-vattjom-background-200">
-          <div className="h-[7rem] px-[1.6rem] py-[1.6rem] flex items-center justify-between bg-white shadow-lg">
+          <div className="h-[7rem] px-[1.6rem] py-[1.6rem] flex items-center justify-between bg-background-DEFAULT shadow-lg">
             <div className="flex items-center gap-12 text-h4-sm">
               <LucideIcon name="bell" /> Notiser
             </div>

@@ -20,7 +20,7 @@ export const AboutErrand: React.FC = () => {
     >
       <div className="flex flex-col">
         <strong className="mb-10">Ärendetyp*</strong>
-        <Select className="w-full" {...register('caseType')}>
+        <Select data-cy="errand-casetype-select" className="w-full" {...register('caseType')}>
           {Object.entries(FTCaseLabel)
             .sort((a, b) => a[1].localeCompare(b[1]))
             .map(([key, label]: [string, string]) => {

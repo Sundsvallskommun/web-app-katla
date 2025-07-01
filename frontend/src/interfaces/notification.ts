@@ -16,4 +16,5 @@ export interface Notification {
   globalAcknowledged?: boolean;
   errandId: number;
   errandNumber?: string;
+  subType?: string;
 }

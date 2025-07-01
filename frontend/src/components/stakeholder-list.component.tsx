@@ -206,13 +206,15 @@ export const StakeholderList: React.FC<{
           </Input.LeftAddin>
 
           <Input
+            data-cy="personal-number-input"
             className="w-full"
-            {...register('personalNumber', { required: 'Personnummer är obligatoriskt' })}
+            {...register('personalNumber')}
             readOnly={fetchedSsn}
             invalid={!!errors.personalNumber}
           />
           <Input.RightAddin icon className="flex gap-2">
             <Button
+              data-cy="clear-person-button"
               iconButton
               size="sm"
               variant="primary"
@@ -230,6 +232,7 @@ export const StakeholderList: React.FC<{
             </Button>
 
             <Button
+              data-cy="search-person-button"
               size="sm"
               variant="primary"
               className="h-full"
@@ -269,6 +272,7 @@ export const StakeholderList: React.FC<{
                 <FormLabel>E-postadress*</FormLabel>
                 <Input
                   className="w-full"
+                  data-cy="stakeholder-email-input"
                   placeholder="Ange e-postadress"
                   invalid={!!validationMessages.email}
                   {...register('emails.0.value', { required: true })}
@@ -278,6 +282,7 @@ export const StakeholderList: React.FC<{
               <div className="flex-col w-full">
                 <FormLabel>Telefonnummer*</FormLabel>
                 <Input
+                  data-cy="stakeholder-mobilephone-input"
                   className="w-full"
                   placeholder="Ange telefonnummer"
                   invalid={!!validationMessages.phone}
@@ -289,6 +294,7 @@ export const StakeholderList: React.FC<{
             <div className="flex flex-col lg:py-10">
               <FormLabel>Personens roll*</FormLabel>
               <Select
+                data-cy="stakeholder-role-select"
                 className="w-full"
                 invalid={!!validationMessages.role}
                 disabled={roles.length === 1}
@@ -330,6 +336,7 @@ export const StakeholderList: React.FC<{
             )}
             <div className="py-10">
               <Button
+                data-cy="add-stakeholder-button"
                 leftIcon={<LucideIcon name="plus" size={16} />}
                 variant="primary"
                 onClick={addStakeholderToErrand}
@@ -353,6 +360,7 @@ export const StakeholderList: React.FC<{
             key={index}
             isEditable={true}
             roles={owner.roles}
+            availableRoles={roles}
             userName={owner.adAccount}
             firstName={owner.firstName}
             lastName={owner.lastName}
@@ -373,6 +381,7 @@ export const StakeholderList: React.FC<{
       })}
 
       <Button
+        data-cy="add-manual-person-button"
         variant="primary"
         size="sm"
         color="vattjom"

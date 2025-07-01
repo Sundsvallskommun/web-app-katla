@@ -14,7 +14,6 @@ export const OngoingCaseDataErrands: React.FC = () => {
     closedErrands,
     sidebarLabel,
     administrators,
-    errands,
   } = useOngoingCaseDataErrands();
 
   return (
@@ -27,7 +26,6 @@ export const OngoingCaseDataErrands: React.FC = () => {
               ownerFilterHandler={setOwnerFilter}
               ownerFilter={ownerFilter}
               administrators={administrators}
-              errands={errands?.errands || []}
             />
           </FormProvider>
         </div>

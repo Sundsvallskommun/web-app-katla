@@ -72,6 +72,9 @@ export const zipSchema = yup
   .required('Postnummer är obligatoriskt')
   .matches(zipPattern, invalidZipMessage);
 
+/**
+ * Stakeholder-schema
+ */
 export const stakeholderSchema = yup.object().shape({
   ssn: ssnSchema,
   firstName: yup.string().required('Förnamn är obligatoriskt'),
@@ -82,4 +85,5 @@ export const stakeholderSchema = yup.object().shape({
   careof: yup.string(),
   zip: zipSchema,
   city: yup.string().required('Ort är obligatorisk'),
+  roles: yup.array().of(yup.string().required()).min(1, 'Välj en roll').required('Välj en roll'),
 });

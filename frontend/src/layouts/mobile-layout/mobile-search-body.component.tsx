@@ -1,3 +1,5 @@
+import { CasedataFilterTags } from '@components/filtering/desktop-filtering/casedata-filter-tags.component';
+import { CasedataFilterBase } from '@components/filtering/desktop-filtering/errand-filter-base.component';
 import { CaseQueryFilter } from '@components/filtering/errand-filter';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Input } from '@sk-web-gui/react';
@@ -6,12 +8,18 @@ import { useFormContext } from 'react-hook-form';
 
 interface MobileSearchBodyProps {
   onDone?: () => void;
+  ownerFilter: boolean;
+  setOwnerFilter: (b: boolean) => void;
 }
 
-export const MobileSearchBody: React.FC<MobileSearchBodyProps> = ({ onDone }) => {
+export const MobileSearchBody: React.FC<MobileSearchBodyProps> = ({
+  onDone,
+  ownerFilter,
+  setOwnerFilter,
+}) => {
   const { watch, setValue } = useFormContext<CaseQueryFilter>();
-  const value = watch('query');
-  const [query, setQuery] = useState<string>(value);
+  const value = watch('query') || '';
+  const [query, setQuery] = useState<string>(value || '');
 
   const handleSearch = () => {
     setValue('query', query);
@@ -38,17 +46,27 @@ export const MobileSearchBody: React.FC<MobileSearchBodyProps> = ({ onDone }) =>
             />
           </Input.Group>
         </div>
-        <div className="h-[2.4rem]" />
-        <Button
-          size="md"
-          color="vattjom"
-          onClick={() => {
-            handleSearch();
-          }}
-        >
-          Sök
-        </Button>
+
+
+      <div className="w-full flex flex-col gap-[2.4rem] pt-24">
+        <CasedataFilterBase ownerFilter={ownerFilter} ownerFilterHandler={setOwnerFilter} />
       </div>
+      <div className="py-[0.5rem]">
+        Valda filter
+      </div>
+        <CasedataFilterTags mobileOverviewPage />
+      </div>
+      <div className="h-[2.4rem]" />
+      <Button
+        className="w-full"
+        size="md"
+        color="vattjom"
+        onClick={() => {
+          handleSearch();
+        }}
+      >
+        Sök/Filtrera
+      </Button>
     </div>
   );
 };

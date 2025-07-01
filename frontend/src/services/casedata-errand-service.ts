@@ -162,7 +162,7 @@ export const getPriorityLabels = () => ({
 
 export const emptyErrand: Partial<IErrand> = {
   caseType: '',
-  channel: Channels.WEB_UI,
+  channel: Channels.ESERVICE_KATLA,
   description: '',
   municipalityId: '2281',
   phase: ErrandPhase.aktualisering,
@@ -188,7 +188,7 @@ export const mapErrandToIErrand: (e: ApiErrand, municipalityId: string) => IErra
       status: e.status,
       statuses: e.statuses,
       phase: e.phase,
-      channel: e.channel ? Channels[e.channel as keyof typeof Channels] : Channels.WEB_UI,
+      channel: e.channel ? Channels[e.channel as keyof typeof Channels] : Channels.ESERVICE_KATLA,
       municipalityId: e.municipalityId || municipalityId,
       stakeholders: e.stakeholders.map(stakeholder2Contact),
       facilities: e.facilities,
@@ -520,7 +520,6 @@ const createApiErrandData: (data: Partial<IErrand>) => Partial<RegisterErrandDat
   const stakeholders = makeStakeholdersList(data);
   const e: Partial<RegisterErrandData> = {
     ...(data.id && { id: data.id?.toString() }),
-    ...(data.errandNumber && { errandNumber: data.errandNumber }),
     ...(data.priority && { priority: ApiPriority[data.priority as keyof typeof ApiPriority] }),
     ...(data.caseType && { caseType: data.caseType }),
     ...(data.channel && { channel: ApiChannels[data.channel as keyof typeof ApiChannels] }),
@@ -564,8 +563,8 @@ export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Pro
           result.errandId = errandData.id;
           return result;
         })
-        .catch(() => {
-          console.error('Something went wrong when patching errand');
+        .catch((e) => {
+          console.error('Something went wrong when patching errand', e);
           return result;
         })
     : apiService

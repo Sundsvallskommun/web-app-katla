@@ -16,6 +16,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({ collapsed = false })
   return (
     <div className="flex justify-center w-full">
       <Button
+        data-cy="logout-button"
         onClick={handleLogout}
         variant="ghost"
         size="md"

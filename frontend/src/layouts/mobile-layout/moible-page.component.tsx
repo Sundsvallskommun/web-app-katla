@@ -1,9 +1,8 @@
-import { Button, Logo } from '@sk-web-gui/react';
+import { MobileHeaderLogo } from '@components/mobile-header-logo.component';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import React from 'react';
+import { Button } from '@sk-web-gui/react';
 import { IconName } from 'lucide-react/dynamic';
-import { appConfig } from 'src/config/app-config';
-import { getApplicationEnvironment } from 'src/common/application-service';
+import React from 'react';
 
 interface MobilePageProps {
   open: boolean;
@@ -14,7 +13,6 @@ interface MobilePageProps {
 }
 
 export const MobilePage: React.FC<MobilePageProps> = ({ open, setOpen, lucideIconName, title, children }) => {
-  const applicationEnvironment = getApplicationEnvironment();
 
   return (
     <div className="fixed inset-0 z-50 bg-vattjom-background-200 flex flex-col">
@@ -26,14 +24,7 @@ export const MobilePage: React.FC<MobilePageProps> = ({ open, setOpen, lucideIco
               {title}
             </div>
           </div>
-        : <div className="flex items-center flex-1">
-            <Logo
-              variant="service"
-              title={'Draken'}
-              subtitle={appConfig.applicationName + (applicationEnvironment ? ` ${applicationEnvironment}` : '')}
-              className="flex-shrink-0"
-            />
-          </div>
+        : <MobileHeaderLogo/>
         }
         <div className="gap-[1.2rem] flex items-center">
           <Button

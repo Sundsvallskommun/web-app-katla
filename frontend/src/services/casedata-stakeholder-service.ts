@@ -77,7 +77,7 @@ export const makeStakeholder: (data: CasedataOwnerOrContact, role: Role) => Crea
     ...(data.id && { id: data.id }),
     ...(data.personId && { personId: data.personId.toString() }),
     type: data.stakeholderType,
-    roles: [role, ...(data.relation ? [data.relation as Role] : [])],
+    roles: [role],
     contactInformation: [...phones, ...mails],
     firstName: data.firstName || '',
     lastName: data.lastName || '',
@@ -258,9 +258,7 @@ export const getOwnerStakeholder: (e: IErrand) => CasedataOwnerOrContact = (e) =
 export const getStakeholdersByRelation: (e: IErrand, relation: Role) => CasedataOwnerOrContact[] = (e, relation) =>
   e.stakeholders?.filter((s) => s.roles.includes(relation));
 
-export const getStakeholderRelationDisplayNames = (
-  s: Stakeholder | CasedataOwnerOrContact
-): string => {
+export const getStakeholderRelationDisplayNames = (s: Stakeholder | CasedataOwnerOrContact): string => {
   const validRoles = Object.values(Role) as string[];
   return s.roles
     .filter((r): r is Role => validRoles.includes(r))

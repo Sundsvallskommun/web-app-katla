@@ -3,5 +3,5 @@ export interface AppConfig {
 }
 
 export const appConfig: AppConfig = {
-  applicationName: process.env.NEXT_PUBLIC_APPLICATION_NAME || 'appen',
+  applicationName: process.env.NEXT_PUBLIC_APP_NAME || 'appen',
 };

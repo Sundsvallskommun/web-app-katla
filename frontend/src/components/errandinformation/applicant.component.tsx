@@ -14,7 +14,8 @@ export const Applicant: React.FC<{
 
   return (
     <Disclosure
-      open={owners.length > 0}
+      data-cy="applicant-diclosure"
+      open={true}
       icon={<LucideIcon name="users" />}
       header="Sökande"
       variant="alt"

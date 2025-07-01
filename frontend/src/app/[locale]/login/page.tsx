@@ -8,6 +8,7 @@ import { appURL } from '@utils/app-url';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { appConfig } from 'src/config/app-config';
 import { capitalize } from 'underscore.string';
 
 // Turn on/off automatic login
@@ -33,17 +34,20 @@ const Login: React.FC = () => {
 
   const onLogin = () => {
     const searchPath = searchParams.get('path');
-    const nonLoginPath = !pathName?.match(/\/login/) && pathName; // Contains path as long as it's not /login
-    const nonLoginSearch = !searchPath?.match(/\/login|\/logout/) && searchPath; // Contains redirect path as long as it's not /login or /logout
+    const nonLoginPath = !pathName?.match(/\/login/) && pathName;
+    const nonLoginSearch = !searchPath?.match(/\/login|\/logout/) && searchPath;
     const path = nonLoginPath || nonLoginSearch || '/';
+
+    //Basepath problem, lägger till FT/FT vid login. Detta löser buggen men inte en bra lösning.
+    const cleanedPath = path.replace(new RegExp(`^${process.env.NEXT_PUBLIC_BASE_PATH}`), '');
 
     const url = new URL(apiURL('/saml/login'));
     const queries = new URLSearchParams({
-      successRedirect: `${appURL(path as string)}`,
+      successRedirect: `${appURL(cleanedPath)}`,
       failureRedirect: `${appURL()}/login`,
     });
     url.search = queries.toString();
-    // NOTE: send user to login with SSO
+
     router.push(url.toString());
   };
 
@@ -83,8 +87,8 @@ const Login: React.FC = () => {
         <div className="flex items-center justify-center min-h-screen">
           <div className="max-w-5xl w-full flex flex-col text-light-primary bg-inverted-background-content p-20 shadow-lg text-left">
             <div className="mb-14">
-              <h1 className="mb-10 text-xl">{process.env.NEXT_PUBLIC_APP_NAME}</h1>
-              <p className="my-0">{t('login:description')}</p>
+              <h1 className="mb-10 text-xl">{appConfig.applicationName}</h1>
+              {/* <p className="my-0">{t('login:description')}</p> */}
             </div>
 
             <Button inverted onClick={() => onLogin()} ref={initalFocus} data-cy="loginButton">
@@ -101,7 +105,6 @@ const Login: React.FC = () => {
 
 function LoginPage() {
   return (
-    // You could have a loading skeleton as the `fallback` too
     <Suspense>
       <Login />
     </Suspense>

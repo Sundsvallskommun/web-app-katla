@@ -22,8 +22,8 @@ export interface TableForm {
 
 export const useOngoingCaseDataErrands = () => {
   const filterForm = useForm<CaseDataFilter>({ defaultValues: CaseDataValues });
-  const { isMaxLargeDevice } = useThemeQueries();
-  const tableForm = useForm<TableForm>({
+  const { isMaxMediumDevice } = useThemeQueries();
+  const tableForm = useForm<TableForm, unknown, undefined>({
     defaultValues: {
       sortColumn: 'updated',
       sortOrder: 'desc',
@@ -60,10 +60,9 @@ export const useOngoingCaseDataErrands = () => {
     return { [sortColumn]: sortOrder };
   }, [sortColumn, sortOrder]);
 
-  const mobileUpdate = useRef(isMaxLargeDevice ? true : false);
+  const mobileUpdate = useRef(isMaxMediumDevice ? true : false);
 
   const [filterObject, setFilterObject] = useState<{ [key: string]: string | boolean }>();
-  // const [shouldTriggerFilter, setShouldTriggerFilter] = useState(!manualFilterTrigger);
 
   const [shouldFetchErrands, setShouldFetchErrands] = useState(true);
 
@@ -72,43 +71,19 @@ export const useOngoingCaseDataErrands = () => {
   const errands = useMemo(() => {
     if (!shouldFetchErrands) return undefined;
     return errandsData;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldFetchErrands]);
-
-  //const errands = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
-
-  // const hasSyncedSelectedStatuses = useRef(false);
-
-  // useEffect(() => {
-  //   if (hasSyncedSelectedStatuses.current) return;
-
-  //   const current = getValues('status');
-  //   const hasChanged = JSON.stringify(current) !== JSON.stringify(selectedErrandStatuses);
-  //   if (hasChanged) {
-  //     setValue('status', selectedErrandStatuses);
-  //   }
-
-  //   hasSyncedSelectedStatuses.current = true;
-  // }, [selectedErrandStatuses, getValues, setValue]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-
-  // const setInitialFocus = () => {
-  //   setTimeout(() => {
-  //     initialFocus.current && initialFocus.current.focus();
-  //   });
-  // };
 
   useEffect(() => {
     setValue('status', selectedErrandStatuses);
     setTableValue('pageSize', 12);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedErrandStatuses]);
 
   useEffect(() => {
     if (mobileUpdate.current) {
-      mobileUpdate.current = false; 
-      return; 
+      mobileUpdate.current = false;
+      return;
     }
 
     const filterdata = store.get('filter');
@@ -152,12 +127,11 @@ export const useOngoingCaseDataErrands = () => {
       resetFilter(storedFilters);
       triggerFilter();
     }
-   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    
     const sortData = store.get('sort');
     const sort = JSON.parse(sortData);
     if (sortData) {
@@ -170,51 +144,30 @@ export const useOngoingCaseDataErrands = () => {
         store.set('sort', JSON.stringify({}));
         setTableValue('pageSize', sort.pageSize);
       }
-      // } else {
-      //   setTableValue('pageSize', tableForm.getValues('pageSize'));
-      //   setTableValue('sortOrder', tableForm.sortOrder);
-      //   setTableValue('sortColumn', tableForm.sortColumn);
-      // }
     }
   }, [setTableValue]);
 
-  // useEffect(() => {
-  //   setTableValue('page', 0);
-  // }, [filterObject, sortColumn, sortOrder, pageSize, setTableValue]);
-
-  // useEffect(() => {
-  //   if (errands) {
-  //     setTableValue('page', errands.page);
-  //     setTableValue('size', errands.size);
-  //     setTableValue('totalPages', errands.totalPages);
-  //     setTableValue('totalElements', errands.totalElements);
-  //   }
-  // }, [errands]);
-
-  //const isManualQueryUpdate = useRef(false);
-
   useDebounceEffect(
     () => {
-
       if (mobileUpdate.current) {
         mobileUpdate.current = false;
         return;
       }
       const fObj: { [key: string]: string | boolean } = {};
-  
+
       const multiValueFilters: Record<string, string[] | undefined> = {
         caseType: caseTypeFilter,
         status: statusFilter,
         priority: priorityFilter,
         channel: channelFilter,
       };
-  
+
       Object.entries(multiValueFilters).forEach(([key, value]) => {
         if (value && value.length) {
           fObj[key] = value.join(',');
         }
       });
-  
+
       if (startdate) {
         fObj.start = startdate;
       }
@@ -227,33 +180,12 @@ export const useOngoingCaseDataErrands = () => {
       if (ownerFilter) {
         fObj.stakeholders = user.username;
       }
-  
-      if (isMaxLargeDevice && queryFilter !== '' && queryFilter !== undefined && queryFilter !== null) {
-        const fObjMobile: { [key: string]: string | boolean } = {};
-        fObjMobile.query = queryFilter.replace(/\+/g, '').replace(/ /g, '+');
-        setFilterObject(fObjMobile);
-        setSelectedErrandStatuses([]);
-        store.set('filter', JSON.stringify(fObjMobile));
-        setSidebarLabel('');
-        mobileUpdate.current = true; // Sätt flaggan innan setValue
-        setValue('query', '');
-      } else {
-        setFilterObject(fObj);
-        store.set('filter', JSON.stringify(fObj));
-      }
+      setFilterObject(fObj);
+      store.set('filter', JSON.stringify(fObj));
     },
     200,
     [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, channelFilter, queryFilter]
   );
-  
-
-  // useDebounceEffect(
-  //   () => {
-  //     store.set('sort', JSON.stringify(watchTable()));
-  //   },
-  //   200,
-  //   [watchTable, sortObject, pageSize]
-  // );
 
   const currentValues = getValues();
   const selectedStatuses = selectedErrandStatuses.map((s) => ErrandStatus[s as keyof typeof ErrandStatus]);
@@ -263,7 +195,7 @@ export const useOngoingCaseDataErrands = () => {
     (currentValues.startdate ? 1 : 0) +
     (currentValues.enddate ? 1 : 0) +
     (currentValues.channel?.length || 0) +
-    (ownerFilter ? 1 : 0) + 
+    (ownerFilter ? 1 : 0) +
     (JSON.stringify(selectedStatuses) === JSON.stringify(ongoingStatuses) ? currentValues.status?.length : 0);
 
   return {

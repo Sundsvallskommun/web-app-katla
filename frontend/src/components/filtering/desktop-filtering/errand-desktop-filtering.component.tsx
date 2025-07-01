@@ -2,18 +2,16 @@ import { Admin } from '@services/user-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, cx, Link } from '@sk-web-gui/react';
 import { useState } from 'react';
-import { CasedataFilterQuery } from './errand-filter-query.component';
 import { CasedataFilterTags } from './casedata-filter-tags.component';
-import { IErrand } from '@interfaces/errand';
 import { CasedataFilterBase } from './errand-filter-base.component';
+import { CasedataFilterQuery } from './errand-filter-query.component';
 
 const CaseDataFiltering: React.FC<{
   ownerFilterHandler: (b: boolean) => void;
   ownerFilter?: boolean;
   administrators?: Admin[];
   numberOfFilters: number;
-  errands: IErrand[];
-}> = ({ numberOfFilters, ownerFilterHandler = () => false, ownerFilter = false, errands }) => {
+}> = ({ numberOfFilters, ownerFilterHandler = () => false, ownerFilter = false }) => {
   const [show, setShow] = useState<boolean>(true);
   return (
     <div className="flex flex-col w-full gap-16 py-19">
@@ -45,7 +43,7 @@ const CaseDataFiltering: React.FC<{
       <div className={cx(show ? 'visible' : 'hidden')}>
         <CasedataFilterBase ownerFilter={ownerFilter} ownerFilterHandler={ownerFilterHandler} />
         <div className="mt-16">
-          <CasedataFilterTags errands={errands} />
+          <CasedataFilterTags />
         </div>
       </div>
     </div>
