@@ -52,7 +52,7 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
   }
 
   return (
-    <GuiProvider colorScheme={colorScheme as ColorSchemeMode}>
+    <GuiProvider theme={theme} colorScheme={colorScheme as ColorSchemeMode}>
       <ConfirmationDialogContextProvider>
         <AppWrapper>{children}</AppWrapper>
       </ConfirmationDialogContextProvider>
