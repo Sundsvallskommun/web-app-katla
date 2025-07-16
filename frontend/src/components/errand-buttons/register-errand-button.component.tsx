@@ -40,7 +40,9 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     const data = getValues() as IErrand & { attachments: UploadFile[] };
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
 
-    data.channel = Channels.WEB_UI; //Change to correct channel when available
+    console.log('data', data);
+
+    data.channel = Channels.ESERVICE_KATLA;
     data.stakeholders = owners;
     data.status = {
       statusType: ErrandStatus.ArendeInkommit,
