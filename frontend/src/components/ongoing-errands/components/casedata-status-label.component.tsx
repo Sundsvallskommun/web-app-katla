@@ -28,7 +28,7 @@ export const CasedataStatusLabelComponent: React.FC<{ status: string; className?
       color = 'vattjom';
       break;
     case ErrandStatus.VantarPaKomplettering:
-    case ErrandStatus.InterntAterkoppling:
+    case ErrandStatus.InternAterkoppling:
       color = 'gronsta';
       inverted = true;
       icon = 'clock-10';
