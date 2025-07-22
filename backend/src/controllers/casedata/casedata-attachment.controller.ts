@@ -20,7 +20,7 @@ interface ResponseData {
 @Controller()
 export class CaseDataAttachmentController {
   private apiService = new ApiService();
-  SERVICE = `case-data/11.0`;
+  SERVICE = `case-data/11.5`;
 
   @Post('/casedata/:municipalityId/errands/:errandId/attachments')
   @HttpCode(201)
@@ -37,7 +37,6 @@ export class CaseDataAttachmentController {
     const baseURL = apiURL(this.SERVICE);
 
     const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/attachments`;
-    console.log('files:', files);
     const data: CreateAttachmentDto = {
       file: files[0].buffer.toString('base64'),
       category: attachmentData.category,

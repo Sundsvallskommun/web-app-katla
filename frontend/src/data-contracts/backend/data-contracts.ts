@@ -217,6 +217,56 @@ export interface PatchNotificationDto {
   globalAcknowledged?: boolean;
 }
 
+export interface MessageDto {
+  email?: string;
+  contactMeans?: string;
+  subject?: string;
+  text: string;
+  attachUtredning: string;
+  errandId: string;
+  municipalityId: string;
+  messageClassification: string;
+  reply_to: string;
+  references: string;
+  files?: any;
+}
+
+export interface SmsDto {
+  phonenumber: string;
+  text: string;
+  errandId: string;
+  municipalityId: string;
+}
+
+export interface DecisionMessageDto {
+  errandId: string;
+}
+
+export interface MessageResponse {
+  messageId?: string;
+  errandId?: string;
+  municipalityId?: string;
+  namespace?: string;
+  direction?: string;
+  familyId?: string;
+  externalCaseId?: string;
+  message?: string;
+  sent?: string;
+  subject?: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  messageType?: string;
+  mobileNumber?: string;
+  recipients?: any[];
+  email?: string;
+  userId?: string;
+  viewed?: string;
+  classification?: string;
+  attachments?: any[];
+  emailHeaders?: any[];
+}
+
 export enum ExtraParametersDtoApplicationRoleEnum {
   SELF = 'SELF',
   GUARDIAN = 'GUARDIAN',

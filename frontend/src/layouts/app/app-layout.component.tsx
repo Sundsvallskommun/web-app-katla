@@ -2,9 +2,9 @@
 
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
 import { AppWrapper } from '@contexts/app.context';
+import { ColorSchemeMode, ConfirmationDialogContextProvider, defaultTheme, GuiProvider } from '@sk-web-gui/react';
 import store from '@services/storage-service';
-import { getMe } from '@services/user-service';
-import { ColorSchemeMode, defaultTheme, GuiProvider } from '@sk-web-gui/react';
+import { getMe } from '@services/user-service';;
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
 import updateLocale from 'dayjs/plugin/updateLocale';
@@ -53,7 +53,9 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
 
   return (
     <GuiProvider theme={theme} colorScheme={colorScheme as ColorSchemeMode}>
-      <AppWrapper>{children}</AppWrapper>
+      <ConfirmationDialogContextProvider>
+        <AppWrapper>{children}</AppWrapper>
+      </ConfirmationDialogContextProvider>
     </GuiProvider>
   );
 };

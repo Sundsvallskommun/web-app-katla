@@ -3,7 +3,7 @@
 import { CasedataFilterSidebarStatusSelector } from '@components/filtering/desktop-filtering/errand-filter-sidebarstatus-selector.component';
 import { CaseDataFilter, CaseStatusValues } from '@components/filtering/errand-filter';
 import { MainErrandsSidebar } from '@components/main-errands-sidebar/main-errands-sidebar.component';
-import { Button, CookieConsent, Link, useThemeQueries } from '@sk-web-gui/react';
+import { Button, CookieConsent, useThemeQueries } from '@sk-web-gui/react';
 import NextLink from 'next/link';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
