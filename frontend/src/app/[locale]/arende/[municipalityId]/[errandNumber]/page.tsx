@@ -9,8 +9,6 @@ import { OtherParties } from '@components/errandinformation/other-parties.compon
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { CasedataMessagesTab } from '@components/messages/message.component';
-import { SaveErrandButton } from '@components/save-errand-button.component';
-import { RegisterErrandButton } from '@components/errand-buttons/register-errand-button.component';
 import { SaveErrandButton } from '@components/errand-buttons/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
