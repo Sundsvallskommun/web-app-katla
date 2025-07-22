@@ -1,14 +1,15 @@
-import { User } from '@/interfaces/users.interface';
-import { Role } from '@interfaces/role';
-import { CreateStakeholderDto } from '@interfaces/stakeholder.interface';
-import ApiService from './api.service';
-import { latestBy } from '@/utils/util';
-import { Errand as ErrandDTO, Stakeholder as StakeholderDTO } from '@/data-contracts/case-data/data-contracts';
 import { CASEDATA_NAMESPACE } from '@/config';
+import { Errand as ErrandDTO, Stakeholder as StakeholderDTO } from '@/data-contracts/case-data/data-contracts';
+import { User } from '@/interfaces/users.interface';
+import { latestBy } from '@/utils/util';
+import { Role } from '@interfaces/role';
+import ApiService from './api.service';
 
-const SERVICE = `case-data/11.0`;
+const SERVICE = `case-data/11.5`;
 
 export const getOwnerStakeholder: (e: ErrandDTO) => StakeholderDTO = e => e.stakeholders.find(s => s.roles.includes(Role.APPLICANT));
+
+export const getHealthcCreStaffStakeholder: (e: ErrandDTO) => StakeholderDTO = e => e.stakeholders.find(s => s.roles.includes(Role.ADMINISTRATOR));
 
 export const getOwnerStakeholderEmail: (e: ErrandDTO) => string = e => {
   const owner = getOwnerStakeholder(e);

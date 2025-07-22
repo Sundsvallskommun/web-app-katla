@@ -31,6 +31,9 @@ export interface AppContextInterface {
   messages: MessageNode[];
   setMessages: (messages: MessageNode[]) => void;
 
+  conversation: MessageNode[];
+  setConversation: (conversation: MessageNode[]) => void;
+
   messageTree: MessageNode[];
   setMessageTree: (messages: MessageNode[]) => void;
 
@@ -101,6 +104,9 @@ export const AppContext = createContext<AppContextInterface>({
 
   messages: [],
   setMessages: () => {},
+
+  conversation: [],
+  setConversation: () => {},
 
   messageTree: [],
   setMessageTree: () => {},

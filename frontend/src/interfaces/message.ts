@@ -70,4 +70,5 @@ export interface MessageResponse {
   classification?: string;
   attachments?: Attachment[];
   emailHeaders?: EmailHeader[];
+  conversationId?: string;
 }

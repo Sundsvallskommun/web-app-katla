@@ -58,12 +58,11 @@ const FileUploadComponent: React.FC = () => {
           </Switch>
         </div>
         <FileUpload.List isEdit={isEdit}>
-          {files.map((file, i) => (
-            <div data-cy={`fileupload-list-item-${i}`}>
+          {files.map((file, key) => (
+            <div key={file.file?.name || `file-${key}`} data-cy={`fileupload-list-item-${key}`}>
               <FileUpload.ListItem
-                key={file.file?.name || `file-${i}`}
                 file={file}
-                index={i}
+                index={key}
                 nameProps={{
                   inputProps: {
                     onChange: handleOnChangeName(file),

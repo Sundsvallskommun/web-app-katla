@@ -4,11 +4,11 @@
 
 Dessa APIer används i projektet, applikationsanvändaren i WSO2 måste prenumerera på dessa. Systemet utgår ifrån /backend/api-config.ts där dessa står specificerade.
 
-| API             | Version |
-| --------------- | ------: |
-| SimulatorServer |     2.0 |
-| Citizen         |     3.0 |
-| CaseData        |    11.0 |
+| API                 | Version |
+| ------------------- | ------: |
+| SimulatorServer     |     2.0 |
+| Citizen             |     3.0 |
+| CaseData            |    11.5 |
 
 ## Utveckling
 

@@ -249,7 +249,6 @@ export const sendAttachments = (
       mimeType: extension === 'msg' ? 'application/vnd.ms-outlook' : fileItem.type,
       file: fileData,
     };
-
     const buf = Buffer.from(obj.file, 'base64');
     const blob = new Blob([buf], { type: obj.mimeType });
 
