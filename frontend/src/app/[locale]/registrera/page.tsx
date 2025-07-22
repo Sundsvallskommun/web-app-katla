@@ -9,8 +9,8 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
-import { RegisterErrandButton } from '@components/register-errand-button.component';
-import { DraftErrandButton } from '@components/save-draft-errand-button.component';
+import { RegisterErrandButton } from '@components/errand-buttons/register-errand-button.component';
+import { DraftErrandButton } from '@components/errand-buttons/save-draft-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';

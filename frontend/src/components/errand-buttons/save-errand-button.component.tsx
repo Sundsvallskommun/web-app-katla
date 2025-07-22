@@ -7,14 +7,23 @@ import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import { Button, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/react';
 import { useContext } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
+import { scrollToFirstError } from './errand-buttons-utils';
 
 export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
-  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const onSubmit = async () => {
     setIsLoading(true);
+
+    const isValid = await trigger();
+    if (!isValid) {
+      setIsLoading(false);
+      scrollToFirstError(formState.errors);
+      return;
+    }
+
     const data = getValues() as IErrand & { attachments: UploadFile[] };
 
     data.stakeholders = owners;

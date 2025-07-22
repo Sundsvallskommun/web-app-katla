@@ -34,7 +34,12 @@ import dayjs from 'dayjs';
 import { useCallback, useContext, useEffect } from 'react';
 import { ApiResponse, apiService } from './api-service';
 import { saveErrandNote } from './casedata-errand-notes-service';
-import { replaceExtraParameter } from './casedata-extra-parameters-service';
+import {
+  extractExtraParameters,
+  extraParametersToUppgiftMapper,
+  replaceExtraParameter,
+  saveExtraParameters,
+} from './casedata-extra-parameters-service';
 
 interface CasedataFormModel {
   id: string;
@@ -543,7 +548,7 @@ interface SaveErrandResponse {
 
 export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Promise<SaveErrandResponse> = (
   data,
-  municipalityId: string
+  municipalityId
 ) => {
   const result: SaveErrandResponse = {
     errandSuccessful: false,
@@ -552,6 +557,9 @@ export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Pro
   };
 
   const errandData: Partial<RegisterErrandData> = createApiErrandData(data);
+  const uppgiftFields = extraParametersToUppgiftMapper(data)[data.caseType ?? ''] ?? [];
+  const extractedExtraParameters = extractExtraParameters(uppgiftFields, () => data);
+
   return errandData.id ?
       apiService
         .patch<ApiResponse<ApiErrand>, Partial<RegisterErrandData>>(
@@ -561,6 +569,11 @@ export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Pro
         .then(async () => {
           result.errandSuccessful = true;
           result.errandId = errandData.id;
+
+          if (extractedExtraParameters.length > 0) {
+            await saveExtraParameters(municipalityId, extractedExtraParameters, data as IErrand);
+          }
+
           return result;
         })
         .catch((e) => {
@@ -572,13 +585,18 @@ export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Pro
         .then(async (res) => {
           result.errandSuccessful = true;
           result.errandId = res.data.data.id.toString();
+
+          if (result.errandId && extractedExtraParameters.length > 0) {
+            const { errand } = await getErrand(municipalityId, result.errandId);
+            if (errand) {
+              await saveExtraParameters(municipalityId, extractedExtraParameters, errand);
+            }
+          }
+
           return result;
         })
-        .finally(() => {
-          return result;
-        })
-        .catch(() => {
-          console.error('Something went wrong when creating errand');
+        .catch((e) => {
+          console.error('Something went wrong when creating errand', e);
           return result;
         });
 };
