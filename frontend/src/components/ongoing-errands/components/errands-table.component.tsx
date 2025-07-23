@@ -4,7 +4,7 @@ import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { CasedataStatusLabelComponent } from './casedata-status-label.component';
+import { StatusLabelComponent } from './casedata-status-label.component';
 import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
 import { FTCaseType } from '@interfaces/case-type';
@@ -71,9 +71,7 @@ export const ErrandsTable: React.FC = () => {
         className="cursor-pointer"
       >
         <Table.HeaderColumn scope="row" className="w-full w-max-[15rem] whitespace-nowrap text-ellipsis table-caption">
-          <CasedataStatusLabelComponent
-            status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string}
-          />
+          <StatusLabelComponent status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string} />
         </Table.HeaderColumn>
         <Table.Column scope="row" className="font-bold w-full whitespace-nowrap overflow-x-hidden">
           {getCaseLabels()[errand.caseType as FTCaseType] ?? errand.caseType}

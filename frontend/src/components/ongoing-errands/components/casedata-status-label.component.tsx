@@ -3,13 +3,14 @@ import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Label } from '@sk-web-gui/react';
 import { IconName } from 'lucide-react/dynamic';
 
-export const CasedataStatusLabelComponent: React.FC<{ status: string; className?: string }> = ({
+export const StatusLabelComponent: React.FC<{ status: string | undefined; className?: string }> = ({
   status,
   className = '',
 }) => {
   let color,
     inverted = false,
     icon = null;
+
   switch (status) {
     case ErrandStatus.ArendeAvslutat:
       color = 'primary';

@@ -8,6 +8,8 @@ import { AppContext } from '@contexts/app-context-interface';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import { useThemeQueries } from '@sk-web-gui/react';
 import { getMenuGroups } from '@components/errand-header/menu-groups';
+import { StatusLabelComponent } from '@components/ongoing-errands/components/casedata-status-label.component';
+import { SidebarMode } from '@interfaces/sidebarmode';
 
 export const ErrandHeader: React.FC = () => {
   const { user, errand } = useContext(AppContext);
@@ -21,7 +23,11 @@ export const ErrandHeader: React.FC = () => {
       </a>
       <Divider orientation="vertical" className="mx-[2.4rem]" />
       {!isMaxMediumDevice && (
-        <strong className="text-large">{!errand.errandNumber ? 'Nytt ärende' : `Ärende ${errand.errandNumber}`}</strong>
+        <>
+          <StatusLabelComponent status={errand?.status?.statusType} />
+          <strong className="text-large ml-8 font-bold">{!errand.errandNumber ? 'Nytt ärende' : 'Ärende:'}</strong>
+          {errand.errandNumber && <span className="text-large ml-4">{` ${errand.errandNumber}`}</span>}
+        </>
       )}
     </div>
   );
@@ -90,7 +96,7 @@ export const ErrandHeader: React.FC = () => {
             <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} />
           </div>
         </div>
-      : <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} withSidebar={false} />}
+      : <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} sidebarMode={SidebarMode.NONE} />}
     </>
   );
 };

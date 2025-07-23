@@ -1,4 +1,4 @@
-import { CasedataStatusLabelComponent } from '@components/ongoing-errands/components/casedata-status-label.component';
+import { StatusLabelComponent } from '@components/ongoing-errands/components/casedata-status-label.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { FTCaseType, getCaseShortLabels } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
@@ -18,7 +18,7 @@ const MobileErrandItem: React.FC<ErrandItemProps> = ({ errand }) => {
     <div className="py-4">
       <div className="flex min-h-[8rem] items-end self-stretch rounded-[20px] border border-opacity-30 pt-[2.0rem] pb-[1.2rem] pl-[2.0rem] pr-[0.8rem] gap-4">
         <div className="flex flex-1 flex-col">
-          <CasedataStatusLabelComponent
+          <StatusLabelComponent
             status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string}
             className="text-white font-arial text-md lining-nums proportional-nums w-fit max-w-full py-[0.6rem] px-[1.2rem] rounded-[1.2rem] text-center"
           />
