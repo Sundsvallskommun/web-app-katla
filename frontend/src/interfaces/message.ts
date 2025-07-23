@@ -55,7 +55,7 @@ export interface MessageResponse {
   direction?: string;
   familyId?: string;
   externalCaseId?: string;
-  message?: string;
+  message: string;
   sent?: string;
   subject?: string;
   username?: string;

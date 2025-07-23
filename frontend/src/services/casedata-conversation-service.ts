@@ -154,14 +154,12 @@ export const sendInternalMessage = (
 
 export const getConversationAttachment: (
   municipalityId: string,
-  namespace: string,
   errandId: number,
   conversationId: string,
   messageId: string,
   attachmentId: string
 ) => Promise<ApiResponse<Attachment>> = (
   municipalityId,
-  namespace,
   errandId,
   conversationId,
   messageId,
@@ -171,7 +169,7 @@ export const getConversationAttachment: (
     console.error('No errand id found, cannot fetch. Returning.');
   }
 
-  const url = `casedata/${municipalityId}/${namespace}/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
+  const url = `casedata/${municipalityId}/namespace/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
   return apiService
     .get<ApiResponse<Attachment>>(url)
     .then((res) => {
