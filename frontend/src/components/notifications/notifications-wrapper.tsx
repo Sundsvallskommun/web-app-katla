@@ -5,12 +5,18 @@ import { Button, Divider, cx, useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect } from 'react';
 import { NotificationItem } from './notification-item';
 import { getFilteredNotifications, sortByCreatedDesc } from './notification-utils';
-
-export const NotificationsWrapper: React.FC<{
+import { SidebarMode } from '@interfaces/sidebarmode';
+export interface NotificationsWrapperProps {
   show: boolean;
   setShow: (arg0: boolean) => void;
-  withSidebar?: boolean;
-}> = ({ show, setShow, withSidebar = true }) => {
+  sidebarMode?: SidebarMode;
+}
+
+export const NotificationsWrapper: React.FC<NotificationsWrapperProps> = ({
+  show,
+  setShow,
+  sidebarMode = SidebarMode.EXPANDED,
+}) => {
   const { municipalityId, notifications, setNotifications } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
   const { user } = useContext(AppContext);
@@ -33,13 +39,27 @@ export const NotificationsWrapper: React.FC<{
   const acknowledgedNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => n.acknowledged));
   const newNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => !n.acknowledged));
 
+  // Overlay till vänster om panelen (bara desktop)
+  const overlayClass =
+    isMaxMediumDevice ? ''
+    : sidebarMode === SidebarMode.EXPANDED ? 'w-[calc(100vw-32rem)] ml-[32rem]'
+    : sidebarMode === SidebarMode.COLLAPSED ? 'w-[calc(100vw-5.6rem)] ml-[5.6rem]'
+    : 'w-full';
+
+  // Panelens position och bredd
+  const panelClass =
+    isMaxMediumDevice ? 'w-full left-0'
+    : sidebarMode === SidebarMode.EXPANDED ? 'w-[48rem] left-[32rem]'
+    : sidebarMode === SidebarMode.COLLAPSED ? 'w-[48rem] left-[5.6rem]'
+    : 'w-[48rem] left-0';
+
   return (
     <>
       {show && !isMaxMediumDevice && (
         <div
           className={cx(
             'fixed top-0 bottom-0 h-full bg-primitives-overlay-darken-6 transition-opacity duration-150 z-[10]',
-            withSidebar ? 'w-[calc(100vw-32rem)] ml-[32rem]' : 'w-full'
+            overlayClass
           )}
         />
       )}
@@ -48,9 +68,7 @@ export const NotificationsWrapper: React.FC<{
         <div
           className={cx(
             'fixed top-0 right-0 bottom-0 bg-background-content z-[20] transition-all ease-in-out duration-150',
-            isMaxMediumDevice ? 'w-full left-0'
-            : withSidebar ? 'w-[48rem] left-[32rem]'
-            : 'w-[48rem] left-[5.6rem]'
+            panelClass
           )}
         >
           <div className="sticky top-0 z-10 bg-background-content py-16 px-40 w-full flex justify-between items-center shadow-lg h-[8rem]">
@@ -72,7 +90,7 @@ export const NotificationsWrapper: React.FC<{
             data-cy="notifications-panel"
             className="flex flex-col gap-24 overflow-y-auto max-h-[calc(100vh-8rem)] px-24 pb-24 pt-0"
           >
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 mt-[2.5rem]">
               <Divider.Section>
                 <div className="flex gap-sm items-center">
                   <h2 className="text-h4-sm">Nya</h2>

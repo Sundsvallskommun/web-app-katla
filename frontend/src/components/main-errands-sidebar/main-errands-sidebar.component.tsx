@@ -9,6 +9,7 @@ import NextLink from 'next/link';
 import { useContext, useState } from 'react';
 import { getApplicationEnvironment } from '@services/application-service';
 import { appConfig } from 'src/config/app-config';
+import { SidebarMode } from '@interfaces/sidebarmode';
 
 interface SidebarProps {
   open: boolean;
@@ -91,7 +92,11 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, chil
         </div>
       </div>
 
-      <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} withSidebar={open} />
+      <NotificationsWrapper
+        show={showNotifications}
+        setShow={setShowNotifications}
+        sidebarMode={open ? SidebarMode.EXPANDED : SidebarMode.COLLAPSED}
+      />
     </aside>
   );
 };

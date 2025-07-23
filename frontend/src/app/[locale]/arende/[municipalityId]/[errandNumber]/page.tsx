@@ -126,7 +126,7 @@ const Arende: React.FC = () => {
         <>
           <ErrandHeader />
 
-          <div className="flex flex-col h-screen w-full overflow-hidden bg-background-100">
+          <div className="flex flex-col w-full min-h-screen overflow-hidden bg-background-100">
             <main
               className={`
         flex-grow flex justify-center
@@ -152,7 +152,7 @@ const Arende: React.FC = () => {
       : <FormProvider {...method}>
           <ErrandHeader />
 
-          <div className="flex flex-col w-full overflow-hidden bg-background-100">
+          <div className="flex flex-col w-full min-h-screen overflow-hidden bg-background-100">
             <main
               className={`
         flex-grow flex justify-center
