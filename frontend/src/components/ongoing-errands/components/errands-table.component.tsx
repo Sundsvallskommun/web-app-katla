@@ -1,5 +1,5 @@
 import NextLink from 'next/link';
-import { Button, Callout, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
+import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { AppContext } from '@contexts/app-context-interface';
@@ -7,7 +7,6 @@ import { IErrand } from '@interfaces/errand';
 import { CasedataStatusLabelComponent } from './casedata-status-label.component';
 import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
-import { Priority } from '@interfaces/priority';
 import { FTCaseType } from '@interfaces/case-type';
 import { PriorityComponent } from '@components/priority/priority.component';
 
@@ -85,7 +84,7 @@ export const ErrandsTable: React.FC = () => {
         </Table.Column>
 
         <Table.Column>
-        <PriorityComponent priority={errand.priority} />
+          <PriorityComponent priority={errand.priority} />
         </Table.Column>
 
         <Table.Column>{errand.channel || ''}</Table.Column>
