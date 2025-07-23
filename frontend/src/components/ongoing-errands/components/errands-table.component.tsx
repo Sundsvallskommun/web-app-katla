@@ -9,6 +9,7 @@ import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@ser
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
 import { Priority } from '@interfaces/priority';
 import { FTCaseType } from '@interfaces/case-type';
+import { PriorityComponent } from '@components/priority/priority.component';
 
 export const ErrandsTable: React.FC = () => {
   const { watch, setValue, register } = useFormContext<TableForm>();
@@ -84,17 +85,7 @@ export const ErrandsTable: React.FC = () => {
         </Table.Column>
 
         <Table.Column>
-          <>
-            <Callout
-              color={
-                errand.priority === Priority.HIGH ? 'error'
-                : errand.priority === Priority.MEDIUM ?
-                  'warning'
-                : 'vattjom'
-              }
-            />
-            {errand.priority}
-          </>
+        <PriorityComponent priority={errand.priority} />
         </Table.Column>
 
         <Table.Column>{errand.channel || ''}</Table.Column>

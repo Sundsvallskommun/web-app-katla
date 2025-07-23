@@ -148,23 +148,6 @@ export const isErrandLocked: (errand: IErrand | CasedataFormModel) => boolean = 
   return errand?.status === ErrandStatus.ArendeAvslutat || phaseChangeInProgress(errand as IErrand);
 };
 
-export const getPriorityColor = (priority: keyof typeof Priority): 'error' | 'warning' | 'vattjom' => {
-  switch (priority) {
-    case 'HIGH':
-      return 'error';
-    case 'MEDIUM':
-      return 'warning';
-    case 'LOW':
-      return 'vattjom';
-  }
-};
-
-export const getPriorityLabels = () => ({
-  HIGH: 'Hög',
-  MEDIUM: 'Mellan',
-  LOW: 'Låg',
-});
-
 export const emptyErrand: Partial<IErrand> = {
   caseType: '',
   channel: Channels.ESERVICE_KATLA,
