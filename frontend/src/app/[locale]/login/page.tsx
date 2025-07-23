@@ -83,22 +83,25 @@ const Login: React.FC = () => {
 
   return (
     <EmptyLayout>
-      <main>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="max-w-5xl w-full flex flex-col text-light-primary bg-inverted-background-content p-20 shadow-lg text-left">
-            <div className="mb-14">
-              <h1 className="mb-10 text-xl">{appConfig.applicationName}</h1>
-              {/* <p className="my-0">{t('login:description')}</p> */}
-            </div>
-
-            <Button inverted onClick={() => onLogin()} ref={initalFocus} data-cy="loginButton">
-              {capitalize(t('common:login'))}
-            </Button>
-
-            {errorMessage && <FormErrorMessage className="mt-lg">{errorMessage}</FormErrorMessage>}
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="max-w-5xl w-full flex flex-col bg-background-content p-20 shadow-lg text-left">
+          <div className="text-center">
+            <h3 className="mb-20">
+              Logga in till <br aria-hidden />
+              {appConfig.applicationName}
+            </h3>
+            {errorMessage && (
+              <FormErrorMessage className="mt-lg">
+                <p className="mb-20">Det gick inte att logga in. {errorMessage}</p>
+              </FormErrorMessage>
+            )}
           </div>
+
+          <Button color="vattjom" onClick={() => onLogin()} ref={initalFocus} data-cy="loginButton">
+            {capitalize(t('common:login'))}
+          </Button>
         </div>
-      </main>
+      </div>
     </EmptyLayout>
   );
 };
