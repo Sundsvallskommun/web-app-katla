@@ -58,17 +58,17 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const ErrorMessage = ({ error }: { error?: string }) =>
     error ? <span className="text-error text-md">{error}</span> : null;
 
-  function getConditionalValidationRules(
+  function getConditionalValidationRules<T extends Record<string, unknown>>(
     field: UppgiftField,
-    getValues: () => any
-  ): { validate?: (value: any) => true | string } {
+    getValues: () => T
+  ): { validate?: (value: unknown) => true | string } {
     if (!field.dependsOn) return {};
 
     const message =
       field.dependsOn.find((dep) => dep.validationMessage)?.validationMessage || 'Detta fält är obligatoriskt';
 
     return {
-      validate: (value: any) => {
+      validate: (value: unknown) => {
         const allValues = getValues();
         const shouldValidate = field.dependsOn?.some((dep) => {
           const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
@@ -85,11 +85,11 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
   function validateAndSetError(
     field: UppgiftField,
-    getValues: () => Record<string, any>,
+    getValues: () => Record<string, unknown>,
     setError: (name: string, error: { type: string; message?: string }) => void,
     clearErrors: (name: string) => void,
     name: string,
-    value: any
+    value: unknown
   ) {
     const rules = getConditionalValidationRules(field, getValues);
     if (rules.validate) {
@@ -102,7 +102,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     }
   }
 
-  const validationRules = getConditionalValidationRules(field, watch);
+  const validationRules = getConditionalValidationRules(field, getValues);
 
   return (
     <FormControl className="flex flex-col gap-2 items-start justify-start max-w-[80rem] w-full">
@@ -176,7 +176,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
             control={control}
             rules={{
               ...validationRules,
-              validate: (value: any) => {
+              validate: (value: unknown) => {
                 const hasSelection = Array.isArray(value) && value.length > 0;
                 const conditionalValidation = getConditionalValidationRules(field, getValues).validate;
 

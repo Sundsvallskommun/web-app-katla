@@ -69,7 +69,7 @@ const Arende: React.FC = () => {
               : values.length === 1 ? values[0]
               : '';
 
-            method.setValue(key as any, valueToSet);
+            method.setValue(`extraParameterValues.${key}`, valueToSet);
           });
 
           if (res.errand.attachments) {
