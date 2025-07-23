@@ -166,7 +166,7 @@ export class CaseDataConversationController {
   }
 
   @Get(
-    '/casedata/:municipalityId/:namespace/errands/:errandId/communication/conversations/:conversationId/messages/:messageId/attachments/:attachmentId',
+    '/casedata/:municipalityId/namespace/errands/:errandId/communication/conversations/:conversationId/messages/:messageId/attachments/:attachmentId',
   )
   @OpenAPI({ summary: 'Get an attachment' })
   @UseBefore(authMiddleware)
@@ -174,12 +174,11 @@ export class CaseDataConversationController {
     @Req() req: RequestWithUser,
     @Param('errandId') errandId: string,
     @Param('municipalityId') municipalityId: string,
-    @Param('namespace') namespace: string,
     @Param('conversationId') conversationId: string,
     @Param('messageId') messageId: string,
     @Param('attachmentId') attachmentId: string,
   ): Promise<{ data: any; message: string }> {
-    const url = `${municipalityId}/${namespace}/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
+    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
     const baseURL = apiURL(this.SERVICE);
     const response = await this.apiService.get<any>({ url, baseURL, responseType: 'arraybuffer' }, req.user).catch(e => {
       console.log('Something went wrong when getting conversation attachment: ' + e);
