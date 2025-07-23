@@ -131,7 +131,7 @@ export const replaceExtraParameter = (extraParameters: ExtraParameter[], newPara
     : [...extraParameters, newParameter];
 };
 
-export const extractExtraParameters = <T extends Record<string, any>>(
+export const extractExtraParameters = <T extends Record<string, unknown>>(
   fields: UppgiftField[],
   getValues: () => T
 ): ExtraParameter[] => {
