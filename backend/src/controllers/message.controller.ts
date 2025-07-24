@@ -1,3 +1,4 @@
+import { apiServiceName } from '@/config/api-config';
 import {
   AttachmentResponse,
   Classification,
@@ -187,8 +188,8 @@ const MESSAGE_SUBJECT = 'Meddelande gällande er ansökan om parkeringstillstån
 @Controller()
 export class MessageController {
   private apiService = new ApiService();
-  SERVICE = `case-data/11.5`;
-  MESSAGING_SERVICE = `messaging/7.0`;
+  SERVICE = apiServiceName('case-data');
+  MESSAGING_SERVICE = apiServiceName('messaging');
 
   @Post('/casedata/:municipalityId/message/decision')
   @HttpCode(201)

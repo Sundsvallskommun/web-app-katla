@@ -4,8 +4,9 @@ import { User } from '@/interfaces/users.interface';
 import { latestBy } from '@/utils/util';
 import { Role } from '@interfaces/role';
 import ApiService from './api.service';
+import { apiServiceName } from '@/config/api-config';
 
-const SERVICE = `case-data/11.5`;
+const SERVICE = apiServiceName('case-data');
 
 export const getOwnerStakeholder: (e: ErrandDTO) => StakeholderDTO = e => e.stakeholders.find(s => s.roles.includes(Role.APPLICANT));
 

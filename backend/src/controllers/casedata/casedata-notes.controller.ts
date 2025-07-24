@@ -11,6 +11,7 @@ import { apiURL } from '@/utils/util';
 import { validateAction } from '@services/errand.service';
 import { Errand as ErrandDTO, Note as NoteDTO } from '@/data-contracts/case-data/data-contracts';
 import { CreateErrandNoteDto } from '@/interfaces/errand-note.interface';
+import { apiServiceName } from '@/config/api-config';
 
 export interface ResponseData {
   data: any;
@@ -20,7 +21,7 @@ export interface ResponseData {
 @Controller()
 export class CasedataNotesController {
   private apiService = new ApiService();
-  SERVICE = `case-data/11.5`;
+  SERVICE = apiServiceName('case-data');
 
   @Patch('/casedata/:municipalityId/errands/:id/notes')
   @HttpCode(201)

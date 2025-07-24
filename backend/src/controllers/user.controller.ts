@@ -1,4 +1,5 @@
 import { MUNICIPALITY_ID } from '@/config';
+import { apiServiceName } from '@/config/api-config';
 import { PortalPersonData } from '@/data-contracts/employee/data-contracts';
 import { HttpException } from '@/exceptions/HttpException';
 import { RequestWithUser } from '@/interfaces/auth.interface';
@@ -41,6 +42,7 @@ interface EmployeeAddress {
 @Controller()
 export class UserController {
   private apiService = new ApiService();
+  SERVICE = apiServiceName('employee');
 
   @Get('/me')
   @OpenAPI({ summary: 'Return current user' })
@@ -77,7 +79,7 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    const url = `employee/2.0/${MUNICIPALITY_ID}/${personId}/personimage`;
+    const url = `${this.SERVICE}/${MUNICIPALITY_ID}/${personId}/personimage`;
     const res = await this.apiService.get<any>(
       {
         url,
@@ -102,7 +104,7 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    const url = `employee/2.0/${MUNICIPALITY_ID}/${personId}/personimage`;
+    const url = `${this.SERVICE}/${MUNICIPALITY_ID}/${personId}/personimage`;
     const res = await this.apiService.get<any>(
       {
         url,
@@ -127,7 +129,7 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    const url = `employee/2.0/${MUNICIPALITY_ID}/portalpersondata/PERSONAL/${adaccount}`;
+    const url = `${this.SERVICE}/${MUNICIPALITY_ID}/portalpersondata/PERSONAL/${adaccount}`;
     const res = await this.apiService.get<PortalPersonData>(
       {
         url,
