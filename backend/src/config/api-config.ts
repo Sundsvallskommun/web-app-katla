@@ -21,3 +21,8 @@ export const APIS = [
     version: '7.0',
   },
 ] as const;
+
+export function apiServiceName(name: string): string {
+  const api = APIS.find(a => a.name === name);
+  return api ? `${api.name}/${api.version}` : name;
+}

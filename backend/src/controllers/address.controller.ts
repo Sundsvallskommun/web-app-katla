@@ -1,3 +1,4 @@
+import { apiServiceName } from '@/config/api-config';
 import { logger } from '@/utils/logger';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import authMiddleware from '@middlewares/auth.middleware';
@@ -78,15 +79,17 @@ interface PersonIdResponseData {
 @Controller()
 export class AddressController {
   private apiService = new ApiService();
+  SERVICE = apiServiceName('citizen');
+  EMPLOYEE_SERVICE = apiServiceName('employee');
 
   @Post('/address/')
   @OpenAPI({ summary: 'Return adress for given person number' })
   @UseBefore(authMiddleware, validationMiddleware(SsnPayload, 'body'))
   async cases(@Req() req: RequestWithUser, @Res() response: any, @Body() ssnPayload: SsnPayload): Promise<ResponseData> {
-    const guidUrl = `citizen/3.0/${process.env.MUNICIPALITY_ID}/${ssnPayload.ssn}/guid`;
+    const guidUrl = `${this.SERVICE}/${process.env.MUNICIPALITY_ID}/${ssnPayload.ssn}/guid`;
     const guidRes = await this.apiService.get<string>({ url: guidUrl }, req.user);
 
-    const url = `citizen/3.0/${process.env.MUNICIPALITY_ID}/${guidRes.data}`;
+    const url = `${apiServiceName('citizen')}/${process.env.MUNICIPALITY_ID}/${guidRes.data}`;
     const res = await this.apiService.get<Citizenaddress>({ url }, req.user);
 
     return { data: res.data, message: 'success' } as ResponseData;
@@ -96,10 +99,10 @@ export class AddressController {
   @OpenAPI({ summary: 'Return personId for given person number' })
   @UseBefore(authMiddleware, validationMiddleware(SsnPayload, 'body'))
   async personId(@Req() req: RequestWithUser, @Res() response: any, @Body() ssnPayload: SsnPayload): Promise<PersonIdResponseData> {
-    const guidUrl = `citizen/3.0/${process.env.MUNICIPALITY_ID}/${ssnPayload.ssn}/guid`;
+    const guidUrl = `${this.SERVICE}/${process.env.MUNICIPALITY_ID}/${ssnPayload.ssn}/guid`;
     const guidRes = await this.apiService.get<string>({ url: guidUrl }, req.user);
 
-    const url = `citizen/3.0/${process.env.MUNICIPALITY_ID}/citizen/${guidRes.data}`;
+    const url = `${this.SERVICE}/${process.env.MUNICIPALITY_ID}/citizen/${guidRes.data}`;
     const res = await this.apiService.get<Citizenaddress>({ url }, req.user);
 
     return { data: { personId: res.data.personId }, message: 'success' } as PersonIdResponseData;
@@ -113,7 +116,7 @@ export class AddressController {
     @Param('loginName') loginName: string,
     @Res() response: any,
   ): Promise<{ data: EmployeeAddress; message: string }> {
-    const url = `employee/2.0/${process.env.MUNICIPALITY_ID}/portalpersondata/PERSONAL/${loginName}`;
+    const url = `${this.EMPLOYEE_SERVICE}/${process.env.MUNICIPALITY_ID}/portalpersondata/PERSONAL/${loginName}`;
     const res = await this.apiService.get<EmployeeAddress>({ url }, req.user).catch(e => {
       logger.error('Error when fetching user information');
       throw e;
@@ -129,7 +132,7 @@ export class AddressController {
     @Param('personalNumber') personalNumber: string,
     @Res() response: any,
   ): Promise<{ data: EmployedPersonData; message: string }> {
-    const url = `employee/2.0/${process.env.MUNICIPALITY_ID}/employed/${personalNumber}/loginname`;
+    const url = `${this.EMPLOYEE_SERVICE}/${process.env.MUNICIPALITY_ID}/employed/${personalNumber}/loginname`;
     const res = await this.apiService.get<EmployedPersonData>({ url }, req.user).catch(e => {
       logger.error('Error when fetching employed user information');
       throw e;
