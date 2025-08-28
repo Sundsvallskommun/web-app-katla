@@ -133,7 +133,6 @@ export const MessageComposer: React.FC<{
   };
 
   const abortHandler = () => {
-    console.log("dirty", formState.dirtyFields.messageBodyPlaintext)
     if (formState.dirtyFields.messageBodyPlaintext) {
       closeConfirm
         .showConfirmation('Vill du avbryta?', 'Du har osparade ändringar.', 'Ja', 'Nej', 'info', 'info')
