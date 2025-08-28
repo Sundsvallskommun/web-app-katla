@@ -4,6 +4,7 @@ import { IErrand } from '@interfaces/errand';
 import { MessageResponse } from '@interfaces/message';
 import { User } from '@interfaces/user';
 import { createConversation, sendInternalMessage } from '@services/casedata-conversation-service';
+import sanitized from '@services/sanitizer-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import {
   Button,
@@ -18,7 +19,8 @@ import {
 } from '@sk-web-gui/react';
 import dynamic from 'next/dynamic';
 import type Quill from 'quill';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { Delta } from 'quill';
+import { useContext, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageWrapper } from './message-wrapper.component';
 const TextEditor = dynamic(() => import('@sk-web-gui/text-editor'), { ssr: false });
@@ -69,31 +71,29 @@ export const MessageComposer: React.FC<{
 }> = (props) => {
   const { municipalityId, errand, user }: { municipalityId: string; errand: IErrand; user: User } =
     useContext(AppContext);
-  const editorRef = useRef<Quill>(null);
+  const quillRef = useRef<Quill>(null);
   const [isLoading, setIsLoading] = useState(false);
   const closeConfirm = useConfirm();
   const [files, setFiles] = useState<UploadFile[]>([]);
   const toastMessage = useSnackbar();
-  const [editorText, setEditorText] = useState('');
+  const [richText, setRichText] = useState<string>('');
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState<boolean>(false);
 
-  const { register, handleSubmit, getValues, setValue } = useForm<CasedataMessageTabFormModel>({
+  const { register, handleSubmit, getValues, setValue, trigger, watch, formState, reset } = useForm<CasedataMessageTabFormModel>({
     defaultValues: defaultMessage,
     mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
   });
 
-  useEffect(() => {
-    if (props.show && editorRef.current) {
-      setEditorText(editorRef.current.getText() || '');
-    }
-  }, [props.show]);
+  const messageBodyPlaintext = watch('messageBodyPlaintext')
 
   const clearAndClose = () => {
     setTimeout(() => {
-      setValue('messageBody', '', { shouldDirty: true });
-      setValue('emails', [], { shouldDirty: true });
-      editorRef?.current?.setText('');
+      setValue('messageBody', '', { shouldDirty: false });
+      setValue('messageBodyPlaintext', '', { shouldDirty: false });
+      setValue('emails', [], { shouldDirty: false });
+      quillRef?.current?.setText('');
       props.closeHandler();
+      reset();
     }, 0);
   };
 
@@ -105,7 +105,7 @@ export const MessageComposer: React.FC<{
     }
 
     createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
-      sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, data.messageBodyPlaintext, files)
+      sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, data.messageBody, files)
         .then(() => {
           toastMessage({
             position: 'bottom',
@@ -133,7 +133,8 @@ export const MessageComposer: React.FC<{
   };
 
   const abortHandler = () => {
-    if (editorText.trim().length !== 0) {
+    console.log("dirty", formState.dirtyFields.messageBodyPlaintext)
+    if (formState.dirtyFields.messageBodyPlaintext) {
       closeConfirm
         .showConfirmation('Vill du avbryta?', 'Du har osparade ändringar.', 'Ja', 'Nej', 'info', 'info')
         .then((confirmed) => {
@@ -161,20 +162,16 @@ export const MessageComposer: React.FC<{
     setFiles((prevFiles) => prevFiles.filter((f) => f.id !== file.id));
   };
 
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor || !editor.on) return;
-
-    const handleChange = () => {
-      const text = editor.getText ? editor.getText() : '';
-      setEditorText(text);
-    };
-
-    editor.on('text-change', handleChange);
-    return () => {
-      editor.off('text-change', handleChange);
-    };
-  }, [editorRef]);
+    const onRichTextChange = (delta: Delta, oldDelta: Delta, source: string) => {
+    if (source === 'api') {
+      return;
+    }
+    setValue('messageBody', sanitized(typeof delta.ops[0].retain === "number" && delta.ops[0].retain > 1 ? quillRef.current?.root.innerHTML ?? "" : ''), {
+      shouldDirty: true,
+    });
+    setValue('messageBodyPlaintext', quillRef.current?.getText() ?? "", { shouldDirty: true });
+    trigger('messageBody');
+  };
 
   return (
     <>
@@ -183,7 +180,16 @@ export const MessageComposer: React.FC<{
           <Input type="hidden" {...register('headerReplyTo')} />
           <Input type="hidden" {...register('headerReferences')} />
 
-          <TextEditor className="h-[30rem] mb-[4rem]" ref={editorRef} />
+          <TextEditor
+                  className="h-[30rem] mb-[4rem]"
+                  key={richText}
+                  ref={quillRef}
+                  defaultValue={richText}
+                  onTextChange={(delta, oldDelta, source) => {
+                    props.setUnsaved(true);
+                    return onRichTextChange(delta, oldDelta, source);
+                  }}
+                />
         </div>
         <div className="flex mb-24 mt-8 px-40">
           <Button
@@ -230,17 +236,11 @@ export const MessageComposer: React.FC<{
             loading={isLoading}
             loadingText="Skickar meddelande"
             onClick={handleSubmit(async () => {
-              if (editorRef.current) {
-                const content = editorRef.current.getText();
-                const htmlContent = editorRef.current.root.innerHTML;
-                setValue('messageBody', htmlContent, { shouldDirty: true });
-                setValue('messageBodyPlaintext', content, { shouldDirty: true });
-              }
               await onSubmit(getValues());
             })}
             variant="primary"
             color="primary"
-            disabled={isLoading || editorText.trim().length === 0}
+            disabled={isLoading || messageBodyPlaintext === ''}
             leftIcon={isLoading ? <Spinner size={2} className="mr-sm" /> : <></>}
           >
             Skicka meddelande
