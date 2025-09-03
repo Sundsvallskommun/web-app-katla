@@ -145,7 +145,15 @@ export const isErrandClosed: (errand: IErrand | CasedataFormModel) => boolean = 
 };
 
 export const isErrandLocked: (errand: IErrand | CasedataFormModel) => boolean = (errand) => {
-  return errand?.status === ErrandStatus.ArendeAvslutat || phaseChangeInProgress(errand as IErrand);
+    if (errand?.status && typeof errand?.status === 'object') {
+    return (
+      errand?.status?.statusType === ErrandStatus.ArendeAvslutat ||
+      errand?.status?.statusType === ErrandStatus.Parkerad ||
+      phaseChangeInProgress(errand as IErrand)
+    );
+  } else {
+    return errand?.status === ErrandStatus.ArendeAvslutat;
+  }
 };
 
 export const emptyErrand: Partial<IErrand> = {

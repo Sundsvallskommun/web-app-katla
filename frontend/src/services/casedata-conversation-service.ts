@@ -86,13 +86,18 @@ export const getConversationMessages: (
 
 export const createConversation = async (municipalityId: string, errandId: number, user: User, topic: string) => {
   const res = await getConversations(municipalityId, errandId);
-  if (res && res.data && res.data.length > 0) {
+if (res && res.data && res.data.length > 0) {
+  const conversation = res.data.find(
+    (item) => item.type === "INTERNAL" && Array.isArray(item.relationIds) && item.relationIds.length === 0
+  );
+  if (conversation) {
     return {
       data: {
-        id: res.data[0].id,
+        id: conversation.id,
       },
     };
   }
+}
 
   const url = `${municipalityId}/namespace/errand/${errandId}/communication/conversations`;
 
