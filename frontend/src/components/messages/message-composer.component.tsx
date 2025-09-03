@@ -76,7 +76,7 @@ export const MessageComposer: React.FC<{
   const closeConfirm = useConfirm();
   const [files, setFiles] = useState<UploadFile[]>([]);
   const toastMessage = useSnackbar();
-  const [richText, setRichText] = useState<string>('');
+  const [richText] = useState<string>('');
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState<boolean>(false);
 
   const { register, handleSubmit, getValues, setValue, trigger, watch, formState, reset } = useForm<CasedataMessageTabFormModel>({
