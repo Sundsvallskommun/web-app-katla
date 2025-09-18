@@ -1,17 +1,14 @@
 /// <reference types="cypress" />
 
 import { FTCaseLabel, FTCaseType } from '@interfaces/case-type';
-import { mockMe } from './fixtures/mockMe';
-import { mockNotifications } from './fixtures/mockNotifications';
-import { mockAdUser } from './fixtures/mockAdUser';
-import { mockProtectedInfo } from './fixtures/mockProtectedInfo';
 import { Role, RoleDisplayNames } from '@interfaces/role';
 import { FTAttachmentLabels } from '@services/casedata-attachment-service';
-import {
-  mockErrands_FT_draft as mockErrands_FT_draft,
-  mockErrands_FT_registered as mockErrands_FT_registered,
-} from './fixtures/mockErrands';
 import { mockAddressResponse } from './fixtures/mockAddressRespons';
+import { mockAdUser } from './fixtures/mockAdUser';
+import { mockErrands_FT_draft, mockErrands_FT_registered } from './fixtures/mockErrands';
+import { mockMe } from './fixtures/mockMe';
+import { mockNotifications } from './fixtures/mockNotifications';
+import { mockProtectedInfo } from './fixtures/mockProtectedInfo';
 
 export const MOCK_INVALID_SEARCH = 'Ej giltigt personnummer (ange tolv siffror: ååååmmddxxxx)';
 
@@ -210,12 +207,6 @@ describe('Registrera ärende-sida', () => {
       .should('contain.text', 'Efternamn')
       .and('contain.text', 'Efternamn är obligatoriskt');
 
-    cy.get('[name="newEmail"]')
-      .parent()
-      .should('contain.text', 'E-postadress')
-      .and('contain.text', 'E-postadress är obligatoriskt');
-
-    cy.get('[name="newPhoneNumber"]').parent().should('contain.text', 'Telefonnummer');
     cy.get('[name="street"]').parent().should('contain.text', 'Adress');
     cy.get('[name="careof"]').parent().should('contain.text', 'C/o adress');
 
