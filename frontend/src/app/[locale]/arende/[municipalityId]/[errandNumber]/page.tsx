@@ -1,4 +1,5 @@
 'use client';
+import { SaveErrandButton } from '@components/errand-buttons/save-errand-button.component';
 import { ErrandHeader } from '@components/errand-header/errand-header.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
@@ -9,7 +10,6 @@ import { OtherParties } from '@components/errandinformation/other-parties.compon
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { CasedataMessagesTab } from '@components/messages/message.component';
-import { SaveErrandButton } from '@components/errand-buttons/save-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
@@ -177,7 +177,6 @@ const Arende: React.FC = () => {
                     </div>
                   )}
                 </header>
-
                 <div className="border-1 rounded-12 bg-background-content">
                   <MenuBar className="py-[1rem] pl-[1.6rem]" current={current}>
                     <MenuBar.Item>
@@ -224,6 +223,15 @@ const Arende: React.FC = () => {
                     {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
                     {current === 2 && <FileUploadComponent />}
                   </section>
+                </div>
+                <div
+                  className={
+                    isMaxMediumDevice ?
+                      'flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 py-16'
+                    : 'flex justify-end mt-md pt-8 mb-[3.2rem]'
+                  }
+                >
+                  <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
                 </div>
               </section>
             </main>

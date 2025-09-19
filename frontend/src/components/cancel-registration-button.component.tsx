@@ -7,9 +7,8 @@ export const CancelRegistrationButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { isLoading } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
-  const openHandler = () => {
-    setIsOpen(!isOpen);
-  };
+
+  const openHandler = () => setIsOpen(!isOpen);
 
   const handleClick = () => {
     if (isMaxMediumDevice) {
@@ -22,6 +21,7 @@ export const CancelRegistrationButton: React.FC = () => {
       window.close();
     }
   };
+
   return (
     <>
       <Button
@@ -33,34 +33,27 @@ export const CancelRegistrationButton: React.FC = () => {
       >
         Avbryt
       </Button>
-      <Dialog data-cy="cancel-registration-dialog" className="max-w-[36rem]" show={isOpen}>
-        <Dialog.Content className="flex flex-col items-center justify-center text-center">
-          <LucideIcon color="vattjom" name="hand" size={32} />
-          <div className="text-h4">Avbryt registrering</div>
-          <div>
-            Du har valt att avbryta registreringen. Ej sparad data kommer att gå förlorad. Är du säker att du vill
-            avbryta?
-          </div>
-        </Dialog.Content>
-        <Dialog.Buttons className="flex justify-center gap-7">
-          <Button
-            data-cy="no-cancel-registation-button"
-            className="w-[12.8rem]"
-            variant="secondary"
-            onClick={openHandler}
-          >
-            Nej
-          </Button>
-          <Button
-            data-cy="confirm-cancel-registation-button"
-            className="w-[12.8rem]"
-            variant="primary"
-            onClick={handleClick}
-          >
-            Ja
-          </Button>
-        </Dialog.Buttons>
-      </Dialog>
+
+      {isOpen && (
+        <Dialog data-cy="cancel-registration-dialog" className="max-w-[36rem]" show={isOpen}>
+          <Dialog.Content className="flex flex-col items-center justify-center text-center">
+            <LucideIcon color="vattjom" name="hand" size={32} />
+            <div className="text-h4">Avbryt registrering</div>
+            <div>
+              Du har valt att avbryta registreringen. Ej sparad data kommer att gå förlorad. Är du säker att du vill
+              avbryta?
+            </div>
+          </Dialog.Content>
+          <Dialog.Buttons className="flex justify-center gap-7">
+            <Button className="w-[12.8rem]" variant="secondary" onClick={openHandler}>
+              Nej
+            </Button>
+            <Button className="w-[12.8rem]" variant="primary" onClick={handleClick}>
+              Ja
+            </Button>
+          </Dialog.Buttons>
+        </Dialog>
+      )}
     </>
   );
 };

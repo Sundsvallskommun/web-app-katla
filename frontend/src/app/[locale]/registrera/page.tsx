@@ -1,5 +1,5 @@
 'use client';
-import { CancelRegistrationButton } from '@components/cancel-registration-button.component';
+import { ErrandActionButtons } from '@components/errand-action-buttons.component';
 import { ErrandHeader } from '@components/errand-header/errand-header.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
@@ -9,8 +9,6 @@ import { MedicalOpinion } from '@components/errandinformation/medical-opinion.co
 import { OtherParties } from '@components/errandinformation/other-parties.component';
 import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
-import { RegisterErrandButton } from '@components/errand-buttons/register-errand-button.component';
-import { DraftErrandButton } from '@components/errand-buttons/save-draft-errand-button.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
@@ -56,13 +54,8 @@ const Registrera: React.FC = () => {
               `}
             >
               <h1 className={'text-h2-lg'}>Nytt ärende</h1>
-
               {!isMaxMediumDevice && (
-                <div className="flex gap-x-md">
-                  <CancelRegistrationButton />
-                  <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
-                  <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
-                </div>
+                <ErrandActionButtons owners={applicants.concat(otherParties).concat(healthCareStaff)} />
               )}
             </header>
 
@@ -93,15 +86,22 @@ const Registrera: React.FC = () => {
 
               <FileUploadComponent />
             </section>
+            {!isMaxMediumDevice && (
+              <div className="flex justify-end mt-md pt-8 mb-[3.2rem]">
+                <ErrandActionButtons
+                  className="flex gap-x-md"
+                  owners={applicants.concat(otherParties).concat(healthCareStaff)}
+                />
+              </div>
+            )}
+            {isMaxMediumDevice && (
+              <ErrandActionButtons
+                className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 py-16"
+                owners={applicants.concat(otherParties).concat(healthCareStaff)}
+              />
+            )}
           </section>
         </main>
-        {isMaxMediumDevice && (
-          <div className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 pt-16">
-            <RegisterErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
-            <DraftErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
-            <CancelRegistrationButton />
-          </div>
-        )}
       </div>
     </FormProvider>
   );
