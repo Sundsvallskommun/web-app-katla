@@ -1,16 +1,15 @@
+import { AppContext } from '@contexts/app-context-interface';
+import { Role, RoleDisplayNames } from '@interfaces/role';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { searchPerson } from '@services/adress-service';
+import { addStakeholder, editStakeholder, removeStakeholder } from '@services/casedata-stakeholder-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, FormLabel, Input, Select } from '@sk-web-gui/react';
+import { emailSchema, phoneSchema, ssnSchema } from '@utils/validation-schema';
 import React, { useContext, useEffect, useState } from 'react';
-import { ssnSchema } from '@utils/validation-schema';
 import { useForm } from 'react-hook-form';
-import { DisplayCard } from './display-card.component';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
-import { editStakeholder, removeStakeholder, addStakeholder } from '@services/casedata-stakeholder-service';
-import { AppContext } from '@contexts/app-context-interface';
-import { emailSchema, phoneSchema } from '@utils/validation-schema';
 import * as yup from 'yup';
-import { Role, RoleDisplayNames } from '@interfaces/role';
+import { DisplayCard } from './display-card.component';
 import { StakeholderFormModal } from './stakeholder-form.component';
 
 export const StakeholderList: React.FC<{
@@ -134,9 +133,7 @@ export const StakeholderList: React.FC<{
     let roleError = '';
     let municipalityError = '';
 
-    if (!emailValue) {
-      emailError = 'E-postadress är obligatorisk';
-    } else {
+    if (emailValue) {
       try {
         emailSchema.validateSync(emailValue);
       } catch (err) {
@@ -144,9 +141,7 @@ export const StakeholderList: React.FC<{
       }
     }
 
-    if (!phoneValue) {
-      phoneError = 'Telefonnummer är obligatoriskt';
-    } else {
+    if (phoneValue) {
       try {
         phoneSchema.validateSync(phoneValue);
       } catch (err) {
@@ -275,7 +270,7 @@ export const StakeholderList: React.FC<{
                   data-cy="stakeholder-email-input"
                   placeholder="Ange e-postadress"
                   invalid={!!validationMessages.email}
-                  {...register('emails.0.value', { required: true })}
+                  {...register('emails.0.value')}
                 />
                 {validationMessages.email && <div className="text-error text-md mt-1">{validationMessages.email}</div>}
               </div>
@@ -286,7 +281,7 @@ export const StakeholderList: React.FC<{
                   className="w-full"
                   placeholder="Ange telefonnummer"
                   invalid={!!validationMessages.phone}
-                  {...register('phoneNumbers.0.value', { required: true })}
+                  {...register('phoneNumbers.0.value')}
                 />
                 {validationMessages.phone && <div className="text-error text-md mt-1">{validationMessages.phone}</div>}
               </div>

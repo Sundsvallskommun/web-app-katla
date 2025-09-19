@@ -2,13 +2,13 @@ import {
   invalidOrgNumberMessage,
   invalidPhoneMessage,
   invalidSsnMessage,
+  invalidZipMessage,
   luhnCheck,
   newNumberPhonePattern,
   orgNumberPattern,
   phonePattern,
   ssnPattern,
   zipPattern,
-  invalidZipMessage,
 } from '@services/helper-service';
 import * as yup from 'yup';
 
@@ -17,9 +17,10 @@ import * as yup from 'yup';
  */
 export const phoneSchema = yup
   .string()
-  .required('Telefonnummer är obligatoriskt')
   .trim()
-  .transform((val) => val.replace('-', ''))
+  .nullable()
+  .notRequired()
+  .transform((val) => (val === '' ? undefined : val.replace('-', '')))
   .matches(phonePattern, invalidPhoneMessage);
 
 /**
@@ -28,7 +29,9 @@ export const phoneSchema = yup
 export const newPhoneSchema = yup
   .string()
   .trim()
-  .transform((val) => val.replace('-', ''))
+  .nullable()
+  .notRequired()
+  .transform((val) => (val === '' ? undefined : val.replace('-', '')))
   .matches(newNumberPhonePattern, invalidPhoneMessage);
 
 /**
@@ -37,14 +40,15 @@ export const newPhoneSchema = yup
 export const emailSchema = yup
   .string()
   .trim()
-  .required('E-postadress är obligatoriskt')
+  .nullable()
+  .notRequired()
+  .transform((value) => (value === '' ? undefined : value))
   .email('E-postadress har fel format')
   .test('has-dot-in-domain', 'E-postadress har fel format', (value) => {
-    if (!value) return false;
+    if (!value) return true;
     const domain = value.split('@')[1];
     return domain?.includes('.');
   });
-
 /**
  * Schema för personnummer med Luhn-kontroll
  */

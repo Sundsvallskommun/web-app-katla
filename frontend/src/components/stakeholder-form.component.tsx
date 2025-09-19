@@ -1,10 +1,9 @@
-import { Button, FormLabel, Input, Modal } from '@sk-web-gui/react';
-import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { stakeholderSchema } from '@utils/validation-schema';
 import { Role, RoleDisplayNames } from '@interfaces/role';
-import { Select } from '@sk-web-gui/react';
+import { Button, FormLabel, Input, Modal, Select } from '@sk-web-gui/react';
+import { stakeholderSchema } from '@utils/validation-schema';
 import { useEffect } from 'react';
+import { Resolver, useForm } from 'react-hook-form';
 
 export type StakeholderFormValues = {
   ssn?: string;
@@ -84,12 +83,12 @@ export const StakeholderFormModal: React.FC<{
 
         <div className="flex gap-8">
           <div className="flex flex-col">
-            <FormLabel>E-postadress*</FormLabel>
+            <FormLabel>E-postadress</FormLabel>
             <Input {...register('newEmail')} name="newEmail" className="w-full" invalid={!!errors.newEmail} />
             {errors.newEmail && <div className="text-error text-md mt-1">{errors.newEmail.message}</div>}
           </div>
           <div className="flex flex-col">
-            <FormLabel>Telefonnummer*</FormLabel>
+            <FormLabel>Telefonnummer</FormLabel>
             <Input
               {...register('newPhoneNumber')}
               name="newPhoneNumber"
