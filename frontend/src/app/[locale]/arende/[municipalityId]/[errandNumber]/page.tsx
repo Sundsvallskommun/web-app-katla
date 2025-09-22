@@ -1,5 +1,5 @@
 'use client';
-import { SaveErrandButton } from '@components/errand-buttons/save-errand-button.component';
+import { ErrandActionButtons } from '@components/errand-action-buttons.component';
 import { ErrandHeader } from '@components/errand-header/errand-header.component';
 import { AboutErrand } from '@components/errandinformation/about-errand.component';
 import { Applicant } from '@components/errandinformation/applicant.component';
@@ -172,9 +172,10 @@ const Arende: React.FC = () => {
                   <h1 className="text-h2-lg">Ärende {errand?.errandNumber}</h1>
 
                   {!isMaxMediumDevice && (
-                    <div className="flex gap-x-md">
-                      <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
-                    </div>
+                    <ErrandActionButtons
+                      className="flex gap-x-md"
+                      owners={applicants.concat(otherParties).concat(healthCareStaff)}
+                    />
                   )}
                 </header>
                 <div className="border-1 rounded-12 bg-background-content">
@@ -224,15 +225,20 @@ const Arende: React.FC = () => {
                     {current === 2 && <FileUploadComponent />}
                   </section>
                 </div>
-                <div
-                  className={
-                    isMaxMediumDevice ?
-                      'flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 py-16'
-                    : 'flex justify-end mt-md pt-8 mb-[3.2rem]'
-                  }
-                >
-                  <SaveErrandButton owners={applicants.concat(otherParties).concat(healthCareStaff)} />
-                </div>
+                {!isMaxMediumDevice && (
+                  <div className="flex justify-end mt-md pt-8 mb-[3.2rem]">
+                    <ErrandActionButtons
+                      className="flex gap-x-md"
+                      owners={applicants.concat(otherParties).concat(healthCareStaff)}
+                    />
+                  </div>
+                )}
+                {isMaxMediumDevice && (
+                  <ErrandActionButtons
+                    className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 py-16"
+                    owners={applicants.concat(otherParties).concat(healthCareStaff)}
+                  />
+                )}
               </section>
             </main>
           </div>

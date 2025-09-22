@@ -10,14 +10,15 @@ import {
 import store from '@services/storage-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Badge, Button } from '@sk-web-gui/react';
-import { IconName } from 'lucide-react/dynamic';
 import { useContext, useMemo } from 'react';
+
+type LucideIconName = React.ComponentProps<typeof LucideIcon>['name'];
 
 export interface SidebarButton {
   label: string;
   key: ErrandStatus;
   statuses: ErrandStatus[];
-  icon: IconName;
+  icon: LucideIconName;
   totalStatusErrands: number;
 }
 
@@ -104,7 +105,7 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
             aria-label={`status-button-${button.key}`}
             variant={buttonIsActive ? 'primary' : 'ghost'}
             className={`${!iconButton && 'justify-start'} ${!buttonIsActive && 'hover:bg-dark-ghost'}`}
-            leftIcon={<LucideIcon name={button.icon as IconName} />}
+            leftIcon={<LucideIcon name={button.icon} />}
             key={button.key}
             iconButton={iconButton}
           >
