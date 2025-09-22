@@ -1,3 +1,4 @@
+import { Role } from '@interfaces/role';
 import {
   invalidOrgNumberMessage,
   invalidPhoneMessage,
@@ -72,9 +73,13 @@ export const orgNumberSchema = yup
  */
 export const zipSchema = yup
   .string()
-  .transform((val) => val.replace(/\s/g, ''))
-  .required('Postnummer är obligatoriskt')
-  .matches(zipPattern, invalidZipMessage);
+  .nullable()
+  .notRequired()
+  .transform((val) => (val ? val.replace(/\s/g, '') : val))
+  .test('zip-format', invalidZipMessage, (value) => {
+    if (!value) return true;
+    return zipPattern.test(value);
+  });
 
 /**
  * Stakeholder-schema
@@ -85,9 +90,25 @@ export const stakeholderSchema = yup.object().shape({
   lastName: yup.string().required('Efternamn är obligatoriskt'),
   newEmail: emailSchema,
   newPhoneNumber: phoneSchema,
-  street: yup.string().required('Adress är obligatorisk'),
   careof: yup.string(),
-  zip: zipSchema,
-  city: yup.string().required('Ort är obligatorisk'),
+
   roles: yup.array().of(yup.string().required()).min(1, 'Välj en roll').required('Välj en roll'),
+
+  street: yup.string().when('roles', {
+    is: (roles?: string[]) => roles?.[0] === Role.APPLICANT,
+    then: (s) => s.required('Adress är obligatorisk'),
+    otherwise: (s) => s.nullable().notRequired(),
+  }),
+
+  zip: yup.string().when('roles', {
+    is: (roles?: string[]) => roles?.[0] === Role.APPLICANT,
+    then: () => zipSchema.required('Postnummer är obligatoriskt'),
+    otherwise: () => zipSchema,
+  }),
+
+  city: yup.string().when('roles', {
+    is: (roles?: string[]) => roles?.[0] === Role.APPLICANT,
+    then: (s) => s.required('Ort är obligatorisk'),
+    otherwise: (s) => s.nullable().notRequired(),
+  }),
 });

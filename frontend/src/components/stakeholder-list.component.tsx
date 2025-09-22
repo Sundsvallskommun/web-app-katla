@@ -29,7 +29,9 @@ export const StakeholderList: React.FC<{
     phone: '',
     role: '',
     municipality: '',
+    address: '',
   });
+
   const { municipalityId, errand } = useContext(AppContext);
 
   const {
@@ -51,6 +53,14 @@ export const StakeholderList: React.FC<{
   const careof = watch('careof');
   const zip = watch('zip');
   const city = watch('city');
+  const selectedRole = watch('roles')?.[0] as Role | undefined;
+  const isOwnerSelected = selectedRole === Role.APPLICANT;
+  const ownerAlreadyExists = owners?.length > 0;
+
+  const streetMissing = isOwnerSelected && !(street && street.trim());
+  const zipMissing = isOwnerSelected && !(zip && zip.trim());
+  const cityMissing = isOwnerSelected && !(city && city.trim());
+  const missingAddress = streetMissing || zipMissing || cityMissing;
 
   useEffect(() => {
     const currentRoles = getValues('roles');
@@ -86,14 +96,16 @@ export const StakeholderList: React.FC<{
 
         searchPerson(personalNumber ?? '')
           .then((res) => {
+            const norm = (s?: string) => ((s ?? '').trim() ? s![0].toUpperCase() + s!.slice(1).toLowerCase() : '');
+
             const defaultValues = {
               personId: res.personId,
               firstName: res.firstName,
               lastName: res.lastName,
-              street: res.street.charAt(0).toUpperCase() + res.street.slice(1).toLowerCase(),
-              city: res.city.charAt(0).toUpperCase() + res.city.slice(1).toLowerCase(),
-              careof: res.careof,
-              zip: res.zip,
+              street: norm(res.street),
+              city: norm(res.city),
+              careof: res.careof ?? '',
+              zip: res.zip ?? '',
               personalNumber: personalNumber,
               roles: roles.length === 1 ? [roles[0]] : [],
             };
@@ -127,11 +139,31 @@ export const StakeholderList: React.FC<{
     const emailValue = getValues('emails.0.value');
     const phoneValue = getValues('phoneNumbers.0.value');
     const role = getValues('roles');
+    const selectedRoleLocal = role?.[0] as Role | undefined;
+    const isOwner = selectedRoleLocal === Role.APPLICANT;
 
     let emailError = '';
     let phoneError = '';
     let roleError = '';
     let municipalityError = '';
+    let addressError = '';
+
+    if (isOwner) {
+      const hasStreet = !!(street && street.trim());
+      const hasZip = !!(zip && zip.trim());
+      const hasCity = !!(city && city.trim());
+      if (!hasStreet || !hasZip || !hasCity) {
+        addressError = 'Adress, postnummer och ort krävs för ärendeägare.';
+      }
+    }
+
+    if (selectedRoleLocal && ownerAlreadyExists) {
+      setValidationMessages((v) => ({
+        ...v,
+        role: `${RoleDisplayNames[selectedRoleLocal]} kan bara finnas en per ärende`,
+      }));
+      return;
+    }
 
     if (emailValue) {
       try {
@@ -157,10 +189,16 @@ export const StakeholderList: React.FC<{
       municipalityError = 'Personen är inte folkbokförd i kommunen';
     }
 
-    const hasErrors = emailError || phoneError || roleError || municipalityError;
+    const hasErrors = emailError || phoneError || roleError || municipalityError || addressError;
 
     if (hasErrors) {
-      setValidationMessages({ email: emailError, phone: phoneError, role: roleError, municipality: municipalityError });
+      setValidationMessages({
+        email: emailError,
+        phone: phoneError,
+        role: roleError,
+        municipality: municipalityError,
+        address: addressError,
+      });
       return;
     }
 
@@ -242,6 +280,7 @@ export const StakeholderList: React.FC<{
 
         {errors.personalNumber && <div className="text-error text-md mt-1">{errors.personalNumber.message}</div>}
       </div>
+
       {searchResult && !notFound && (
         <div className="border-1 rounded-12 bg-background-content w-max-[52.5rem] my-15">
           <div className="px-16 py-8">
@@ -264,7 +303,7 @@ export const StakeholderList: React.FC<{
 
             <div className="flex flex-col lg:flex-row py-10 gap-10">
               <div className="flex-col w-full">
-                <FormLabel>E-postadress*</FormLabel>
+                <FormLabel>E-postadress</FormLabel>
                 <Input
                   className="w-full"
                   data-cy="stakeholder-email-input"
@@ -275,7 +314,7 @@ export const StakeholderList: React.FC<{
                 {validationMessages.email && <div className="text-error text-md mt-1">{validationMessages.email}</div>}
               </div>
               <div className="flex-col w-full">
-                <FormLabel>Telefonnummer*</FormLabel>
+                <FormLabel>Telefonnummer</FormLabel>
                 <Input
                   data-cy="stakeholder-mobilephone-input"
                   className="w-full"
@@ -286,33 +325,81 @@ export const StakeholderList: React.FC<{
                 {validationMessages.phone && <div className="text-error text-md mt-1">{validationMessages.phone}</div>}
               </div>
             </div>
-            <div className="flex flex-col lg:py-10">
-              <FormLabel>Personens roll*</FormLabel>
-              <Select
-                data-cy="stakeholder-role-select"
-                className="w-full"
-                invalid={!!validationMessages.role}
-                disabled={roles.length === 1}
-                value={watch('roles')?.[0] ?? ''}
-                onChange={(e) => {
-                  const selectedRole = e.target.value;
-                  if (selectedRole) {
-                    setValue('roles', [selectedRole as Role], { shouldDirty: true });
-                  } else {
-                    setValue('roles', [], { shouldDirty: true });
-                  }
-                }}
-              >
-                {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
-                {roles
-                  .sort((a, b) => RoleDisplayNames[a].localeCompare(RoleDisplayNames[b]))
-                  .map((role) => (
-                    <Select.Option key={role} value={role}>
-                      {RoleDisplayNames[role]}
-                    </Select.Option>
-                  ))}
-              </Select>
-              {validationMessages.role && <div className="text-error text-md mt-1">{validationMessages.role}</div>}
+
+            <div className="flex flex-col gap-8">
+              <div className="flex gap-8">
+                <div className="flex flex-col w-full">
+                  <FormLabel>Adress{isOwnerSelected ? '*' : ''}</FormLabel>
+                  <Input
+                    className="w-full"
+                    placeholder="Ange gatuadress"
+                    invalid={!!validationMessages.address && streetMissing}
+                    {...register('street')}
+                  />
+                </div>
+                <div className="flex flex-col w-full">
+                  <FormLabel>C/o adress</FormLabel>
+                  <Input className="w-full" placeholder="C/O (valfritt)" {...register('careof')} />
+                </div>
+              </div>
+
+              <div className="flex gap-8">
+                <div className="flex flex-col w-full">
+                  <FormLabel>Postnummer{isOwnerSelected ? '*' : ''}</FormLabel>
+                  <Input
+                    className="w-full"
+                    placeholder=" Ange postnummer"
+                    invalid={!!validationMessages.address && zipMissing}
+                    {...register('zip')}
+                  />
+                </div>
+                <div className="flex flex-col w-full">
+                  <FormLabel>Ort{isOwnerSelected ? '*' : ''}</FormLabel>
+                  <Input
+                    className="w-full"
+                    placeholder="Ange ort"
+                    invalid={!!validationMessages.address && cityMissing}
+                    {...register('city')}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <FormLabel>Personens roll*</FormLabel>
+                <Select
+                  data-cy="stakeholder-role-select"
+                  className="w-full"
+                  invalid={!!validationMessages.role}
+                  disabled={roles.length === 1}
+                  value={watch('roles')?.[0] ?? ''}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (selected) {
+                      setValue('roles', [selected as Role], { shouldDirty: true });
+                    } else {
+                      setValue('roles', [], { shouldDirty: true });
+                    }
+                  }}
+                >
+                  {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
+                  {roles
+                    .sort((a, b) => RoleDisplayNames[a].localeCompare(RoleDisplayNames[b]))
+                    .map((role) => (
+                      <Select.Option
+                        key={role}
+                        value={role}
+                        disabled={ownerAlreadyExists && watch('roles')?.[0] !== role}
+                      >
+                        {RoleDisplayNames[role]}
+                      </Select.Option>
+                    ))}
+                </Select>
+                {validationMessages.role && <div className="text-error text-md mt-1">{validationMessages.role}</div>}
+              </div>
+
+              {validationMessages.address && (
+                <div className="text-error text-md mt-1">{validationMessages.address}</div>
+              )}
             </div>
 
             {validationMessages.municipality && (
@@ -329,6 +416,7 @@ export const StakeholderList: React.FC<{
                 </span>
               </div>
             )}
+
             <div className="py-10">
               <Button
                 data-cy="add-stakeholder-button"
@@ -336,6 +424,7 @@ export const StakeholderList: React.FC<{
                 variant="primary"
                 onClick={addStakeholderToErrand}
                 className="w-full lg:w-auto"
+                disabled={ownerAlreadyExists || (isOwnerSelected && missingAddress)}
               >
                 Lägg till person
               </Button>
@@ -347,8 +436,8 @@ export const StakeholderList: React.FC<{
       {owners?.map((owner, index) => {
         const email = owner.newEmail || owner.emails?.[0]?.value?.trim() || '';
         const phone = owner.newPhoneNumber || owner.phoneNumbers?.[0]?.value?.trim() || '';
-        const street = owner.street?.trim() || '';
-        const city = owner.city?.trim() || '';
+        const streetVal = owner.street?.trim() || '';
+        const cityVal = owner.city?.trim() || '';
 
         return (
           <DisplayCard
@@ -362,8 +451,8 @@ export const StakeholderList: React.FC<{
             personalNumber={owner.personalNumber}
             newEmail={email}
             newPhoneNumber={phone}
-            street={street}
-            city={city}
+            street={streetVal}
+            city={cityVal}
             careof={owner.careof}
             zip={owner.zip}
             onRemove={() => {
@@ -383,6 +472,7 @@ export const StakeholderList: React.FC<{
         inverted={true}
         className="mt-6"
         leftIcon={<LucideIcon name="pen" />}
+        disabled={ownerAlreadyExists}
         onClick={() => {
           setManualEntryOpen((prev) => !prev);
           reset();

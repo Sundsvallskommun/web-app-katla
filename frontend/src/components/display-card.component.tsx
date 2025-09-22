@@ -1,7 +1,7 @@
+import { getRoleDisplayName, Role } from '@interfaces/role';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, useThemeQueries } from '@sk-web-gui/react';
 import { useState } from 'react';
-import { getRoleDisplayName, Role } from '@interfaces/role';
 import { StakeholderFormModal } from './stakeholder-form.component';
 
 export const DisplayCard: React.FC<{
