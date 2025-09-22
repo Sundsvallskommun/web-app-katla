@@ -55,7 +55,10 @@ const Registrera: React.FC = () => {
             >
               <h1 className={'text-h2-lg'}>Nytt ärende</h1>
               {!isMaxMediumDevice && (
-                <ErrandActionButtons owners={applicants.concat(otherParties).concat(healthCareStaff)} />
+                <ErrandActionButtons
+                  className="flex gap-x-md"
+                  owners={applicants.concat(otherParties).concat(healthCareStaff)}
+                />
               )}
             </header>
 
