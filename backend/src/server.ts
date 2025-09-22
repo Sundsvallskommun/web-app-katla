@@ -12,7 +12,6 @@ import { CaseDataHistoryController } from './controllers/casedata/casedata-histo
 import { CasedataNotesController } from './controllers/casedata/casedata-notes.controller';
 import { CasedataNotificationController } from './controllers/casedata/casedata-notification-controller';
 import { CasedataStakeholderController } from './controllers/casedata/casedata-stakeholder.controller';
-import { MessageController } from './controllers/message.controller';
 import { CaseDataConversationController } from './controllers/casedata/casedata-conversation.controller';
 
 validateEnv();
@@ -30,7 +29,6 @@ const app = new App([
   CasedataNotesController,
   CasedataNotificationController,
   CasedataStakeholderController,
-  MessageController,
   CaseDataConversationController,
 ]);
 

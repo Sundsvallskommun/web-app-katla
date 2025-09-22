@@ -14,6 +14,5 @@ export enum UiPhase {
   granskning = 'Granskning',
   utredning = 'Utredning',
   beslut = 'Beslut',
-  // uppfoljning = 'Uppföljning',
   slutfor = 'Slutför',
 }

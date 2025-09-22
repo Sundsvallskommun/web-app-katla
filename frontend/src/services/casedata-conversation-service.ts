@@ -2,7 +2,7 @@ import { Attachment } from '@interfaces/attachment';
 import { User } from '@interfaces/user';
 import { UploadFile } from '@sk-web-gui/react';
 import { ApiResponse, apiService } from './api-service';
-import { MessageNode } from './casedata-message-service';
+import { MessageNode } from '@interfaces/message';
 
 export enum ConversationType {
   INTERNAL = 'INTERNAL',
@@ -42,6 +42,32 @@ export interface Message {
   readBy?: ReadBy[];
   attachments?: Attachment[];
 }
+
+//Count functions can be removed if it wont be used for FT
+export const countAllMessages = (tree: MessageNode[]): number => {
+  if (!tree) {
+    return 0;
+  }
+  let c = 0;
+  c += tree.length;
+  tree.forEach((root) => {
+    c += countAllMessages(root.children ?? []);
+  });
+  return c;
+};
+
+export const countUnreadMessages = (tree: MessageNode[]): number => {
+  if (!tree) {
+    return 0;
+  }
+  let c = 0;
+  c += tree.filter((node) => !node.viewed).length;
+  tree.forEach((root) => {
+    c += countUnreadMessages(root.children ?? []);
+  });
+  return c;
+};
+
 
 export const getConversations: (municipalityId: string, errandId: number) => Promise<ApiResponse<Conversation[]>> = (
   municipalityId,

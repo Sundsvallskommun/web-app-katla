@@ -2,10 +2,10 @@ import { Asset } from '@interfaces/asset';
 import { ErrandsData, IErrand } from '@interfaces/errand';
 import { UiPhase } from '@interfaces/errand-phase';
 import { ErrandStatus } from '@interfaces/errand-status';
+import { MessageNode } from '@interfaces/message';
 import { Notification as CaseDataNotification } from '@interfaces/notification';
 import { User } from '@interfaces/user';
 import { emptyErrandList } from '@services/casedata-errand-service';
-import { MessageNode } from '@services/casedata-message-service';
 import { Admin, emptyUser } from '@services/user-service';
 import { createContext } from 'react';
 
@@ -28,14 +28,8 @@ export interface AppContextInterface {
   errand: IErrand;
   setErrand: (errand: IErrand) => void;
 
-  messages: MessageNode[];
-  setMessages: (messages: MessageNode[]) => void;
-
   conversation: MessageNode[];
   setConversation: (conversation: MessageNode[]) => void;
-
-  messageTree: MessageNode[];
-  setMessageTree: (messages: MessageNode[]) => void;
 
   assets: Asset[];
   setAssets: (assets: Asset[]) => void;
@@ -76,9 +70,6 @@ export interface AppContextInterface {
   administrators: Admin[];
   setAdministrators: (admins: Admin[]) => void;
 
-  isCookieConsentOpen: boolean;
-  setIsCookieConsentOpen: (isOpen: boolean) => void;
-
   uiPhase: UiPhase;
   setUiPhase: (phase: UiPhase) => void;
 }
@@ -102,14 +93,8 @@ export const AppContext = createContext<AppContextInterface>({
   errand: {} as IErrand,
   setErrand: () => {},
 
-  messages: [],
-  setMessages: () => {},
-
   conversation: [],
   setConversation: () => {},
-
-  messageTree: [],
-  setMessageTree: () => {},
 
   assets: [],
   setAssets: () => {},
@@ -149,9 +134,6 @@ export const AppContext = createContext<AppContextInterface>({
 
   administrators: [],
   setAdministrators: () => {},
-
-  isCookieConsentOpen: true,
-  setIsCookieConsentOpen: () => {},
 
   uiPhase: UiPhase.inkommet,
   setUiPhase: () => {},
