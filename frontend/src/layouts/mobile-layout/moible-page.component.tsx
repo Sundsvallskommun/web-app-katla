@@ -1,19 +1,19 @@
 import { MobileHeaderLogo } from '@components/mobile-header-logo.component';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button } from '@sk-web-gui/react';
-import { IconName } from 'lucide-react/dynamic';
 import React from 'react';
+
+type LucideIconName = React.ComponentProps<typeof LucideIcon>['name'];
 
 interface MobilePageProps {
   open: boolean;
   setOpen: (state: boolean) => void;
-  lucideIconName?: IconName;
+  lucideIconName?: LucideIconName;
   title?: string;
   children?: React.ReactNode;
 }
 
 export const MobilePage: React.FC<MobilePageProps> = ({ open, setOpen, lucideIconName, title, children }) => {
-
   return (
     <div className="fixed inset-0 z-50 bg-vattjom-background-200 flex flex-col">
       <div className="flex h-[7rem] p-[1.6rem] gap-[1.2rem] items-center flex-shrink-0 self-stretch bg-vattjom-background-200 shadow-100 relative z-10">
@@ -24,8 +24,7 @@ export const MobilePage: React.FC<MobilePageProps> = ({ open, setOpen, lucideIco
               {title}
             </div>
           </div>
-        : <MobileHeaderLogo/>
-        }
+        : <MobileHeaderLogo />}
         <div className="gap-[1.2rem] flex items-center">
           <Button
             color="primary"

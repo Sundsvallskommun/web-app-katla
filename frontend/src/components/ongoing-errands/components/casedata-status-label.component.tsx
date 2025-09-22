@@ -1,15 +1,16 @@
 import { ErrandStatus } from '@interfaces/errand-status';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Label } from '@sk-web-gui/react';
-import { IconName } from 'lucide-react/dynamic';
+
+type LucideIconName = React.ComponentProps<typeof LucideIcon>['name'];
 
 export const StatusLabelComponent: React.FC<{ status: string | undefined; className?: string }> = ({
   status,
   className = '',
 }) => {
+  let icon: LucideIconName | null = null;
   let color,
-    inverted = false,
-    icon = null;
+    inverted = false;
 
   switch (status) {
     case ErrandStatus.ArendeAvslutat:
@@ -51,10 +52,7 @@ export const StatusLabelComponent: React.FC<{ status: string | undefined; classN
       color={color}
       className={`max-h-full h-auto text-center whitespace-nowrap ${className}`}
     >
-      {icon ?
-        <LucideIcon name={icon as IconName} size={16} />
-      : null}{' '}
-      {status}
+      {icon && <LucideIcon name={icon} size={16} />} {status}
     </Label>
   );
 };

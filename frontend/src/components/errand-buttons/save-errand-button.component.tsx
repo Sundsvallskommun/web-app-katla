@@ -1,6 +1,7 @@
 'use client';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
+import { ErrandStatus } from '@interfaces/errand-status';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
@@ -11,17 +12,20 @@ import { scrollToFirstError } from './errand-buttons-utils';
 
 export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
   const toastMessage = useSnackbar();
-  const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
+  const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const draftErrand = errand.status.statusType === ErrandStatus.Utkast;
 
   const onSubmit = async () => {
     setIsLoading(true);
 
-    const isValid = await trigger();
-    if (!isValid) {
-      setIsLoading(false);
-      scrollToFirstError(formState.errors);
-      return;
+    if (!draftErrand) {
+      const isValid = await trigger();
+      if (!isValid) {
+        setIsLoading(false);
+        scrollToFirstError(formState.errors);
+        return;
+      }
     }
 
     const data = getValues() as IErrand & { attachments: UploadFile[] };
