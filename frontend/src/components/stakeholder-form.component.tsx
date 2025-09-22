@@ -55,6 +55,9 @@ export const StakeholderFormModal: React.FC<{
     }
   }, [initialValues, reset]);
 
+  const selectedRole = watch('roles')?.[0];
+  const isOwner = selectedRole === Role.APPLICANT;
+
   return (
     <Modal
       data-cy="manual-person-modal"
@@ -101,7 +104,7 @@ export const StakeholderFormModal: React.FC<{
 
         <div className="flex gap-8">
           <div className="flex flex-col">
-            <FormLabel>Adress*</FormLabel>
+            <FormLabel>Adress{isOwner ? '*' : ''}</FormLabel>
             <Input {...register('street')} name="street" className="w-full" invalid={!!errors.street} />
             {errors.street && <div className="text-error text-md mt-1">{errors.street.message}</div>}
           </div>
@@ -113,12 +116,12 @@ export const StakeholderFormModal: React.FC<{
 
         <div className="flex gap-8">
           <div className="flex flex-col">
-            <FormLabel>Postnummer*</FormLabel>
+            <FormLabel>Postnummer{isOwner ? '*' : ''}</FormLabel>
             <Input {...register('zip')} name="zip" className="w-full" invalid={!!errors.zip} />
             {errors.zip && <div className="text-error text-md mt-1">{errors.zip.message}</div>}
           </div>
           <div className="flex flex-col">
-            <FormLabel>Ort*</FormLabel>
+            <FormLabel>Ort{isOwner ? '*' : ''}</FormLabel>
             <Input {...register('city')} name="city" className="w-full" invalid={!!errors.city} />
             {errors.city && <div className="text-error text-md mt-1">{errors.city.message}</div>}
           </div>
