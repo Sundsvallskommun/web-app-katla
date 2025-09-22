@@ -13,6 +13,7 @@ import { CasedataMessagesTab } from '@components/messages/message.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
+import { ErrandStatus } from '@interfaces/errand-status';
 import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
@@ -182,9 +183,11 @@ const Arende: React.FC = () => {
                     <MenuBar.Item>
                       <button onClick={() => setCurrent(0)}>Rapporterat</button>
                     </MenuBar.Item>
-                    <MenuBar.Item>
-                      <button onClick={() => setCurrent(1)}>Meddelanden</button>
-                    </MenuBar.Item>
+                    {errand?.status?.statusType != ErrandStatus.Utkast && (
+                      <MenuBar.Item>
+                        <button onClick={() => setCurrent(1)}>Meddelanden</button>
+                      </MenuBar.Item>
+                    )}
                     <MenuBar.Item>
                       <button onClick={() => setCurrent(2)}>Bilagor</button>
                     </MenuBar.Item>
