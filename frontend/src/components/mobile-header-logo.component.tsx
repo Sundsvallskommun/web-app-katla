@@ -4,12 +4,12 @@ import { appConfig } from 'src/config/app-config';
 
 export const MobileHeaderLogo: React.FC = () => {
   return (
-    <div className="flex items-center flex-1">
+    <div className="flex items-center min-w-0 flex-1">
       <Logo
         variant="service"
-        title={'Draken'}
-        subtitle={`${appConfig.applicationName} ` + ` ${getApplicationEnvironment()}`}
-        className="flex-shrink-0"
+        title="Draken"
+        subtitle={`${appConfig.applicationName} ${getApplicationEnvironment()}`}
+        className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
       />
     </div>
   );
