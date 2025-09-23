@@ -1,15 +1,13 @@
 'use client';
 
-import { Logo, Divider, Button, Link, cx } from '@sk-web-gui/react';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { UserMenu } from '@sk-web-gui/react';
-import { useContext, useState } from 'react';
-import { AppContext } from '@contexts/app-context-interface';
-import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
-import { useThemeQueries } from '@sk-web-gui/react';
 import { getMenuGroups } from '@components/errand-header/menu-groups';
+import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import { StatusLabelComponent } from '@components/ongoing-errands/components/casedata-status-label.component';
+import { AppContext } from '@contexts/app-context-interface';
 import { SidebarMode } from '@interfaces/sidebarmode';
+import LucideIcon from '@sk-web-gui/lucide-icon';
+import { Button, Divider, Link, Logo, UserMenu, cx, useThemeQueries } from '@sk-web-gui/react';
+import { useContext, useState } from 'react';
 
 export const ErrandHeader: React.FC = () => {
   const { user, errand } = useContext(AppContext);
