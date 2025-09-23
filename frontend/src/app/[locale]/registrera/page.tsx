@@ -18,7 +18,10 @@ import { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 const Registrera: React.FC = () => {
-  const method = useForm<IErrand>();
+  const method = useForm<IErrand>({
+    mode: 'onChange',
+    defaultValues: { caseType: 'PARATRANSIT_NOTIFICATION' },
+  });
   const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
   const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
