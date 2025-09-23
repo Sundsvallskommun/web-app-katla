@@ -1,16 +1,14 @@
-import { MessageNode, countAllMessages, countUnreadMessages } from '@services/casedata-message-service';
 import React, { Fragment, useState } from 'react';
 import { RenderedMessage } from './rendered-message.component';
 import { Button, cx, Divider } from '@sk-web-gui/react';
+import { MessageNode } from '@interfaces/message';
+import { countAllMessages, countUnreadMessages } from '@services/casedata-conversation-service';
 
 interface MessageTreeProps {
   nodes: MessageNode[];
   onSelect: (node: MessageNode) => void;
   setShowMessageComposer: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-const getId = (node: MessageNode): string =>
-  node.emailHeaders?.find((h) => h.header === 'MESSAGE_ID')?.values?.[0] ?? '';
 
 const MessageNodeComponent: React.FC<{
   node: MessageNode;
@@ -22,7 +20,7 @@ const MessageNodeComponent: React.FC<{
 
   return (
     <>
-      <div className="m-md mr-0" id={`node-${getId(node)}`}>
+      <div className="m-md mr-0" id={`node-${node?.messageId}`}>
         <RenderedMessage message={node} onSelect={onSelect} root={root} setShowMessageComposer={setShowMessageComposer}>
           {root && node.children?.length ?
             <Button
@@ -47,7 +45,7 @@ const MessageNodeComponent: React.FC<{
           <div className={cx(root ? 'border-l' : 'border-l')}>
             {node.children.map((child, idx) => (
               <MessageNodeComponent
-                key={`${idx}-${getId(child)}`}
+                key={`${idx}`}
                 node={child}
                 onSelect={onSelect}
                 setShowMessageComposer={setShowMessageComposer}
@@ -64,7 +62,7 @@ const MessageTreeComponent: React.FC<MessageTreeProps> = ({ nodes, onSelect, set
   return (
     <div className="my-lg" data-cy="message-container">
       {nodes.map((node, idx) => (
-        <Fragment key={`${idx}-${getId(node)}`}>
+        <Fragment key={`${idx}`}>
           <Divider />
           <MessageNodeComponent node={node} onSelect={onSelect} setShowMessageComposer={setShowMessageComposer} root={true} />
         </Fragment>

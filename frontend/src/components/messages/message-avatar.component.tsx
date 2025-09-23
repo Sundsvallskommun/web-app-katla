@@ -1,5 +1,5 @@
 
-import { MessageNode } from '@services/casedata-message-service';
+import { MessageNode } from '@interfaces/message';
 import { Avatar } from '@sk-web-gui/react';
 
 const getSenderInitials = (msg: MessageNode): string => {

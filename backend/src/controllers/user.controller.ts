@@ -18,27 +18,6 @@ interface UserData {
   permissions: Permissions;
 }
 
-interface EmployeeAddress {
-  personid: string;
-  givenname: string;
-  lastname: string;
-  fullname: string;
-  address: string;
-  postalCode: string;
-  city: string;
-  workPhone: string;
-  mobilePhone: string;
-  aboutMe: string;
-  email: string;
-  mailNickname: string;
-  company: string;
-  companyId: number;
-  orgTree: string;
-  referenceNumber: string;
-  isManager: boolean;
-  loginName: string;
-}
-
 @Controller()
 export class UserController {
   private apiService = new ApiService();

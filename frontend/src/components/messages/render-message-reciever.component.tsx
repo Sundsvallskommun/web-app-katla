@@ -1,23 +1,11 @@
 import { IErrand } from "@interfaces/errand";
-import { MessageNode } from "@services/casedata-message-service";
+import { MessageNode } from "@interfaces/message";
 import { getOwnerStakeholder } from "@services/casedata-stakeholder-service";
 import sanitized from "@services/sanitizer-service";
 
 
 const getMessageSourceLabel = (message: MessageNode, errand: IErrand): string =>  {
   if (!message) return '';
-
-  if (message.messageType === 'EMAIL' && message.recipients) {
-    return message.recipients.join(', ');
-  }
-
-  if (message.messageType === 'SMS' && message.mobileNumber) {
-    return message.mobileNumber;
-  }
-
-  if (message.messageType === 'WEBMESSAGE' || message.externalCaseId) {
-    return 'E-tjänst';
-  }
 
   if (message.messageType === 'MINASIDOR' && message.direction === 'OUTBOUND') {
     const owner = getOwnerStakeholder(errand);

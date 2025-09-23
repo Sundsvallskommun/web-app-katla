@@ -2,9 +2,8 @@ import { AppContext } from '@contexts/app-context-interface';
 import { MessageResponse } from '@interfaces/message';
 import { Conversation, getConversationMessages, getConversations } from '@services/casedata-conversation-service';
 import { isErrandLocked } from '@services/casedata-errand-service';
-import { fetchMessages, fetchMessagesTree, setMessageViewStatus } from '@services/casedata-message-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Divider, RadioButton, useSnackbar } from '@sk-web-gui/react';
+import { Button, Divider, RadioButton } from '@sk-web-gui/react';
 import React, { useContext, useEffect, useState } from 'react';
 import { MessageComposer } from './message-composer.component';
 import MessageTreeComponent from './tree.component';
@@ -13,89 +12,20 @@ export const CasedataMessagesTab: React.FC<{
   setUnsaved: (unsaved: boolean) => void;
   update: () => void;
 }> = (props) => {
-  const { municipalityId, errand, messages, messageTree, setMessages, setMessageTree, conversation, setConversation } =
+  const { municipalityId, errand, conversation, setConversation } =
     useContext(AppContext);
   const [selectedMessage, setSelectedMessage] = useState<MessageResponse>();
   const [showMessageComposer, setShowMessageComposer] = useState<boolean>(false);
   const [sortMessages, setSortMessages] = useState<number>(0);
-  const [sortedMessages, setSortedMessages] = useState(messages);
-  const toastMessage = useSnackbar();
-  const [allMessages, setAllMessages] = useState<MessageResponse[]>([]);
+  const [sortedMessages, setSortedMessages] = useState(conversation);
 
-  useEffect(() => {
-    const merged = [...(messages || []), ...(conversation || [])];
-    const unique = merged.filter((msg, index, self) => index === self.findIndex((m) => m.messageId === msg.messageId));
-    setAllMessages(unique);
-  }, [messages, conversation]);
 
   const setMessageViewed = (msg: MessageResponse) => {
-    if (msg?.conversationId) {
-      console.warn('Not implemented'); //Unsure of how acknowledge for conversation messages will work
-    } else {
-      setMessageViewStatus(errand.id.toString(), municipalityId, msg?.messageId || '', true)
-        .then(() =>
-          fetchMessagesTree(municipalityId, errand).catch(() => {
-            toastMessage({
-              position: 'bottom',
-              closeable: false,
-              message: 'Något gick fel när meddelanden hämtades',
-              status: 'error',
-            });
-          })
-        )
-        .then((result) => {
-          if (Array.isArray(result)) {
-            setMessageTree(result);
-          }
-        })
-        .then(() =>
-          fetchMessages(municipalityId, errand).catch(() => {
-            toastMessage({
-              position: 'bottom',
-              closeable: false,
-              message: 'Något gick fel när meddelanden hämtades',
-              status: 'error',
-            });
-          })
-        )
-        .then((result) => {
-          if (Array.isArray(result)) {
-            setMessages(result);
-          }
-        })
-        .catch(() => {
-          toastMessage({
-            position: 'bottom',
-            closeable: false,
-            message: 'Något gick fel när meddelandets status uppdaterades',
-            status: 'error',
-          });
-        });
-    }
+      console.warn('Not implemented', msg); //Unsure of how acknowledge for conversation messages will work
   };
 
   useEffect(() => {
     if (errand && errand.errandNumber) {
-      fetchMessages(municipalityId, errand)
-        .then(setMessages)
-        .catch(() => {
-          toastMessage({
-            position: 'bottom',
-            closeable: false,
-            message: 'Något gick fel när meddelanden hämtades',
-            status: 'error',
-          });
-        });
-      fetchMessagesTree(municipalityId, errand)
-        .then(setMessageTree)
-        .catch(() => {
-          toastMessage({
-            position: 'bottom',
-            closeable: false,
-            message: 'Något gick fel när meddelanden hämtades',
-            status: 'error',
-          });
-        });
       getConversations(municipalityId, errand.id)
         .then((res) => {
           Promise.all(
@@ -125,18 +55,23 @@ export const CasedataMessagesTab: React.FC<{
   }, [municipalityId, errand]);
 
   useEffect(() => {
-    if (allMessages && messageTree) {
+    if (conversation) {
+      let filteredMessages = conversation;
       if (sortMessages === 1) {
-        const filteredMessages = allMessages.filter((message) => message.direction === 'INBOUND');
-        setSortedMessages(filteredMessages);
+         filteredMessages = conversation.filter((message) => message.direction === 'INBOUND');
       } else if (sortMessages === 2) {
-        const filteredMessages = allMessages.filter((message) => message.direction === 'OUTBOUND');
-        setSortedMessages(filteredMessages);
-      } else {
-        setSortedMessages(allMessages);
+         filteredMessages = conversation.filter((message) => message.direction === 'OUTBOUND');
+      } 
+
+     const sorted = [...filteredMessages].sort(
+      (a, b) => {
+        if (!a.sent || !b.sent) return 0;
+        return new Date(b.sent).getTime() - new Date(a.sent).getTime();
       }
+    );
+    setSortedMessages(sorted);
     }
-  }, [allMessages, messageTree, sortMessages]);
+  }, [sortMessages, conversation]);
 
   return (
     <>

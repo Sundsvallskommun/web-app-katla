@@ -1,9 +1,8 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { Role } from '@interfaces/role';
+import { MessageNode } from '@interfaces/message';
 import { messageAttachment } from '@services/casedata-attachment-service';
 import { getConversationAttachment } from '@services/casedata-conversation-service';
 import { isErrandLocked } from '@services/casedata-errand-service';
-import { MessageNode } from '@services/casedata-message-service';
 import sanitized from '@services/sanitizer-service';
 import { Button, cx, Icon, useSnackbar } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
@@ -25,35 +24,16 @@ export const RenderedMessage: React.FC<{
 
   const toastMessage = useSnackbar();
 
-  // We truncate reply messages at the first occurence of "Från: " and
-  // the first "-----Ursprungligt meddelande-----" line, so that only the
-  // last message body is shown.
-  //eslint-disable-next-line no-useless-escape
-  const answerMessage = message.message.replace(/\<br\>\<br\>\<br\>\<br\>/g, '<p><br></p>');
 
   const getSender = (msg: MessageNode) =>
-    msg?.firstName && msg?.lastName ? `${msg.firstName} ${msg.lastName}` : msg?.email ? msg.email : '(okänd avsändare)';
-
-  const getMessageOwner = (msg: MessageNode) => {
-    if (msg.direction === 'INBOUND') {
-      const ownerInfomration = errand.stakeholders.filter((stakeholder) => stakeholder.roles.includes(Role.APPLICANT));
-      const isWebMessageOpenE = msg.messageType === 'WEBMESSAGE' && msg.externalCaseId !== null;
-      const isOwnerStakeholderEmail = ownerInfomration.some((stakeholder) =>
-        stakeholder.emails.some((email) => email.value === msg.email)
-      );
-
-      if (isWebMessageOpenE || isOwnerStakeholderEmail) {
-        return <span className="text-xs whitespace-nowrap">Ärendeägare</span>;
-      }
-    }
-  };
+    msg?.firstName && msg?.lastName ? `${msg.firstName} ${msg.lastName}` : '(okänd avsändare)';
 
   return (
     <>
       <div
         key={`message-${message.messageId}`}
         className={cx('rounded-4 m-0 py-sm px-sm text-md hover:bg-background-color-mixin-1')}
-        data-cy={`node-${message?.emailHeaders?.[0]?.values || message?.messageId}`}
+        data-cy={`node-${message?.messageId}`}
       >
         <div className="relative flex gap-md items-start justify-between">
           <div className="flex w-full">
@@ -135,7 +115,6 @@ export const RenderedMessage: React.FC<{
                 })()}
               </span>
             </div>
-            {getMessageOwner(message)}
           </div>
           <div className="flex gap-8">
             <span
@@ -276,21 +255,12 @@ export const RenderedMessage: React.FC<{
             </ul>
           ) : null}
           <div className="my-18">
-            {Array.isArray(message.emailHeaders?.find((h) => h.header === 'IN_REPLY_TO')?.values) ? (
-              <p
-                className="my-0 [&>ul]:list-disc [&>ol]:list-decimal [&>ul]:ml-lg [&>ol]:ml-lg"
-                dangerouslySetInnerHTML={{
-                  __html: sanitized(answerMessage.toString() || ''),
-                }}
-              ></p>
-            ) : (
               <p
                 className="my-0 [&>ul]:list-disc [&>ol]:list-decimal [&>ul]:ml-lg [&>ol]:ml-lg"
                 dangerouslySetInnerHTML={{
                   __html: sanitized(message?.message || ''),
                 }}
               ></p>
-            )}
           </div>
         </div>
       </div>
