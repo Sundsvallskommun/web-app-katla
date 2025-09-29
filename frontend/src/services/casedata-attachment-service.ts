@@ -1,5 +1,4 @@
 import { Attachment } from '@interfaces/attachment';
-import { IErrand } from '@interfaces/errand';
 import { ApiResponse, apiService } from '@services/api-service';
 import { UploadFile } from '@sk-web-gui/react';
 import { toBase64 } from '@utils/toBase64';
@@ -49,9 +48,7 @@ export const ACCEPTED_UPLOAD_FILETYPES = [
   ...documentMimeTypes,
 ];
 
-export type FTAttachmentCategory =
-  | 'MEDICAL_CONFIRMATION'
-  | 'MEDICAL_OPINION';
+export type FTAttachmentCategory = 'MEDICAL_CONFIRMATION' | 'MEDICAL_OPINION';
 
 export enum FTAttachmentLabels {
   'MEDICAL_CONFIRMATION' = 'Läkarintyg',
@@ -62,8 +59,8 @@ export const getFTAttachmentKey: (label: string) => FTAttachmentCategory | undef
   switch (label) {
     case 'Läkarintyg':
       return 'MEDICAL_CONFIRMATION';
-      case 'Medicinskt utlåtande':
-        return 'MEDICAL_OPINION';
+    case 'Medicinskt utlåtande':
+      return 'MEDICAL_OPINION';
     default:
       return undefined;
   }
@@ -72,35 +69,15 @@ export const getFTAttachmentKey: (label: string) => FTAttachmentCategory | undef
 export const getAttachmentLabel = (attachment: Attachment) =>
   FTAttachmentLabels[attachment?.category as keyof typeof FTAttachmentLabels] || 'Okänt';
 
-export const getImageAspect: (attachment: Attachment) => number | undefined = (attachment) =>
-  attachment?.category === 'PASSPORT_PHOTO' ? 3 / 4
-  : attachment?.category === 'MEDICAL_CONFIRMATION' ? undefined
-  : attachment?.category === 'SIGNATURE' ? 4 / 1
-  : attachment?.category === 'POLICE_REPORT' ? undefined
-  : attachment?.category === 'UNKNOWN' ? undefined
-  : undefined;
-
- const uniqueAttachments: FTAttachmentCategory[] = [];
-
-export const validateAttachmentsForUtredning: (errand: IErrand) => boolean = (errand) => {
-  // Errand may only have max one passport photo and max one signature before moving to Utredning phase
-  const uniqueAttachmentsOnlyOnce = uniqueAttachments.every(
-    (u) => errand.attachments.filter((a) => (a.category as FTAttachmentCategory) === u).length < 2
-  );
-  return uniqueAttachmentsOnlyOnce;
-};
-
 export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFile[] => {
   return attachments.map((attachment) => {
-    // Konvertera Base64-strängen tillbaka till en Blob
-    const binaryData = atob(attachment.file); // Decode Base64
+    const binaryData = atob(attachment.file);
     const byteArray = new Uint8Array(binaryData.length);
     for (let i = 0; i < binaryData.length; i++) {
       byteArray[i] = binaryData.charCodeAt(i);
     }
     const blob = new Blob([byteArray], { type: attachment.mimeType });
 
-    // Skapa en File-instans från Blob
     const file = new File([blob], attachment.name + '.' + (attachment.extension || ''), { type: attachment.mimeType });
 
     const nameWithoutExtension = attachment.name.replace(/\.[^/.]+$/, '');
@@ -117,68 +94,6 @@ export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFi
       },
     };
   });
-};
-
-// export const validateAttachmentsForDecision: (errand: IErrand) => { valid: boolean; reason: string } = (errand) => {
-//   const uniqueAttachmentsOnlyOnce = validateAttachmentsForUtredning(errand);
-//   const passportPhotoMissing =
-//     errand.caseType === FTCaseType.PARKING_PERMIT &&
-//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'PASSPORT_PHOTO').length === 0;
-//   const tooManypassportPhotos =
-//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'PASSPORT_PHOTO').length > 1;
-//   const medicalConfirmationValid =
-//     (errand.extraParameters.find((p) => p.key === 'application.renewal.medicalConfirmationRequired')?.values?.[0] ??
-//       '') === 'no' ||
-//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'MEDICAL_CONFIRMATION').length > 0 ||
-//     errand.caseType !== FTCaseType.PARKING_PERMIT;
-//   const signatureValid =
-//     errand.attachments.filter((a) => (a.category as PTAttachmentCategory) === 'SIGNATURE').length ==
-//     ((
-//       (errand.extraParameters.find((p) => p.key === 'application.applicant.signingAbility')?.values?.[0] ?? '') ===
-//       'true'
-//     ) ?
-//       1
-//     : 0);
-//   const rsn = [];
-//   if (passportPhotoMissing) {
-//     rsn.push('passfoto saknas');
-//   }
-//   if (tooManypassportPhotos) {
-//     rsn.push('endast ett passfoto får bifogas');
-//   }
-//   if (!medicalConfirmationValid) {
-//     rsn.push('läkarintyg saknas');
-//   }
-//   if (!signatureValid) {
-//     rsn.push('signaturfoto måste bifogas om den sökande kan signera');
-//   }
-
-//   const reason = rsn.map((r, i) => {
-//     if (i === 0) {
-//       return r.charAt(0).toUpperCase() + r.slice(1);
-//     }
-//     return r;
-//   });
-
-//   return {
-//     valid:
-//       uniqueAttachmentsOnlyOnce &&
-//       !passportPhotoMissing &&
-//       !tooManypassportPhotos &&
-//       medicalConfirmationValid &&
-//       signatureValid,
-//     reason: reason.join(', '),
-//   };
-// };
-
-//TEMP: Vet inte reglerna för bilagor ännu.
-export const validateAttachmentsForDecision = (errand: IErrand): { valid: boolean; reason: string } => {
-  const valid = validateAttachmentsForUtredning(errand);
-
-  return {
-    valid,
-    reason: valid ? '' : 'Ogiltiga eller dubbla bilagor förekommer',
-  };
 };
 
 export const withRetries: <T>(retries: number, func: () => Promise<T>) => Promise<T | boolean> = (retries, func) => {
@@ -328,29 +243,6 @@ export const fetchErrandAttachments: (
     .then((res) => res.data)
     .catch(() => {
       console.error('Something went wrong when fetching attachments for errand: ', errandId);
-      return { data: [], message: 'error' };
-    });
-};
-
-export const messageAttachment: (
-  municipalityId: string,
-  errandId: number,
-  messageId: string,
-  attachmentId: string
-) => Promise<ApiResponse<Attachment[]>> = (municipalityId, errandId, messageId, attachmentId) => {
-  if (!errandId) {
-    console.error('No errand id found, cannot fetch. Returning.');
-  }
-  if (!attachmentId) {
-    console.error('No attachment id found, cannot fetch. Returning.');
-  }
-
-  const url = `casedata/${municipalityId}/errand/${errandId}/messages/${messageId}/attachments/${attachmentId}`;
-  return apiService
-    .get<ApiResponse<Attachment[]>>(url)
-    .then((res) => res.data)
-    .catch(() => {
-      console.error('Something went wrong when fetching attachment');
       return { data: [], message: 'error' };
     });
 };

@@ -1,6 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { MessageNode } from '@interfaces/message';
-import { messageAttachment } from '@services/casedata-attachment-service';
 import { getConversationAttachment } from '@services/casedata-conversation-service';
 import { isErrandLocked } from '@services/casedata-errand-service';
 import sanitized from '@services/sanitizer-service';
@@ -21,9 +20,7 @@ export const RenderedMessage: React.FC<{
   const { errand, municipalityId } = useContext(AppContext);
   const [expanded, setExpanded] = useState<boolean>(!message?.children?.length ? true : false);
 
-
   const toastMessage = useSnackbar();
-
 
   const getSender = (msg: MessageNode) =>
     msg?.firstName && msg?.lastName ? `${msg.firstName} ${msg.lastName}` : '(okänd avsändare)';
@@ -41,7 +38,9 @@ export const RenderedMessage: React.FC<{
             <div className="w-5/6 ml-sm">
               <div className="my-0 flex justify-between">
                 <div>
-                  {!root ? <CornerDownRight size={16} className="mr-sm" /> : null}
+                  {!root ?
+                    <CornerDownRight size={16} className="mr-sm" />
+                  : null}
                   <p
                     className={cx(`mr-md break-all text-small font-bold`)}
                     dangerouslySetInnerHTML={{
@@ -61,7 +60,7 @@ export const RenderedMessage: React.FC<{
                 {message.sent ? dayjs(message.sent).format('YYYY-MM-DD HH:mm') : 'Datum saknas'}
               </span>
               <span className="text-xs mx-sm">|</span>
-              {message.attachments && message.attachments?.length > 0 ? (
+              {message.attachments && message.attachments?.length > 0 ?
                 <>
                   <div className="mx-sm inline-flex items-center gap-xs">
                     <Paperclip size="1.5rem" />
@@ -69,7 +68,7 @@ export const RenderedMessage: React.FC<{
                   </div>
                   <span className="text-xs mx-sm">|</span>
                 </>
-              ) : null}
+              : null}
               <span className="flex text-xs whitespace-nowrap items-center">
                 {(() => {
                   switch (message.messageType) {
@@ -145,11 +144,13 @@ export const RenderedMessage: React.FC<{
               __html: sanitized(message.subject || ''),
             }}
           ></p>
-          {expanded &&
-          (message.messageType === 'EMAIL' ||
-            message.messageType === 'WEB_MESSAGE' ||
-            message.messageType === 'DRAKEN' ||
-            message.messageType === 'MINASIDOR') ? (
+          {(
+            expanded &&
+            (message.messageType === 'EMAIL' ||
+              message.messageType === 'WEB_MESSAGE' ||
+              message.messageType === 'DRAKEN' ||
+              message.messageType === 'MINASIDOR')
+          ) ?
             <Button
               type="button"
               className="self-start"
@@ -164,14 +165,14 @@ export const RenderedMessage: React.FC<{
             >
               {message?.direction === 'INBOUND' ? 'Svara' : 'Följ upp'}
             </Button>
-          ) : null}
+          : null}
         </div>
         <div
           className={`message-${message.messageId} px-xl ${
             expanded ? '' : 'max-h-0 overflow-hidden'
           } transition-[max-height] ease-in-out`}
         >
-          {message?.attachments && message?.attachments?.length > 0 ? (
+          {message?.attachments && message?.attachments?.length > 0 ?
             <ul className="flex flex-wrap gap-sm items-center my-12">
               <Icon icon={<Paperclip />} size="1.6rem" />
               {message?.attachments?.map((a, idx) => (
@@ -212,36 +213,6 @@ export const RenderedMessage: React.FC<{
                             status: 'error',
                           });
                         });
-                    } else {
-                      if(message.messageId && a.id){
-                      messageAttachment(municipalityId, errand.id, message.messageId, a.id)
-                        .then((res) => {
-                          if (res.data.length !== 0) {
-                            const uri = `data:${a.file};base64,${res.data}`;
-                            const link = document.createElement('a');
-                            const filename = a.name;
-                            link.href = uri;
-                            link.setAttribute('download', filename);
-                            document.body.appendChild(link);
-                            link.click();
-                          } else {
-                            toastMessage({
-                              position: 'bottom',
-                              closeable: false,
-                              message: 'Filen kan inte hittas eller är skadad.',
-                              status: 'error',
-                            });
-                          }
-                        })
-                        .catch(() => {
-                          toastMessage({
-                            position: 'bottom',
-                            closeable: false,
-                            message: 'Något gick fel när bilagan skulle hämtas',
-                            status: 'error',
-                          });
-                        });
-                    }
                     }
                   }}
                   role="listitem"
@@ -253,14 +224,14 @@ export const RenderedMessage: React.FC<{
                 </Button>
               ))}
             </ul>
-          ) : null}
+          : null}
           <div className="my-18">
-              <p
-                className="my-0 [&>ul]:list-disc [&>ol]:list-decimal [&>ul]:ml-lg [&>ol]:ml-lg"
-                dangerouslySetInnerHTML={{
-                  __html: sanitized(message?.message || ''),
-                }}
-              ></p>
+            <p
+              className="my-0 [&>ul]:list-disc [&>ol]:list-decimal [&>ul]:ml-lg [&>ol]:ml-lg"
+              dangerouslySetInnerHTML={{
+                __html: sanitized(message?.message || ''),
+              }}
+            ></p>
           </div>
         </div>
       </div>
