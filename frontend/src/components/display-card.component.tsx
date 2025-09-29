@@ -1,6 +1,7 @@
 import { getRoleDisplayName, Role } from '@interfaces/role';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, useThemeQueries } from '@sk-web-gui/react';
+import { phoneNumberFormatter } from '@utils/contact-form-utils';
 import { useState } from 'react';
 import { StakeholderFormModal } from './stakeholder-form.component';
 
@@ -75,8 +76,8 @@ export const DisplayCard: React.FC<{
             <div className={!newEmail?.trim() ? 'italic text-text-secondary' : ''}>
               {newEmail?.trim() || 'E-post saknas'}
             </div>
-            <div className={!newPhoneNumber?.trim() ? 'italic text-text-secondary' : ''}>
-              {newPhoneNumber?.trim() || 'Telefonnummer saknas'}
+            <div className={!phoneNumberFormatter(newPhoneNumber) ? 'italic text-text-secondary' : ''}>
+              {phoneNumberFormatter(newPhoneNumber) || 'Telefonnummer saknas'}
             </div>
           </div>
         </div>
@@ -123,7 +124,7 @@ export const DisplayCard: React.FC<{
           onSubmit={(data) => {
             onUpdate?.({
               newEmail: data.newEmail,
-              newPhoneNumber: data.newPhoneNumber,
+              newPhoneNumber: phoneNumberFormatter(data.newPhoneNumber),
               street: data.street,
               zip: data.zip,
               city: data.city,
