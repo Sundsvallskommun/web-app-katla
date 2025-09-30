@@ -14,7 +14,7 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
-  const draftErrand = errand.status.statusType === ErrandStatus.Utkast;
+  const draftErrand = errand?.status?.statusType === ErrandStatus.Utkast;
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -128,7 +128,7 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
       disabled={isLoading}
       rightIcon={isLoading ? <Spinner size={2} /> : undefined}
     >
-      Uppdatera ärende
+      {draftErrand ? 'Uppdatera utkast' : 'Uppdatera ärende'}
     </Button>
   );
 };
