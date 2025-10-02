@@ -2,7 +2,7 @@ import { StatusLabelComponent } from '@components/ongoing-errands/components/cas
 import { AppContext } from '@contexts/app-context-interface';
 import { FTCaseType, getCaseShortLabels } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
-import { findStatusLabelForStatusKey } from '@services/casedata-errand-service';
+import { normalizeStatus } from '@interfaces/errand-status';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button } from '@sk-web-gui/react';
 import { useContext } from 'react';
@@ -13,13 +13,12 @@ interface ErrandItemProps {
 const MobileErrandItem: React.FC<ErrandItemProps> = ({ errand }) => {
   const { municipalityId } = useContext(AppContext);
   const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${municipalityId}/${errand.errandNumber}`;
-
   return (
     <div className="py-4">
       <div className="flex min-h-[8rem] items-end self-stretch rounded-[20px] border border-opacity-30 pt-[2.0rem] pb-[1.2rem] pl-[2.0rem] pr-[0.8rem] gap-4">
         <div className="flex flex-1 flex-col">
           <StatusLabelComponent
-            status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string}
+            status={normalizeStatus(errand?.status?.statusType)}
             className="text-white font-arial text-md lining-nums proportional-nums w-fit max-w-full py-[0.6rem] px-[1.2rem] rounded-[1.2rem] text-center"
           />
 

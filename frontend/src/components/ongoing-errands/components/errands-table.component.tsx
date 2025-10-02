@@ -1,14 +1,15 @@
-import NextLink from 'next/link';
+import { PriorityComponent } from '@components/priority/priority.component';
+import { AppContext } from '@contexts/app-context-interface';
+import { FTCaseType } from '@interfaces/case-type';
+import { IErrand } from '@interfaces/errand';
+import { normalizeStatus } from '@interfaces/errand-status';
+import { getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
 import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
+import { TableForm } from '@utils/useOngoingCaseDataErrands';
+import NextLink from 'next/link';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { AppContext } from '@contexts/app-context-interface';
-import { IErrand } from '@interfaces/errand';
 import { StatusLabelComponent } from './casedata-status-label.component';
-import { findStatusLabelForStatusKey, getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
-import { TableForm } from '@utils/useOngoingCaseDataErrands';
-import { FTCaseType } from '@interfaces/case-type';
-import { PriorityComponent } from '@components/priority/priority.component';
 
 export const ErrandsTable: React.FC = () => {
   const { watch, setValue, register } = useFormContext<TableForm>();
@@ -59,7 +60,6 @@ export const ErrandsTable: React.FC = () => {
 
   const rows = (data.errands || []).map((errand: IErrand, index) => {
     const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${municipalityId}/${errand.errandNumber}`;
-
     return (
       <Table.Row
         key={`row-${index}`}
@@ -71,7 +71,7 @@ export const ErrandsTable: React.FC = () => {
         className="cursor-pointer"
       >
         <Table.HeaderColumn scope="row" className="w-full w-max-[15rem] whitespace-nowrap text-ellipsis table-caption">
-          <StatusLabelComponent status={findStatusLabelForStatusKey(errand?.status?.statusType as string) as string} />
+          <StatusLabelComponent status={normalizeStatus(errand?.status?.statusType)} />
         </Table.HeaderColumn>
         <Table.Column scope="row" className="font-bold w-full whitespace-nowrap overflow-x-hidden">
           {getCaseLabels()[errand.caseType as FTCaseType] ?? errand.caseType}

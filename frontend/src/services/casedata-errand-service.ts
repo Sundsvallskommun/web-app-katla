@@ -2,13 +2,7 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { FTCaseLabel, FTCaseType } from '@interfaces/case-type';
 import { ApiChannels, Channels } from '@interfaces/channels';
-import {
-  ApiErrand,
-  ErrandsData,
-  IErrand,
-  PagedApiErrandsResponse,
-  RegisterErrandData
-} from '@interfaces/errand';
+import { ApiErrand, ErrandsData, IErrand, PagedApiErrandsResponse, RegisterErrandData } from '@interfaces/errand';
 import { ErrandPhase, UiPhase } from '@interfaces/errand-phase';
 import { ErrandStatus } from '@interfaces/errand-status';
 import { ExtraParameter } from '@interfaces/extra-parameters';
@@ -16,7 +10,6 @@ import { All, ApiPriority, Priority } from '@interfaces/priority';
 import { Role } from '@interfaces/role';
 import { Stakeholder } from '@interfaces/stakeholder';
 import { User } from '@interfaces/user';
-import { fetchErrandAttachments, MAX_FILE_SIZE_MB } from '@services/casedata-attachment-service';
 import {
   getLastUpdatedAdministrator,
   makeStakeholdersList,
@@ -26,6 +19,7 @@ import { useSnackbar } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import { useCallback, useContext, useEffect } from 'react';
 import { ApiResponse, apiService } from './api-service';
+import { fetchErrandAttachments, MAX_FILE_SIZE_MB } from './casedata-attachment-service';
 import {
   extractExtraParameters,
   extraParametersToUppgiftMapper,
@@ -65,6 +59,7 @@ export const ongoingCaseDataPTErrandLabels = [
 export const newStatuses = [ErrandStatus.ArendeInkommit];
 
 export const ongoingStatuses = [
+  ErrandStatus.ArendeInkommit,
   ErrandStatus.UnderGranskning,
   ErrandStatus.VantarPaKomplettering,
   ErrandStatus.InterntAterkoppling,
@@ -89,13 +84,7 @@ export const closedStatuses = [
 export const getStatusLabel = (statuses: ErrandStatus[]) => {
   if (statuses.length > 0) {
     if (statuses.some((s) => newStatuses.includes(s))) {
-      return 'Nya ärenden';
-    } else if (statuses.some((s) => ongoingStatuses.includes(s))) {
       return 'Öppna ärenden';
-    } else if (statuses.some((s) => suspendedStatuses.includes(s))) {
-      return 'Parkerade ärenden';
-    } else if (statuses.some((s) => assignedStatuses.includes(s))) {
-      return 'Tilldelade ärenden';
     } else if (statuses.some((s) => draftStatuses.includes(s))) {
       return 'Utkast';
     } else if (statuses.some((s) => closedStatuses.includes(s))) {
