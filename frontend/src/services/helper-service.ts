@@ -1,13 +1,13 @@
 import dayjs from 'dayjs';
 
 export const newNumberPhonePattern = /^$|^\+46$|^(\+?[0-9]{7,11})$/gi;
-export const phonePattern = /^$|^(\+?[0-9]{7,11})$/gi;
+export const phonePattern = /^$|^(?:\+|0)[0-9\s-]{6,19}$/;
 export const phonePatternNoCountryCode = /^$|^07[02369]\d{7}$/;
 export const phonePatternWithCountryCode = /^$|^(\+[0-9]{10,12})$/gi;
 export const supportManagementPhonePattern = /^\+[1-9]\d{3,14}$/gi;
 export const supportManagementPhonePatternOrCountryCode = /^\+46$|^\+[1-9]\d{3,14}$/gi;
 
-export const invalidPhoneMessage = 'Ej giltigt telefonnummer';
+export const invalidPhoneMessage = 'Fyll i ett giltigt mobilnummer.';
 
 export const ssnPattern = /^$|^((19|20)[0-9]{6}-?[0-9]{4})$/gi;
 export const usernamePattern = /.*/;

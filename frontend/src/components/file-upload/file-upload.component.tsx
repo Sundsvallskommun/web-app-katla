@@ -1,18 +1,22 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { deleteAttachment, FTAttachmentLabels } from '@services/casedata-attachment-service';
-import { CustomOnChangeEventUploadFile, FileUpload, Switch, UploadFile } from '@sk-web-gui/react';
+import { deleteAttachment, editAttachment, FTAttachmentLabels } from '@services/casedata-attachment-service';
+import { CustomOnChangeEventUploadFile, FileUpload, UploadFile, useConfirm, useSnackbar } from '@sk-web-gui/react';
+import dayjs from 'dayjs';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 const FileUploadComponent: React.FC = () => {
-  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [originalFile, setOriginalFile] = useState<UploadFile | null>(null);
   const { setValue, watch } = useFormContext();
+  const removeConfirm = useConfirm();
+  const toastMessage = useSnackbar();
 
   const { municipalityId, errand } = useContext(AppContext);
 
   const files: UploadFile[] = watch('attachments') || [];
 
-  const onChange = (e: CustomOnChangeEventUploadFile) => {
+  const onChange = async (e: CustomOnChangeEventUploadFile) => {
     if (e.target.value !== null) {
       const updatedFiles = files.concat(
         ...e.target.value.map((file) => ({
@@ -25,11 +29,21 @@ const FileUploadComponent: React.FC = () => {
     }
   };
 
-  const handleRemoveFile = (file: UploadFile) => {
+  const handleRemoveFile = async (file: UploadFile) => {
     const updatedFiles = files.filter((f) => f !== file);
     const errandIdNum = typeof errand.id === 'string' ? Number(errand.id) : errand.id;
 
-    deleteAttachment(municipalityId, errandIdNum, file);
+    const confirmed = await removeConfirm.showConfirmation(
+      'Ta bort?',
+      'Vill du ta bort denna bilaga?',
+      'Ja',
+      'Nej',
+      'info',
+      'info'
+    );
+    if (!confirmed) return;
+
+    await deleteAttachment(municipalityId, errandIdNum, file);
     setValue('attachments', updatedFiles);
   };
 
@@ -53,17 +67,15 @@ const FileUploadComponent: React.FC = () => {
           </div>
         </div>
         <div className="py-[1rem]">
-          <Switch value={isEdit.toString()} checked={isEdit} onChange={() => setIsEdit((value) => !value)}>
-            Redigera
-          </Switch>
-        </div>
-        <FileUpload.List isEdit={isEdit}>
-          {files.map((file, key) => (
-            <div key={file.file?.name || `file-${key}`} data-cy={`fileupload-list-item-${key}`}>
+          <FileUpload.List>
+            {files.map((file, i) => (
               <FileUpload.ListItem
                 file={file}
-                index={key}
+                index={i}
+                key={i}
+                isEdit={editIndex === i}
                 nameProps={{
+                  description: `Uppladdad: ${dayjs(file?.meta?.created as string).format('YYYY-MM-DD HH:mm')}`,
                   inputProps: {
                     onChange: handleOnChangeName(file),
                   },
@@ -75,13 +87,50 @@ const FileUploadComponent: React.FC = () => {
                   },
                 }}
                 actionsProps={{
-                  showRemove: true,
+                  showEdit: true,
+                  showEditSave: editIndex === i,
+                  showEditCancel: editIndex === i,
+                  onEdit: () => {
+                    setOriginalFile(file);
+                    setEditIndex(i);
+                  },
+                  onEditSave: () => {
+                    if (file.meta.name === '') {
+                      toastMessage({
+                        position: 'bottom',
+                        closeable: false,
+                        message: 'Namn måste anges',
+                        status: 'error',
+                      });
+                      return;
+                    }
+                    editAttachment(
+                      municipalityId,
+                      errand.id,
+                      file.id,
+                      `${file.meta.name}.${file.meta.ending}`,
+                      file.meta.category as string
+                    );
+                    setEditIndex(null);
+                  },
+                  onEditCancel: () => {
+                    if (originalFile) {
+                      setValue(`attachments.${i}`, originalFile, {
+                        shouldDirty: false,
+                        shouldTouch: false,
+                        shouldValidate: false,
+                      });
+                    }
+                    setEditIndex(null);
+                    setOriginalFile(null);
+                  },
+                  showRemove: editIndex !== i,
                   onRemove: () => handleRemoveFile(file),
                 }}
               />
-            </div>
-          ))}
-        </FileUpload.List>
+            ))}
+          </FileUpload.List>
+        </div>
       </div>
     </FileUpload.Area>
   );

@@ -11,9 +11,12 @@ import ApiService from '@services/api.service';
 import { logger } from '@utils/logger';
 import { Body, Controller, Get, HttpCode, Param, Patch, Put, Req, Res, UseBefore } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
-import { ResponseData } from './casedata-notes.controller';
 import { apiServiceName } from '@/config/api-config';
 
+export interface ResponseData {
+  data: any;
+  message: string;
+}
 @Controller()
 export class CaseDataDecisionsController {
   private apiService = new ApiService();

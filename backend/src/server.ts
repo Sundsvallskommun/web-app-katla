@@ -9,7 +9,6 @@ import { CaseDataDecisionsController } from './controllers/casedata/casedata-dec
 import { CaseDataErrandController } from './controllers/casedata/casedata-errand.controller';
 import { caseDataFacilitiesController } from './controllers/casedata/casedata-facilities.controller';
 import { CaseDataHistoryController } from './controllers/casedata/casedata-history.controller';
-import { CasedataNotesController } from './controllers/casedata/casedata-notes.controller';
 import { CasedataNotificationController } from './controllers/casedata/casedata-notification-controller';
 import { CasedataStakeholderController } from './controllers/casedata/casedata-stakeholder.controller';
 import { CaseDataConversationController } from './controllers/casedata/casedata-conversation.controller';
@@ -26,7 +25,6 @@ const app = new App([
   CaseDataErrandController,
   caseDataFacilitiesController,
   CaseDataHistoryController,
-  CasedataNotesController,
   CasedataNotificationController,
   CasedataStakeholderController,
   CaseDataConversationController,

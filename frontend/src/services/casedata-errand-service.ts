@@ -1,29 +1,15 @@
-// import { CasedataFormModel } from '@casedata/components/errand/tabs/overview/casedata-form.component'; TODO: Add import when implemented
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { FTCaseLabel, FTCaseType } from '@interfaces/case-type';
 import { ApiChannels, Channels } from '@interfaces/channels';
-import {
-  ApiErrand,
-  ErrandsData,
-  IErrand,
-  PagedApiErrandsResponse,
-  RegisterErrandData,
-  RelatedErrand,
-} from '@interfaces/errand';
+import { ApiErrand, ErrandsData, IErrand, PagedApiErrandsResponse, RegisterErrandData } from '@interfaces/errand';
 import { ErrandPhase, UiPhase } from '@interfaces/errand-phase';
 import { ErrandStatus } from '@interfaces/errand-status';
-import { CreateErrandNoteDto } from '@interfaces/errandNote';
 import { ExtraParameter } from '@interfaces/extra-parameters';
 import { All, ApiPriority, Priority } from '@interfaces/priority';
 import { Role } from '@interfaces/role';
 import { Stakeholder } from '@interfaces/stakeholder';
 import { User } from '@interfaces/user';
-import {
-  fetchErrandAttachments,
-  MAX_FILE_SIZE_MB,
-  validateAttachmentsForDecision,
-} from '@services/casedata-attachment-service';
 import {
   getLastUpdatedAdministrator,
   makeStakeholdersList,
@@ -33,7 +19,7 @@ import { useSnackbar } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import { useCallback, useContext, useEffect } from 'react';
 import { ApiResponse, apiService } from './api-service';
-import { saveErrandNote } from './casedata-errand-notes-service';
+import { fetchErrandAttachments, MAX_FILE_SIZE_MB } from './casedata-attachment-service';
 import {
   extractExtraParameters,
   extraParametersToUppgiftMapper,
@@ -52,12 +38,6 @@ interface CasedataFormModel {
   phase: ErrandPhase;
   supplementDueDate: string;
 }
-
-export const municipalityIds = [
-  { label: 'Sundsvall', id: '2281' },
-  { label: 'Timrå', id: '2262' },
-  { label: 'Ånge', id: '2260' },
-];
 
 export const emptyErrandList: ErrandsData = {
   errands: [],
@@ -660,14 +640,6 @@ export const validateStakeholdersForDecision: (e: IErrand) => { valid: boolean; 
   return { valid: true, reason: '' };
 };
 
-export const validateErrandForDecision: (e: IErrand) => boolean = (e) => {
-  return (
-    validateStakeholdersForDecision(e).valid &&
-    validateStatusForDecision(e).valid &&
-    validateAttachmentsForDecision(e).valid
-  );
-};
-
 export const phaseChangeInProgress = (errand: IErrand) => {
   if (!errand?.id) {
     return false;
@@ -756,93 +728,4 @@ export const validateAction: (errand: IErrand, user: User) => boolean = (errand,
     allowed = true;
   }
   return allowed;
-};
-
-export const isErrandAdmin: (errand: IErrand, user: User) => boolean = (errand, user) => {
-  return user.username.toLocaleLowerCase() === errand?.administrator?.adAccount?.toLocaleLowerCase();
-};
-
-export const isAdmin: (errand: IErrand, user: User) => boolean = (errand, user) => {
-  return user.username.toLocaleLowerCase() === errand?.administrator?.adAccount?.toLocaleLowerCase();
-};
-
-export const setSuspendedErrands = async (
-  errandId: number,
-  municipalityId: string,
-  status: ErrandStatus,
-  date: string,
-  comment: string
-): Promise<boolean> => {
-  if (status === ErrandStatus.Parkerad && (date === '' || dayjs().isAfter(dayjs(date)))) {
-    return Promise.reject('Invalid date');
-  }
-
-  const url = `casedata/${municipalityId}/errands/${errandId}`;
-  const data: Partial<RegisterErrandData> = {
-    id: errandId.toString(),
-    status: { statusType: status },
-    suspension: {
-      suspendedFrom: status === ErrandStatus.Parkerad ? dayjs().toISOString() : undefined,
-      suspendedTo: status === ErrandStatus.Parkerad ? dayjs(date).set('hour', 7).toISOString() : undefined,
-    },
-  };
-
-  return apiService
-    .patch<boolean, Partial<RegisterErrandData>>(url, data)
-    .then(async (res) => {
-      if (status === ErrandStatus.Parkerad && comment) {
-        const newNote: CreateErrandNoteDto = {
-          title: '',
-          text: comment,
-          noteType: 'INTERNAL',
-          extraParameters: {},
-        };
-        await saveErrandNote(municipalityId, errandId.toString(), newNote);
-      }
-      return res.data;
-    })
-    .catch((e) => {
-      console.error('Something went wrong when suspending the errand', e);
-      throw new Error('Något gick fel när ärendet skulle parkeras.');
-    });
-};
-
-export const appealErrand: (data: Partial<IErrand> & { municipalityId: string }) => Promise<SaveErrandResponse> = (
-  data
-) => {
-  const result: SaveErrandResponse = {
-    errandSuccessful: false,
-    attachmentsSuccessful: false,
-    noteSuccessful: false,
-  };
-
-  const relatedErrand: Partial<RelatedErrand> = {
-    errandId: data.id,
-    errandNumber: data.errandNumber,
-    relationReason: 'APPEAL',
-  };
-
-  const errandData: Partial<RegisterErrandData> = {
-    ...(data.priority && { priority: ApiPriority[data.priority as keyof typeof ApiPriority] }),
-    ...(data.channel && { channel: 'Webgränssnitt' }),
-    caseType: 'APPEAL',
-    relatesTo: [relatedErrand],
-    applicationReceived: dayjs().toISOString(),
-    stakeholders: makeStakeholdersList(data),
-  };
-
-  return apiService
-    .post<ApiResponse<ApiErrand>, Partial<RegisterErrandData>>(`casedata/${data.municipalityId}/errands`, errandData)
-    .then(async (res) => {
-      result.errandSuccessful = true;
-      result.errandId = res.data.data.id.toString();
-      return result;
-    })
-    .finally(() => {
-      return result;
-    })
-    .catch(() => {
-      console.error('Something went wrong when appealing errand');
-      return result;
-    });
 };
