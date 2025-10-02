@@ -17,7 +17,7 @@ interface Props {
 export const ErrandActionButtons: React.FC<Props> = ({ owners, className = '' }) => {
   const { errand } = useContext(AppContext);
   const draftErrand = errand?.status?.statusType === ErrandStatus.Utkast;
-
+  const errandRegistredState = errand?.created === undefined || null;
   return (
     <div className={className}>
       {draftErrand ?
@@ -25,12 +25,13 @@ export const ErrandActionButtons: React.FC<Props> = ({ owners, className = '' })
           <SaveErrandButton owners={owners} />
           <RegisterErrandButton owners={owners} />
         </>
-      : <>
+      : errandRegistredState ?
+        <>
           <CancelRegistrationButton />
           <DraftErrandButton owners={owners} />
           <RegisterErrandButton owners={owners} />
         </>
-      }
+      : null}
     </div>
   );
 };
