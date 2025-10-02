@@ -1,7 +1,7 @@
 // import { CasedataFormModel } from '@casedata/components/errand/tabs/overview/casedata-form.component'; TODO: Add import when implemented
 import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
-import { FTCaseType, FTCaseLabel } from '@interfaces/case-type';
+import { FTCaseLabel, FTCaseType } from '@interfaces/case-type';
 import { ApiChannels, Channels } from '@interfaces/channels';
 import {
   ApiErrand,
@@ -20,8 +20,8 @@ import { Role } from '@interfaces/role';
 import { Stakeholder } from '@interfaces/stakeholder';
 import { User } from '@interfaces/user';
 import {
-  MAX_FILE_SIZE_MB,
   fetchErrandAttachments,
+  MAX_FILE_SIZE_MB,
   validateAttachmentsForDecision,
 } from '@services/casedata-attachment-service';
 import {
@@ -79,6 +79,7 @@ export const ongoingCaseDataPTErrandLabels = [
 export const newStatuses = [ErrandStatus.ArendeInkommit];
 
 export const ongoingStatuses = [
+  ErrandStatus.ArendeInkommit,
   ErrandStatus.UnderGranskning,
   ErrandStatus.VantarPaKomplettering,
   ErrandStatus.InterntAterkoppling,
@@ -103,13 +104,7 @@ export const closedStatuses = [
 export const getStatusLabel = (statuses: ErrandStatus[]) => {
   if (statuses.length > 0) {
     if (statuses.some((s) => newStatuses.includes(s))) {
-      return 'Nya ärenden';
-    } else if (statuses.some((s) => ongoingStatuses.includes(s))) {
       return 'Öppna ärenden';
-    } else if (statuses.some((s) => suspendedStatuses.includes(s))) {
-      return 'Parkerade ärenden';
-    } else if (statuses.some((s) => assignedStatuses.includes(s))) {
-      return 'Tilldelade ärenden';
     } else if (statuses.some((s) => draftStatuses.includes(s))) {
       return 'Utkast';
     } else if (statuses.some((s) => closedStatuses.includes(s))) {
@@ -145,7 +140,7 @@ export const isErrandClosed: (errand: IErrand | CasedataFormModel) => boolean = 
 };
 
 export const isErrandLocked: (errand: IErrand | CasedataFormModel) => boolean = (errand) => {
-    if (errand?.status && typeof errand?.status === 'object') {
+  if (errand?.status && typeof errand?.status === 'object') {
     return (
       errand?.status?.statusType === ErrandStatus.ArendeAvslutat ||
       errand?.status?.statusType === ErrandStatus.Parkerad ||
