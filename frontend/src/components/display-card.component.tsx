@@ -1,8 +1,10 @@
+import { AppContext } from '@contexts/app-context-interface';
 import { getRoleDisplayName, Role } from '@interfaces/role';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, useThemeQueries } from '@sk-web-gui/react';
 import { phoneNumberFormatter } from '@utils/contact-form-utils';
-import { useState } from 'react';
+import { isErrandReadOnly } from '@utils/errand-utils';
+import { useContext, useState } from 'react';
 import { StakeholderFormModal } from './stakeholder-form.component';
 
 export const DisplayCard: React.FC<{
@@ -48,6 +50,7 @@ export const DisplayCard: React.FC<{
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isMaxMediumDevice } = useThemeQueries();
+  const { errand } = useContext(AppContext);
 
   return (
     <div className="border-1 rounded-12 bg-background-content w-full max-w-[52.5rem] my-15">
@@ -82,7 +85,7 @@ export const DisplayCard: React.FC<{
           </div>
         </div>
 
-        {isEditable && (
+        {isEditable && !isErrandReadOnly(errand) && (
           <div className="flex flex-col sm:flex-row gap-[1rem] mb-10">
             <Button
               data-cy="edit-card-button"

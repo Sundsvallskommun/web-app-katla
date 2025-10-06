@@ -1,3 +1,5 @@
+import { AppContext } from '@contexts/app-context-interface';
+import { EXTRAPARAMETER_SEPARATOR, UppgiftField } from '@services/casedata-extra-parameters-service';
 import {
   Checkbox,
   DatePicker,
@@ -9,9 +11,9 @@ import {
   Textarea,
   useThemeQueries,
 } from '@sk-web-gui/react';
+import { isErrandReadOnly } from '@utils/errand-utils';
+import { useContext, useEffect } from 'react';
 import { Controller, get, useFormContext } from 'react-hook-form';
-import { EXTRAPARAMETER_SEPARATOR, UppgiftField } from '@services/casedata-extra-parameters-service';
-import { useEffect } from 'react';
 
 export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field }) => {
   const {
@@ -28,7 +30,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const error = get(errors, name)?.message;
   const fieldValue = watch(name);
   const { isMaxMediumDevice } = useThemeQueries();
-
+  const { errand } = useContext(AppContext);
   const dependentSatisfied = field.dependsOn?.every((dep) => {
     const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
     const depValue = watch(depName);
@@ -105,7 +107,10 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const validationRules = getConditionalValidationRules(field, getValues);
 
   return (
-    <FormControl className="flex flex-col gap-2 items-start justify-start max-w-[80rem] w-full">
+    <FormControl
+      disabled={isErrandReadOnly(errand)}
+      className="flex flex-col gap-2 items-start justify-start max-w-[80rem] w-full"
+    >
       <FormLabel className="self-stretch justify-center text-dark-primary text-md leading-24 ">{field.label}</FormLabel>
 
       {field.formField.type === 'text' && (
