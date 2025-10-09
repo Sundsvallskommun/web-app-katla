@@ -1,5 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import { closedStatuses, draftStatuses, getStatusLabel, ongoingStatuses } from '@services/casedata-errand-service';
 import store from '@services/storage-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
@@ -10,8 +10,8 @@ type LucideIconName = React.ComponentProps<typeof LucideIcon>['name'];
 
 export interface SidebarButton {
   label: string;
-  key: ErrandStatus;
-  statuses: ErrandStatus[];
+  key: ErrandStatusType;
+  statuses: ErrandStatusType[];
   icon: LucideIconName;
   totalStatusErrands: number;
 }
@@ -28,10 +28,10 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
     closedErrands,
   } = useContext(AppContext);
 
-  const updateStatusFilter = (ss: ErrandStatus[]) => {
+  const updateStatusFilter = (ss: ErrandStatusType[]) => {
     try {
       const labelsToKeys: Record<string, string> = {};
-      Object.entries(ErrandStatus).forEach(([k, v]) => {
+      Object.entries(ErrandStatusType).forEach(([k, v]) => {
         labelsToKeys[v] = k;
       });
       const statusKeys = ss.map((s) => labelsToKeys[s]);
@@ -41,7 +41,7 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
       jsonparsedstatus.status = status;
       const stringified = JSON.stringify(jsonparsedstatus);
       store.set('filter', stringified);
-      setSelectedErrandStatuses(statusKeys as ErrandStatus[]);
+      setSelectedErrandStatuses(statusKeys as ErrandStatusType[]);
     } catch (error) {
       console.error('Error updating status filter', error);
     }
@@ -79,9 +79,9 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
       {casedataSidebarButtons?.map((button) => {
         const buttonIsActive = button.statuses.some((s) => {
           const selectedStatusValues = selectedErrandStatuses.map(
-            (status) => ErrandStatus[status as keyof typeof ErrandStatus]
+            (status) => ErrandStatusType[status as keyof typeof ErrandStatusType]
           );
-          return selectedStatusValues.includes(s as ErrandStatus);
+          return selectedStatusValues.includes(s as ErrandStatusType);
         });
         return (
           <Button

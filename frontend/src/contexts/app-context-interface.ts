@@ -1,7 +1,7 @@
 import { Asset } from '@interfaces/asset';
 import { ErrandsData, IErrand } from '@interfaces/errand';
 import { UiPhase } from '@interfaces/errand-phase';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import { MessageNode } from '@interfaces/message';
 import { Notification as CaseDataNotification } from '@interfaces/notification';
 import { User } from '@interfaces/user';
@@ -37,8 +37,8 @@ export interface AppContextInterface {
   municipalityId: string;
   setMunicipalityId: (municipalityId: string) => void;
 
-  selectedErrandStatuses: ErrandStatus[];
-  setSelectedErrandStatuses: (selectedErrandStatuses: ErrandStatus[]) => void;
+  selectedErrandStatuses: ErrandStatusType[];
+  setSelectedErrandStatuses: (selectedErrandStatuses: ErrandStatusType[]) => void;
 
   notifications: CaseDataNotification[];
   setNotifications: (notifications: CaseDataNotification[]) => void;
@@ -102,7 +102,7 @@ export const AppContext = createContext<AppContextInterface>({
   municipalityId: '',
   setMunicipalityId: () => {},
 
-  selectedErrandStatuses: [ErrandStatus.ArendeInkommit],
+  selectedErrandStatuses: [ErrandStatusType.ArendeInkommit],
   setSelectedErrandStatuses: () => {},
 
   notifications: [],

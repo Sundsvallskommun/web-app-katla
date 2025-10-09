@@ -1,7 +1,7 @@
 'use client';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
@@ -26,7 +26,7 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
 
     data.stakeholders = owners;
     data.status = data.status || {};
-    data.status.statusType = ErrandStatus.Utkast;
+    data.status.statusType = ErrandStatusType.Utkast;
     delete (data as Partial<IErrand>).errandNumber;
     delete (data as Partial<IErrand>).channel;
 

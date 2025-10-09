@@ -1,10 +1,10 @@
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatus, ErrandStatusType } from '@interfaces/errand-status';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Label } from '@sk-web-gui/react';
 
 type LucideIconName = React.ComponentProps<typeof LucideIcon>['name'];
 
-export const StatusLabelComponent: React.FC<{ status: string | undefined; className?: string }> = ({
+export const StatusLabelComponent: React.FC<{ status: ErrandStatus; className?: string }> = ({
   status,
   className = '',
 }) => {
@@ -12,30 +12,30 @@ export const StatusLabelComponent: React.FC<{ status: string | undefined; classN
   let color,
     inverted = false;
 
-  switch (status) {
-    case ErrandStatus.ArendeAvslutat:
+  switch (status.statusType) {
+    case ErrandStatusType.ArendeAvslutat:
       color = 'primary';
       icon = 'check';
       break;
-    case ErrandStatus.BeslutOverklagat:
-    case ErrandStatus.BeslutVerkstallt:
-    case ErrandStatus.Beslutad:
-    case ErrandStatus.UnderGranskning:
-    case ErrandStatus.UnderUtredning:
-    case ErrandStatus.UnderBeslut:
+    case ErrandStatusType.BeslutOverklagat:
+    case ErrandStatusType.BeslutVerkstallt:
+    case ErrandStatusType.Beslutad:
+    case ErrandStatusType.UnderGranskning:
+    case ErrandStatusType.UnderUtredning:
+    case ErrandStatusType.UnderBeslut:
       color = 'gronsta';
       icon = 'pen';
       break;
-    case ErrandStatus.ArendeInkommit:
+    case ErrandStatusType.ArendeInkommit:
       color = 'vattjom';
       break;
-    case ErrandStatus.VantarPaKomplettering:
-    case ErrandStatus.InterntAterkoppling:
+    case ErrandStatusType.VantarPaKomplettering:
+    case ErrandStatusType.InterntAterkoppling:
       color = 'gronsta';
       inverted = true;
       icon = 'clock-10';
       break;
-    case ErrandStatus.Tilldelat:
+    case ErrandStatusType.Tilldelat:
       color = 'warning';
       inverted = false;
       icon = 'circle-pause';
@@ -52,7 +52,7 @@ export const StatusLabelComponent: React.FC<{ status: string | undefined; classN
       color={color}
       className={`max-h-full h-auto text-center whitespace-nowrap ${className}`}
     >
-      {icon && <LucideIcon name={icon} size={16} />} {status}
+      {icon && <LucideIcon name={icon} size={16} />} {status.statusType}
     </Label>
   );
 };

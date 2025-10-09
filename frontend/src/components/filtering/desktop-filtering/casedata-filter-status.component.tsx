@@ -3,7 +3,7 @@ import { Checkbox, PopupMenu, SearchField, useThemeQueries } from '@sk-web-gui/r
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CaseStatusFilter } from '../errand-filter';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 
 export const CasedataFilterStatus: React.FC = () => {
   const { register } = useFormContext<CaseStatusFilter>();
@@ -32,7 +32,7 @@ export const CasedataFilterStatus: React.FC = () => {
           placeholder="Skriv för att söka"
         />
         <PopupMenu.Items autoFocus={false}>
-          {Object.entries(ErrandStatus)
+          {Object.entries(ErrandStatusType)
             .filter(
               (s: [string, string]) =>
                 s[0].toLowerCase().includes(query.toLowerCase()) || s[1].toLowerCase().includes(query.toLowerCase())

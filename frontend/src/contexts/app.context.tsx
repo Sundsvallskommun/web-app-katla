@@ -7,7 +7,7 @@ import { Admin, emptyUser } from '@services/user-service';
 import { ReactNode, useState } from 'react';
 import { AppContext } from './app-context-interface';
 import { emptyErrandList } from '@services/casedata-errand-service';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import { MessageNode } from '@interfaces/message';
 
 export function AppWrapper({ children }: { children: ReactNode }) {
@@ -26,7 +26,9 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   const [errand, setErrand] = useState<IErrand>({} as IErrand);
   const [conversation, setConversation] = useState<MessageNode[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [selectedErrandStatuses, setSelectedErrandStatuses] = useState<ErrandStatus[]>([ErrandStatus.ArendeInkommit]);
+  const [selectedErrandStatuses, setSelectedErrandStatuses] = useState<ErrandStatusType[]>([
+    ErrandStatusType.ArendeInkommit,
+  ]);
   const [municipalityId, setMunicipalityId] = useState<string>('');
   const [sidebarLabel, setSidebarLabel] = useState<string>('');
   const [administrators, setAdministrators] = useState<Admin[]>([]);
@@ -61,7 +63,7 @@ export function AppWrapper({ children }: { children: ReactNode }) {
         setAssets: (assets: Asset[]) => setAssets(assets),
 
         selectedErrandStatuses,
-        setSelectedErrandStatuses: (selectedErrandStatuses: ErrandStatus[]) =>
+        setSelectedErrandStatuses: (selectedErrandStatuses: ErrandStatusType[]) =>
           setSelectedErrandStatuses(selectedErrandStatuses),
 
         municipalityId,

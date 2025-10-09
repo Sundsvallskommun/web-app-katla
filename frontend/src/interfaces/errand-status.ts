@@ -1,5 +1,5 @@
-export enum ErrandStatus {
-  ArendeInkommit = 'Ärende inskickat',
+export enum ErrandStatusType {
+  ArendeInkommit = 'Ärende inkommit',
   UnderGranskning = 'Under granskning',
   VantarPaKomplettering = 'Väntar på komplettering',
   InterntAterkoppling = 'Internt återkoppling',
@@ -16,51 +16,49 @@ export enum ErrandStatus {
   Parkerad = 'Parkerad',
 }
 
-export const STATUS_LABEL_SV: Record<ErrandStatus, string> = {
-  [ErrandStatus.ArendeInkommit]: 'Ärende inskickat',
-  [ErrandStatus.UnderGranskning]: 'Under granskning',
-  [ErrandStatus.VantarPaKomplettering]: 'Väntar på komplettering',
-  [ErrandStatus.InterntAterkoppling]: 'Internt återkoppling',
-  [ErrandStatus.UnderUtredning]: 'Under utredning',
-  [ErrandStatus.UnderBeslut]: 'Under beslut',
-  [ErrandStatus.Beslutad]: 'Beslutad',
-  [ErrandStatus.BeslutVerkstallt]: 'Beslut verkställt',
-  [ErrandStatus.BeslutOverklagat]: 'Beslut överklagat',
-  [ErrandStatus.ArendeAvslutat]: 'Ärende avslutat',
-  [ErrandStatus.Tilldelat]: 'Tilldelat',
-  [ErrandStatus.Utkast]: 'Utkast',
-  [ErrandStatus.HanterasIAnnatSystem]: 'Hanteras i annat system',
-  [ErrandStatus.ArendetAvvisas]: 'Ärendet avvisas',
-  [ErrandStatus.Parkerad]: 'Parkerad',
+export const STATUS_LABEL_SV: Record<ErrandStatusType, string> = {
+  [ErrandStatusType.ArendeInkommit]: 'Ärende inkommit',
+  [ErrandStatusType.UnderGranskning]: 'Under granskning',
+  [ErrandStatusType.VantarPaKomplettering]: 'Väntar på komplettering',
+  [ErrandStatusType.InterntAterkoppling]: 'Internt återkoppling',
+  [ErrandStatusType.UnderUtredning]: 'Under utredning',
+  [ErrandStatusType.UnderBeslut]: 'Under beslut',
+  [ErrandStatusType.Beslutad]: 'Beslutad',
+  [ErrandStatusType.BeslutVerkstallt]: 'Beslut verkställt',
+  [ErrandStatusType.BeslutOverklagat]: 'Beslut överklagat',
+  [ErrandStatusType.ArendeAvslutat]: 'Ärende avslutat',
+  [ErrandStatusType.Tilldelat]: 'Tilldelat',
+  [ErrandStatusType.Utkast]: 'Utkast',
+  [ErrandStatusType.HanterasIAnnatSystem]: 'Hanteras i annat system',
+  [ErrandStatusType.ArendetAvvisas]: 'Ärendet avvisas',
+  [ErrandStatusType.Parkerad]: 'Parkerad',
 };
 
-export const STATUS_ALIASES: Record<string, ErrandStatus> = {
-  'Ärende inkommit': ErrandStatus.ArendeInkommit,
-  'Ärende inskickat': ErrandStatus.ArendeInkommit,
-  'Under granskning': ErrandStatus.UnderGranskning,
-  'Väntar på komplettering': ErrandStatus.VantarPaKomplettering,
-  'Internt återkoppling': ErrandStatus.InterntAterkoppling,
-  'Under utredning': ErrandStatus.UnderUtredning,
-  'Under beslut': ErrandStatus.UnderBeslut,
-  Beslutad: ErrandStatus.Beslutad,
-  'Beslut verkställt': ErrandStatus.BeslutVerkstallt,
-  'Beslut överklagat': ErrandStatus.BeslutOverklagat,
-  'Ärende avslutat': ErrandStatus.ArendeAvslutat,
-  Tilldelat: ErrandStatus.Tilldelat,
-  Utkast: ErrandStatus.Utkast,
-  'Hanteras i annat system': ErrandStatus.HanterasIAnnatSystem,
-  'Ärendet avvisas': ErrandStatus.ArendetAvvisas,
-  Parkerad: ErrandStatus.Parkerad,
+export const STATUS_ALIASES: Partial<Record<ErrandStatusType, string>> = {
+  [ErrandStatusType.ArendeInkommit]: 'Ärende inskickat',
 };
 
-export function normalizeStatus(s?: string): ErrandStatus | undefined {
-  if (!s) return;
-  const t = s.normalize('NFC').trim();
-  return STATUS_ALIASES[t] as ErrandStatus | undefined;
+export function displayStatus(s?: ErrandStatus): ErrandStatus {
+  console.log('Displaying status:', s);
+  if (!s || !s.statusType) {
+    return { statusType: 'Ärende inskickat' as ErrandStatusType };
+  }
+  if (s?.statusType && STATUS_ALIASES[s.statusType]) {
+    return { statusType: STATUS_ALIASES[s.statusType] as ErrandStatusType };
+  }
+  return { statusType: s.statusType };
 }
 
-export interface ApiErrandStatus {
-  statusType?: string;
+export function normalizeStatus(status: ErrandStatus): ErrandStatus {
+  console.log('Normalizing status:', status);
+  if (!status.statusType) {
+    return { ...status, statusType: ErrandStatusType.ArendeInkommit };
+  }
+  return { ...status, statusType: (STATUS_LABEL_SV[status.statusType] as ErrandStatusType) || status.statusType };
+}
+
+export interface ErrandStatus {
+  statusType?: ErrandStatusType;
   description?: string;
   created?: string;
 }

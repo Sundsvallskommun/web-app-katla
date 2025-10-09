@@ -2,7 +2,7 @@
 
 import { CaseDataFilter, CaseDataValues } from '@components/filtering/errand-filter';
 import { AppContext } from '@contexts/app-context-interface';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import { getStatusLabel, ongoingStatuses, useErrands } from '@services/casedata-errand-service';
 import store from '@services/storage-service';
 import { useThemeQueries } from '@sk-web-gui/react';
@@ -106,7 +106,7 @@ export const useOngoingCaseDataErrands = () => {
         setSelectedErrandStatuses(filterStatuses);
 
         const selectedStatusLabel = getStatusLabel(
-          filterStatuses.map((s: keyof typeof ErrandStatus) => ErrandStatus[s as keyof typeof ErrandStatus])
+          filterStatuses.map((s: keyof typeof ErrandStatusType) => ErrandStatusType[s as keyof typeof ErrandStatusType])
         );
         setSidebarLabel(selectedStatusLabel);
       } catch {
@@ -188,7 +188,7 @@ export const useOngoingCaseDataErrands = () => {
   );
 
   const currentValues = getValues();
-  const selectedStatuses = selectedErrandStatuses.map((s) => ErrandStatus[s as keyof typeof ErrandStatus]);
+  const selectedStatuses = selectedErrandStatuses.map((s) => ErrandStatusType[s as keyof typeof ErrandStatusType]);
   const numberOfFilters =
     currentValues.caseType?.length +
     (currentValues.priority?.length || 0) +

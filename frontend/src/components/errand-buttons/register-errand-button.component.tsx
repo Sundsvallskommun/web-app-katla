@@ -2,7 +2,7 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { Channels } from '@interfaces/channels';
 import { IErrand } from '@interfaces/errand';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
@@ -43,7 +43,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     data.channel = Channels.ESERVICE_KATLA;
     data.stakeholders = owners;
     data.status = {
-      statusType: ErrandStatus.ArendeInkommit,
+      statusType: ErrandStatusType.ArendeInkommit,
     };
 
     try {

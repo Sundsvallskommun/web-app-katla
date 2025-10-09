@@ -1,7 +1,7 @@
 'use client';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
@@ -14,7 +14,7 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
-  const draftErrand = errand?.status?.statusType === ErrandStatus.Utkast;
+  const draftErrand = errand?.status?.statusType === ErrandStatusType.Utkast;
 
   const onSubmit = async () => {
     setIsLoading(true);

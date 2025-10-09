@@ -4,7 +4,7 @@ import { FTCaseLabel, FTCaseType } from '@interfaces/case-type';
 import { ApiChannels, Channels } from '@interfaces/channels';
 import { ApiErrand, ErrandsData, IErrand, PagedApiErrandsResponse, RegisterErrandData } from '@interfaces/errand';
 import { ErrandPhase, UiPhase } from '@interfaces/errand-phase';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { normalizeStatus, ErrandStatusType, displayStatus } from '@interfaces/errand-status';
 import { ExtraParameter } from '@interfaces/extra-parameters';
 import { All, ApiPriority, Priority } from '@interfaces/priority';
 import { Role } from '@interfaces/role';
@@ -56,32 +56,32 @@ export const ongoingCaseDataPTErrandLabels = [
   { label: 'Inkom via', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
 ];
 
-export const newStatuses = [ErrandStatus.ArendeInkommit];
+export const newStatuses = [ErrandStatusType.ArendeInkommit];
 
 export const ongoingStatuses = [
-  ErrandStatus.ArendeInkommit,
-  ErrandStatus.UnderGranskning,
-  ErrandStatus.VantarPaKomplettering,
-  ErrandStatus.InterntAterkoppling,
-  ErrandStatus.UnderUtredning,
-  ErrandStatus.UnderBeslut,
-  ErrandStatus.Beslutad,
-  ErrandStatus.BeslutVerkstallt,
-  ErrandStatus.BeslutOverklagat,
+  ErrandStatusType.ArendeInkommit,
+  ErrandStatusType.UnderGranskning,
+  ErrandStatusType.VantarPaKomplettering,
+  ErrandStatusType.InterntAterkoppling,
+  ErrandStatusType.UnderUtredning,
+  ErrandStatusType.UnderBeslut,
+  ErrandStatusType.Beslutad,
+  ErrandStatusType.BeslutVerkstallt,
+  ErrandStatusType.BeslutOverklagat,
 ];
 
-export const suspendedStatuses = [ErrandStatus.Parkerad];
-export const assignedStatuses = [ErrandStatus.Tilldelat];
+export const suspendedStatuses = [ErrandStatusType.Parkerad];
+export const assignedStatuses = [ErrandStatusType.Tilldelat];
 
-export const draftStatuses = [ErrandStatus.Utkast];
+export const draftStatuses = [ErrandStatusType.Utkast];
 
 export const closedStatuses = [
-  ErrandStatus.ArendeAvslutat,
-  ErrandStatus.ArendetAvvisas,
-  ErrandStatus.HanterasIAnnatSystem,
+  ErrandStatusType.ArendeAvslutat,
+  ErrandStatusType.ArendetAvvisas,
+  ErrandStatusType.HanterasIAnnatSystem,
 ];
 
-export const getStatusLabel = (statuses: ErrandStatus[]) => {
+export const getStatusLabel = (statuses: ErrandStatusType[]) => {
   if (statuses.length > 0) {
     if (statuses.some((s) => newStatuses.includes(s))) {
       return 'Öppna ärenden';
@@ -100,10 +100,10 @@ export const findPriorityKeyForPriorityLabel = (key: string) =>
   Object.entries(Priority).find((e: [string, string]) => e[1] === key)?.[0];
 
 export const findStatusKeyForStatusLabel = (statusKey: string) =>
-  Object.entries(ErrandStatus).find((e: [string, string]) => e[1] === statusKey)?.[0];
+  Object.entries(ErrandStatusType).find((e: [string, string]) => e[1] === statusKey)?.[0];
 
 export const findStatusLabelForStatusKey = (statusLabel: string) =>
-  Object.entries(ErrandStatus).find((e: [string, string]) => e[1] === statusLabel)?.[1];
+  Object.entries(ErrandStatusType).find((e: [string, string]) => e[1] === statusLabel)?.[1];
 
 export const getCaseTypes = () => FTCaseType;
 export const getCaseLabels = () => FTCaseLabel;
@@ -116,18 +116,18 @@ export const findCaseLabelForCaseType = (caseType: string) =>
   Object.entries(getCaseLabels()).find((e: [string, string]) => e[0] === caseType)?.[1];
 
 export const isErrandClosed: (errand: IErrand | CasedataFormModel) => boolean = (errand) => {
-  return errand?.status === ErrandStatus.ArendeAvslutat;
+  return errand?.status === ErrandStatusType.ArendeAvslutat;
 };
 
 export const isErrandLocked: (errand: IErrand | CasedataFormModel) => boolean = (errand) => {
   if (errand?.status && typeof errand?.status === 'object') {
     return (
-      errand?.status?.statusType === ErrandStatus.ArendeAvslutat ||
-      errand?.status?.statusType === ErrandStatus.Parkerad ||
+      errand?.status?.statusType === ErrandStatusType.ArendeAvslutat ||
+      errand?.status?.statusType === ErrandStatusType.Parkerad ||
       phaseChangeInProgress(errand as IErrand)
     );
   } else {
-    return errand?.status === ErrandStatus.ArendeAvslutat;
+    return errand?.status === ErrandStatusType.ArendeAvslutat;
   }
 };
 
@@ -138,7 +138,14 @@ export const emptyErrand: Partial<IErrand> = {
   municipalityId: '2281',
   phase: ErrandPhase.aktualisering,
   priority: Priority.MEDIUM,
-  status: { statusType: ErrandStatus.ArendeInkommit },
+  status: {
+    statusType: ErrandStatusType.ArendeInkommit,
+  },
+  statuses: [
+    {
+      statusType: ErrandStatusType.ArendeInkommit,
+    },
+  ],
 };
 export const mapErrandToIErrand: (e: ApiErrand, municipalityId: string) => IErrand | undefined = (
   e,
@@ -156,8 +163,8 @@ export const mapErrandToIErrand: (e: ApiErrand, municipalityId: string) => IErra
       administrator: administrator,
       administratorName: administrator ? `${administrator.firstName} ${administrator.lastName}` : '',
       priority: Priority[e.priority as unknown as keyof typeof Priority],
-      status: e.status,
-      statuses: e.statuses,
+      status: displayStatus(e.status),
+      statuses: e.statuses.map((s) => ({ ...s, status: displayStatus(s) })),
       phase: e.phase,
       channel: e.channel ? Channels[e.channel as keyof typeof Channels] : Channels.ESERVICE_KATLA,
       municipalityId: e.municipalityId || municipalityId,
@@ -497,7 +504,7 @@ const createApiErrandData: (data: Partial<IErrand>) => Partial<RegisterErrandDat
     ...(data.description && { description: data.description }),
     ...(data.caseType &&
       data.caseType in FTCaseLabel && { caseTitleAddition: FTCaseLabel[data.caseType as keyof typeof FTCaseLabel] }),
-    ...(data.status && { status: data.status }),
+    ...(data.status && { status: normalizeStatus(data.status) }),
     ...(data.statuses && { statuses: data.statuses }),
     ...(data.phase && { phase: data.phase }),
     stakeholders: stakeholders,
@@ -525,6 +532,13 @@ export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Pro
   const errandData: Partial<RegisterErrandData> = createApiErrandData(data);
   const uppgiftFields = extraParametersToUppgiftMapper(data)[data.caseType ?? ''] ?? [];
   const extractedExtraParameters = extractExtraParameters(uppgiftFields, () => data);
+
+  console.log('Saving errand data: ', errandData);
+  // return Promise.resolve({
+  //   errandSuccessful: true,
+  //   attachmentsSuccessful: true,
+  //   noteSuccessful: true,
+  // });
 
   return errandData.id ?
       apiService
@@ -613,7 +627,7 @@ export const saveCroppedImage = async (
     });
 };
 
-export const updateErrandStatus = async (municipalityId: string, id: string, status: ErrandStatus) => {
+export const updateErrandStatus = async (municipalityId: string, id: string, status: ErrandStatusType) => {
   const e: Partial<RegisterErrandData> = {
     id,
     status: { statusType: status },
@@ -648,7 +662,7 @@ export const phaseChangeInProgress = (errand: IErrand) => {
     return (errand.extraParameters?.find((p) => p.key === 'process.phaseStatus')?.values?.[0] ?? '') !== 'CANCELED';
   }
 
-  if (errand.status?.statusType === ErrandStatus.ArendeAvslutat) {
+  if (errand.status?.statusType === ErrandStatusType.ArendeAvslutat) {
     return false;
   }
   if (typeof errand.extraParameters?.find((p) => p.key === 'process.phaseStatus')?.values?.[0] === 'undefined') {

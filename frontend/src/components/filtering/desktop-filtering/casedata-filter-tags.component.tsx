@@ -1,5 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 import {
   assignedStatuses,
   closedStatuses,
@@ -101,7 +101,7 @@ export const CasedataFilterTags: React.FC<{ mobileOverviewPage?: boolean }> = (m
             key={`caseStatus-${statusIndex}`}
             onClick={() => handleRemoveStatus(status)}
           >
-            {ErrandStatus[status as keyof typeof ErrandStatus]}
+            {ErrandStatusType[status as keyof typeof ErrandStatusType]}
           </Chip>
         ))}
 

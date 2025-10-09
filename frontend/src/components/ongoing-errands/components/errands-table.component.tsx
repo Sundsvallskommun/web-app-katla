@@ -2,7 +2,7 @@ import { PriorityComponent } from '@components/priority/priority.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { FTCaseType } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
-import { normalizeStatus } from '@interfaces/errand-status';
+import { displayStatus } from '@interfaces/errand-status';
 import { getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
 import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
@@ -71,7 +71,7 @@ export const ErrandsTable: React.FC = () => {
         className="cursor-pointer"
       >
         <Table.HeaderColumn scope="row" className="w-full w-max-[15rem] whitespace-nowrap text-ellipsis table-caption">
-          <StatusLabelComponent status={normalizeStatus(errand?.status?.statusType)} />
+          <StatusLabelComponent status={displayStatus(errand?.status)} />
         </Table.HeaderColumn>
         <Table.Column scope="row" className="font-bold w-full whitespace-nowrap overflow-x-hidden">
           {getCaseLabels()[errand.caseType as FTCaseType] ?? errand.caseType}

@@ -3,7 +3,7 @@ import { FTCaseLabel } from '@interfaces/case-type';
 import { emptyMockErrands, mockErrands_base } from './fixtures/mockErrands';
 import { mockMe } from './fixtures/mockMe';
 import { mockNotifications } from './fixtures/mockNotifications';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatusType } from '@interfaces/errand-status';
 
 describe('Overview page', () => {
   beforeEach(() => {
@@ -25,10 +25,10 @@ describe('Overview page', () => {
 
   it('shows the correct sidebar main buttons', () => {
     const expectedStatusLabels = [
-      ErrandStatus.ArendeInkommit,
-      ErrandStatus.UnderGranskning,
-      ErrandStatus.Utkast,
-      ErrandStatus.ArendeAvslutat,
+      ErrandStatusType.ArendeInkommit,
+      ErrandStatusType.UnderGranskning,
+      ErrandStatusType.Utkast,
+      ErrandStatusType.ArendeAvslutat,
     ];
 
     expectedStatusLabels.forEach((status) => {
@@ -139,7 +139,7 @@ describe('Overview page', () => {
   });
 
   it('allows filtering by single status', () => {
-    const labels = Object.entries(ErrandStatus);
+    const labels = Object.entries(ErrandStatusType);
     cy.get('[aria-label="status-button-Under granskning"]').click();
     cy.get('[data-cy="Show-filters-button"]').should('exist');
     cy.get('[data-cy="Status-filter"]').click();
@@ -155,7 +155,7 @@ describe('Overview page', () => {
   });
 
   it('allows filtering by multiple statuses', () => {
-    const labels = Object.entries(ErrandStatus);
+    const labels = Object.entries(ErrandStatusType);
     cy.get('[aria-label="status-button-Under granskning"]').click();
     cy.get('[data-cy="Show-filters-button"]').should('exist');
     cy.get('[data-cy="Status-filter"]').click();

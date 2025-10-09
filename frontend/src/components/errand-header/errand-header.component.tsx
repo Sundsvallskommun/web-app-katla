@@ -4,7 +4,7 @@ import { getMenuGroups } from '@components/errand-header/menu-groups';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
 import { StatusLabelComponent } from '@components/ongoing-errands/components/casedata-status-label.component';
 import { AppContext } from '@contexts/app-context-interface';
-import { normalizeStatus } from '@interfaces/errand-status';
+import { displayStatus } from '@interfaces/errand-status';
 import { SidebarMode } from '@interfaces/sidebarmode';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, Link, Logo, UserMenu, cx, useThemeQueries } from '@sk-web-gui/react';
@@ -23,7 +23,7 @@ export const ErrandHeader: React.FC = () => {
       <Divider orientation="vertical" className="mx-[2.4rem]" />
       {!isMaxMediumDevice && (
         <>
-          <StatusLabelComponent status={normalizeStatus(errand?.status?.statusType)} />
+          <StatusLabelComponent status={displayStatus(errand?.status)} />
           <strong className="text-large ml-8 font-bold">{!errand.errandNumber ? 'Nytt ärende' : 'Ärende:'}</strong>
           {errand.errandNumber && <span className="text-large ml-4">{` ${errand.errandNumber}`}</span>}
         </>
