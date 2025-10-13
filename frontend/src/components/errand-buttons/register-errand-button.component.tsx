@@ -3,6 +3,7 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Channels } from '@interfaces/channels';
 import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
+import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
@@ -21,9 +22,24 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
   const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const applicantHasPartyId = owners.some(
+    (owner) => owner.roles?.includes(Role.APPLICANT) && Boolean(owner.personId?.trim?.())
+  );
 
-  const openHandler = () => {
-    setIsOpen(!isOpen);
+  const closeDialog = () => setIsOpen(false);
+
+  const handleOpenClick = () => {
+    if (!applicantHasPartyId) {
+      toastMessage({
+        position: 'bottom',
+        message: 'Det går inte att registrera ärendet eftersom ingen sökande part är tillagd.',
+        status: 'error',
+      });
+      console.warn('Cannot register errand, stakeholder missing partyId');
+      return;
+    }
+
+    setIsOpen(true);
   };
 
   const onSubmit = async () => {
@@ -32,7 +48,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
     const isValid = await trigger();
     if (!isValid) {
       setIsLoading(false);
-      setIsOpen(false);
+      closeDialog();
       scrollToFirstError(formState.errors);
       return;
     }
@@ -99,7 +115,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
       }
 
       setIsLoading(false);
-      openHandler();
+      closeDialog();
       return true;
     } catch (error) {
       console.error(error);
@@ -120,7 +136,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
         variant="primary"
         color="vattjom"
         className="w-full"
-        onClick={openHandler}
+        onClick={handleOpenClick}
         disabled={isLoading}
         rightIcon={isLoading ? <Spinner size={2} /> : undefined}
       >
@@ -139,7 +155,7 @@ export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }
             <p>Vill du fortsätta med registreringen?</p>
           </Dialog.Content>
           <Dialog.Buttons className="flex justify-center gap-7">
-            <Button className="w-[12.8rem]" variant="secondary" onClick={openHandler}>
+            <Button className="w-[12.8rem]" variant="secondary" onClick={closeDialog}>
               Nej
             </Button>
             <Button

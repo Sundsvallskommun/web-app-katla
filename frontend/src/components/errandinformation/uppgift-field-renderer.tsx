@@ -1,3 +1,4 @@
+import { EXTRAPARAMETER_SEPARATOR, UppgiftField } from '@services/casedata-extra-parameters-service';
 import {
   Checkbox,
   DatePicker,
@@ -9,9 +10,8 @@ import {
   Textarea,
   useThemeQueries,
 } from '@sk-web-gui/react';
-import { Controller, get, useFormContext } from 'react-hook-form';
-import { EXTRAPARAMETER_SEPARATOR, UppgiftField } from '@services/casedata-extra-parameters-service';
 import { useEffect } from 'react';
+import { Controller, get, useFormContext } from 'react-hook-form';
 
 export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field }) => {
   const {

@@ -53,14 +53,10 @@ export const StakeholderList: React.FC<{
   const careof = watch('careof');
   const zip = watch('zip');
   const city = watch('city');
-  const selectedRole = watch('roles')?.[0] as Role | undefined;
-  const isOwnerSelected = selectedRole === Role.APPLICANT;
+  const isApplicantList = roles.includes(Role.APPLICANT);
   const ownerAlreadyExists = owners?.length > 0;
-
-  const streetMissing = isOwnerSelected && !(street && street.trim());
-  const zipMissing = isOwnerSelected && !(zip && zip.trim());
-  const cityMissing = isOwnerSelected && !(city && city.trim());
-  const missingAddress = streetMissing || zipMissing || cityMissing;
+  const municipalityMismatch = isApplicantList && !!outsideMunicipalityWarning;
+  const manualEntryAllowed = !isApplicantList;
 
   useEffect(() => {
     const currentRoles = getValues('roles');
@@ -115,7 +111,7 @@ export const StakeholderList: React.FC<{
             setSearching(false);
             setSearchResult(true);
 
-            if (res.municipality !== municipalityId) {
+            if (res.municipality !== municipalityId && isApplicantList) {
               setOutsideMunicipalityWarning('Den sökande som du försöker lägga till är inte folkbokförd i kommunen.');
             } else {
               setOutsideMunicipalityWarning(null);
@@ -185,7 +181,7 @@ export const StakeholderList: React.FC<{
       roleError = 'Välj roll';
     }
 
-    if (!personId) {
+    if (municipalityMismatch || (isOwner && !personId)) {
       municipalityError = 'Personen är inte folkbokförd i kommunen';
     }
 
@@ -259,6 +255,7 @@ export const StakeholderList: React.FC<{
                 setSearchResult(false);
                 setFetchedSsn(false);
                 reset();
+                setOutsideMunicipalityWarning(null);
               }}
             >
               <LucideIcon name="x" />
@@ -301,111 +298,97 @@ export const StakeholderList: React.FC<{
               </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row py-10 gap-10">
-              <div className="flex-col w-full">
-                <FormLabel>E-postadress</FormLabel>
-                <Input
-                  className="w-full"
-                  data-cy="stakeholder-email-input"
-                  placeholder="Ange e-postadress"
-                  invalid={!!validationMessages.email}
-                  {...register('emails.0.value')}
-                />
-                {validationMessages.email && <div className="text-error text-md mt-1">{validationMessages.email}</div>}
-              </div>
-              <div className="flex-col w-full">
-                <FormLabel>Telefonnummer</FormLabel>
-                <Input
-                  data-cy="stakeholder-mobilephone-input"
-                  className="w-full"
-                  placeholder="Ange telefonnummer"
-                  invalid={!!validationMessages.phone}
-                  {...register('phoneNumbers.0.value')}
-                />
-                {validationMessages.phone && <div className="text-error text-md mt-1">{validationMessages.phone}</div>}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-8">
-              <div className="flex gap-8">
-                <div className="flex flex-col w-full">
-                  <FormLabel>Adress{isOwnerSelected ? '*' : ''}</FormLabel>
-                  <Input
-                    className="w-full"
-                    placeholder="Ange gatuadress"
-                    invalid={!!validationMessages.address && streetMissing}
-                    {...register('street')}
-                  />
+            {!municipalityMismatch && (
+              <>
+                <div className="flex flex-col lg:flex-row py-10 gap-10">
+                  <div className="flex-col w-full">
+                    <FormLabel>E-postadress</FormLabel>
+                    <Input
+                      className="w-full"
+                      data-cy="stakeholder-email-input"
+                      placeholder="Ange e-postadress"
+                      invalid={!!validationMessages.email}
+                      {...register('emails.0.value')}
+                    />
+                    {validationMessages.email && (
+                      <div className="text-error text-md mt-1">{validationMessages.email}</div>
+                    )}
+                  </div>
+                  <div className="flex-col w-full">
+                    <FormLabel>Telefonnummer</FormLabel>
+                    <Input
+                      data-cy="stakeholder-mobilephone-input"
+                      className="w-full"
+                      placeholder="Ange telefonnummer"
+                      invalid={!!validationMessages.phone}
+                      {...register('phoneNumbers.0.value')}
+                    />
+                    {validationMessages.phone && (
+                      <div className="text-error text-md mt-1">{validationMessages.phone}</div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-col w-full">
-                  <FormLabel>C/o adress</FormLabel>
-                  <Input className="w-full" placeholder="C/O (valfritt)" {...register('careof')} />
+
+                <div className="flex flex-col gap-8">
+                  <div className="flex flex-col">
+                    <FormLabel>Personens roll*</FormLabel>
+                    <Select
+                      data-cy="stakeholder-role-select"
+                      className="w-full"
+                      invalid={!!validationMessages.role}
+                      disabled={roles.length === 1}
+                      value={watch('roles')?.[0] ?? ''}
+                      onChange={(e) => {
+                        const selected = e.target.value;
+                        if (selected) {
+                          setValue('roles', [selected as Role], { shouldDirty: true });
+                        } else {
+                          setValue('roles', [], { shouldDirty: true });
+                        }
+                      }}
+                    >
+                      {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
+                      {roles
+                        .sort((a, b) => RoleDisplayNames[a].localeCompare(RoleDisplayNames[b]))
+                        .map((role) => (
+                          <Select.Option
+                            key={role}
+                            value={role}
+                            disabled={ownerAlreadyExists && watch('roles')?.[0] !== role}
+                          >
+                            {RoleDisplayNames[role]}
+                          </Select.Option>
+                        ))}
+                    </Select>
+                    {validationMessages.role && (
+                      <div className="text-error text-md mt-1">{validationMessages.role}</div>
+                    )}
+                  </div>
+
+                  {validationMessages.address && (
+                    <div className="text-error text-md mt-1">{validationMessages.address}</div>
+                  )}
                 </div>
-              </div>
 
-              <div className="flex gap-8">
-                <div className="flex flex-col w-full">
-                  <FormLabel>Postnummer{isOwnerSelected ? '*' : ''}</FormLabel>
-                  <Input
-                    className="w-full"
-                    placeholder=" Ange postnummer"
-                    invalid={!!validationMessages.address && zipMissing}
-                    {...register('zip')}
-                  />
+                {validationMessages.municipality && (
+                  <div className="mb-10 p-8 bg-warning-light border-l-4 border-warning text-warning-dark">
+                    {validationMessages.municipality}
+                  </div>
+                )}
+
+                <div className="py-10">
+                  <Button
+                    data-cy="add-stakeholder-button"
+                    leftIcon={<LucideIcon name="plus" size={16} />}
+                    variant="primary"
+                    onClick={addStakeholderToErrand}
+                    className="w-full lg:w-auto"
+                    disabled={ownerAlreadyExists || municipalityMismatch}
+                  >
+                    Lägg till person
+                  </Button>
                 </div>
-                <div className="flex flex-col w-full">
-                  <FormLabel>Ort{isOwnerSelected ? '*' : ''}</FormLabel>
-                  <Input
-                    className="w-full"
-                    placeholder="Ange ort"
-                    invalid={!!validationMessages.address && cityMissing}
-                    {...register('city')}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col">
-                <FormLabel>Personens roll*</FormLabel>
-                <Select
-                  data-cy="stakeholder-role-select"
-                  className="w-full"
-                  invalid={!!validationMessages.role}
-                  disabled={roles.length === 1}
-                  value={watch('roles')?.[0] ?? ''}
-                  onChange={(e) => {
-                    const selected = e.target.value;
-                    if (selected) {
-                      setValue('roles', [selected as Role], { shouldDirty: true });
-                    } else {
-                      setValue('roles', [], { shouldDirty: true });
-                    }
-                  }}
-                >
-                  {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
-                  {roles
-                    .sort((a, b) => RoleDisplayNames[a].localeCompare(RoleDisplayNames[b]))
-                    .map((role) => (
-                      <Select.Option
-                        key={role}
-                        value={role}
-                        disabled={ownerAlreadyExists && watch('roles')?.[0] !== role}
-                      >
-                        {RoleDisplayNames[role]}
-                      </Select.Option>
-                    ))}
-                </Select>
-                {validationMessages.role && <div className="text-error text-md mt-1">{validationMessages.role}</div>}
-              </div>
-
-              {validationMessages.address && (
-                <div className="text-error text-md mt-1">{validationMessages.address}</div>
-              )}
-            </div>
-
-            {validationMessages.municipality && (
-              <div className="mb-10 p-8 bg-warning-light border-l-4 border-warning text-warning-dark">
-                {validationMessages.municipality}
-              </div>
+              </>
             )}
 
             {outsideMunicipalityWarning && (
@@ -416,19 +399,6 @@ export const StakeholderList: React.FC<{
                 </span>
               </div>
             )}
-
-            <div className="py-10">
-              <Button
-                data-cy="add-stakeholder-button"
-                leftIcon={<LucideIcon name="plus" size={16} />}
-                variant="primary"
-                onClick={addStakeholderToErrand}
-                className="w-full lg:w-auto"
-                disabled={ownerAlreadyExists || (isOwnerSelected && missingAddress)}
-              >
-                Lägg till person
-              </Button>
-            </div>
           </div>
         </div>
       )}
@@ -464,22 +434,24 @@ export const StakeholderList: React.FC<{
         );
       })}
 
-      <Button
-        data-cy="add-manual-person-button"
-        variant="primary"
-        size="sm"
-        color="vattjom"
-        inverted={true}
-        className="mt-6"
-        leftIcon={<LucideIcon name="pen" />}
-        disabled={ownerAlreadyExists}
-        onClick={() => {
-          setManualEntryOpen((prev) => !prev);
-          reset();
-        }}
-      >
-        Lägg till manuellt
-      </Button>
+      {manualEntryAllowed && (
+        <Button
+          data-cy="add-manual-person-button"
+          variant="primary"
+          size="sm"
+          color="vattjom"
+          inverted={true}
+          className="mt-6"
+          leftIcon={<LucideIcon name="pen" />}
+          disabled={ownerAlreadyExists}
+          onClick={() => {
+            setManualEntryOpen((prev) => !prev);
+            reset();
+          }}
+        >
+          Lägg till manuellt
+        </Button>
+      )}
 
       <StakeholderFormModal
         show={manualEntryOpen}
