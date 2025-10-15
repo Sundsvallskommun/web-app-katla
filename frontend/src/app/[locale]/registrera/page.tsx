@@ -1,13 +1,7 @@
 'use client';
 import { ErrandActionButtons } from '@components/errand-action-buttons.component';
 import { ErrandHeader } from '@components/errand-header/errand-header.component';
-import { AboutErrand } from '@components/errandinformation/about-errand.component';
-import { Applicant } from '@components/errandinformation/applicant.component';
-import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
-import { HealthCareStaff } from '@components/errandinformation/healthcare-staff.component';
-import { MedicalOpinion } from '@components/errandinformation/medical-opinion.component';
-import { OtherParties } from '@components/errandinformation/other-parties.component';
-import { PersonalInformation } from '@components/errandinformation/personal-information.component';
+import { ErrandReportedTab } from '@components/errand-reported-tab.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
@@ -30,7 +24,6 @@ const Registrera: React.FC = () => {
 
   useEffect(() => {
     setMunicipalityId(process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '');
-    //getAdminUsers().then(setAdministrators);
     getMe().then((user) => setUser(user));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -71,25 +64,14 @@ const Registrera: React.FC = () => {
                 ${isMaxMediumDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
               `}
             >
-              <div className={`${isMaxMediumDevice ? 'mb-[2.0rem]' : 'w-full py-[1.5rem] px-32'}`}>
-                <h2>Grundinformation</h2>
-              </div>
-              <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
-                <AboutErrand />
-                <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
-                <Applicant owners={applicants} setOwners={setApplicants} />
-                <OtherParties owners={otherParties} setOwners={setOtherParties} />
-              </div>
-
-              <div className={`${isMaxMediumDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
-                <h2>Ärendeuppgifter</h2>
-              </div>
-              <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
-                <ExternalCircumstances />
-                <PersonalInformation />
-                <MedicalOpinion />
-              </div>
-
+              <ErrandReportedTab
+                healthCareStaff={healthCareStaff}
+                setHealthCareStaff={setHealthCareStaff}
+                applicants={applicants}
+                setApplicants={setApplicants}
+                otherParties={otherParties}
+                setOtherParties={setOtherParties}
+              />
               <FileUploadComponent />
             </section>
             {!isMaxMediumDevice && (

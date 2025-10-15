@@ -4,18 +4,19 @@ import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { searchADUser } from '@services/adress-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Checkbox, Disclosure, useThemeQueries, isArray } from '@sk-web-gui/react';
+import { Disclosure, FormControl, isArray } from '@sk-web-gui/react';
+import { isErrandReadOnly } from '@utils/errand-utils';
+import { usePathname } from 'next/navigation';
 import { useContext, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { usePathname } from 'next/navigation';
+import { SectionCompletion } from './sectionCompletion.component';
 
 export const HealthCareStaff: React.FC<{
   staff?: CasedataOwnerOrContact[];
   setStaff: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
 }> = ({ staff, setStaff }) => {
   const [doneMark, setDoneMark] = useState(false);
-  const { user } = useContext(AppContext);
-  const { isMaxMediumDevice } = useThemeQueries();
+  const { user, errand } = useContext(AppContext);
   const pathname = usePathname();
   const isOnRegisterPage = pathname?.includes('/registrera');
   const hasStaff = Array.isArray(staff) && staff.length > 0;
@@ -76,19 +77,18 @@ export const HealthCareStaff: React.FC<{
   }, [user, staff, isOnRegisterPage]);
 
   return (
-    <Disclosure
-      icon={<LucideIcon name="user" />}
-      header="Vårdpersonal"
-      variant="alt"
-      className="w-full mobileVersion"
-      open={true}
-      label={doneMark ? 'Komplett' : ''}
-      labelColor={'gronsta'}
-    >
-      <div className="w-full">
-        <div className={`${isMaxMediumDevice ? '' : 'px-16'}`}>
+    <FormControl className="w-full" disabled={isErrandReadOnly(errand)}>
+      <Disclosure
+        icon={<LucideIcon name="user" />}
+        header="Vårdpersonal"
+        variant="alt"
+        className="w-full mobileVersion"
+        open={true}
+        label={doneMark ? 'Komplett' : ''}
+        labelColor={'gronsta'}
+      >
+        <div className="w-full">
           <p>Vårdpersonal är den person som initierat ärendet och vår primära kontakt när ärendet handläggs.</p>
-
           {hasStaff &&
             staff!.map((person, index) => (
               <DisplayCard
@@ -107,12 +107,13 @@ export const HealthCareStaff: React.FC<{
               />
             ))}
         </div>
-      </div>
-      <div className={`${isMaxMediumDevice ? 'mt-24' : 'mt-24 px-16'}`}>
-        <Checkbox onClick={() => setDoneMark(!doneMark)} checked={doneMark}>
-          Markera avsnittet som komplett
-        </Checkbox>
-      </div>
-    </Disclosure>
+        <SectionCompletion
+          checked={doneMark}
+          onChange={() => {
+            setDoneMark(!doneMark);
+          }}
+        />
+      </Disclosure>
+    </FormControl>
   );
 };

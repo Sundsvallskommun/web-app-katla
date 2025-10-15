@@ -1,14 +1,14 @@
+import { CASEDATA_NAMESPACE } from '@/config';
+import { apiServiceName } from '@/config/api-config';
+import { Errand as ErrandDTO } from '@/data-contracts/case-data/data-contracts';
+import { UiPhase } from '@/interfaces/errand-phase.interface';
+import { logger } from '@/utils/logger';
 import { CPatchErrandDto, CreateErrandDto } from '@interfaces/errand.interface';
 import { Role } from '@interfaces/role';
 import { User } from '@interfaces/users.interface';
-import { logger } from '@/utils/logger';
 import { apiURL, latestBy } from '@utils/util';
 import ApiService from './api.service';
-import { UiPhase } from '@/interfaces/errand-phase.interface';
 import { getLastUpdatedAdministrator } from './stakeholder.service';
-import { Errand as ErrandDTO } from '@/data-contracts/case-data/data-contracts';
-import { CASEDATA_NAMESPACE } from '@/config';
-import { apiServiceName } from '@/config/api-config';
 
 const SERVICE = apiServiceName('case-data');
 
@@ -26,6 +26,22 @@ export const validateErrandPhaseChange: (errand: CreateErrandDto, user: User) =>
 };
 
 export const makeErrandApiData: (errandData: CreateErrandDto | CPatchErrandDto, errandId: string) => CreateErrandDto = (errandData, errandId) => {
+  const toApiStatus = (s?: string) => (s === 'Ärende inskickat' ? 'Ärende inkommit' : s);
+
+  const normalizedStatus = errandData.status
+    ? {
+        ...errandData.status,
+        statusType: toApiStatus(errandData.status.statusType),
+      }
+    : undefined;
+
+  const normalizedStatuses = Array.isArray(errandData.statuses)
+    ? errandData.statuses.map(s => ({
+        ...s,
+        statusType: toApiStatus(s.statusType),
+      }))
+    : undefined;
+
   const newErrand: CreateErrandDto = {
     ...(errandId && { id: parseInt(errandId, 10) }),
     ...(errandData.caseType && { caseType: errandData.caseType as string }),
@@ -44,8 +60,8 @@ export const makeErrandApiData: (errandData: CreateErrandDto | CPatchErrandDto, 
           },
         }
       : {}),
-    ...(errandData.status && { status: errandData.status }),
-    ...(errandData.statuses && { stauses: errandData.statuses }),
+    ...(normalizedStatus && { status: normalizedStatus }),
+    ...(normalizedStatuses && { statuses: normalizedStatuses }),
     ...(errandData.stakeholders && { stakeholders: errandData.stakeholders }),
     ...(errandData.extraParameters && { extraParameters: errandData.extraParameters }),
     ...(errandData.relatesTo && { relatesTo: errandData.relatesTo }),
