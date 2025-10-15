@@ -1,13 +1,7 @@
 'use client';
 import { ErrandActionButtons } from '@components/errand-action-buttons.component';
 import { ErrandHeader } from '@components/errand-header/errand-header.component';
-import { AboutErrand } from '@components/errandinformation/about-errand.component';
-import { Applicant } from '@components/errandinformation/applicant.component';
-import { ExternalCircumstances } from '@components/errandinformation/external-circumstances.component';
-import { HealthCareStaff } from '@components/errandinformation/healthcare-staff.component';
-import { MedicalOpinion } from '@components/errandinformation/medical-opinion.component';
-import { OtherParties } from '@components/errandinformation/other-parties.component';
-import { PersonalInformation } from '@components/errandinformation/personal-information.component';
+import { ErrandReportedTab } from '@components/errand-reported-tab.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { CasedataMessagesTab } from '@components/messages/message.component';
 import { AppContext } from '@contexts/app-context-interface';
@@ -37,7 +31,6 @@ const Arende: React.FC = () => {
   const pathName = usePathname();
   const { isMaxMediumDevice } = useThemeQueries();
   const errandNumber = pathName.split('/')[3];
-
   useEffect(() => {
     const initializeData = async () => {
       try {
@@ -200,28 +193,14 @@ const Arende: React.FC = () => {
           `}
                   >
                     {current === 0 && (
-                      <>
-                        <div className={`${isMaxMediumDevice ? 'mb-[2.0rem]' : 'w-full py-15 px-32'}`}>
-                          <h2>Grundinformation</h2>
-                        </div>
-
-                        <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
-                          <AboutErrand />
-                          <HealthCareStaff staff={healthCareStaff} setStaff={setHealthCareStaff} />
-                          <Applicant owners={applicants} setOwners={setApplicants} />
-                          <OtherParties owners={otherParties} setOwners={setOtherParties} />
-                        </div>
-
-                        <div className={`${isMaxMediumDevice ? 'my-[2.4rem]' : 'w-full pb-[2rem] pt-[5rem] px-32'}`}>
-                          <h2>Ärendeuppgifter</h2>
-                        </div>
-
-                        <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
-                          <ExternalCircumstances />
-                          <PersonalInformation />
-                          <MedicalOpinion />
-                        </div>
-                      </>
+                      <ErrandReportedTab
+                        healthCareStaff={healthCareStaff}
+                        setHealthCareStaff={setHealthCareStaff}
+                        applicants={applicants}
+                        setApplicants={setApplicants}
+                        otherParties={otherParties}
+                        setOtherParties={setOtherParties}
+                      />
                     )}
 
                     {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}

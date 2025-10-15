@@ -4,7 +4,8 @@ import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { searchPerson } from '@services/adress-service';
 import { addStakeholder, editStakeholder, removeStakeholder } from '@services/casedata-stakeholder-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, FormLabel, Input, Select } from '@sk-web-gui/react';
+import { Button, FormControl, FormLabel, Input, Select } from '@sk-web-gui/react';
+import { isErrandReadOnly } from '@utils/errand-utils';
 import { emailSchema, phoneSchema, ssnSchema } from '@utils/validation-schema';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -16,7 +17,8 @@ export const StakeholderList: React.FC<{
   owners: CasedataOwnerOrContact[];
   setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
   roles: Role[];
-}> = ({ owners, setOwners, roles }) => {
+  isReadOnly?: boolean;
+}> = ({ owners, setOwners, roles, isReadOnly = false }) => {
   const [fetchedSsn, setFetchedSsn] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(false);
@@ -229,57 +231,60 @@ export const StakeholderList: React.FC<{
   };
 
   return (
-    <div>
-      <FormLabel>Sök på personnummer</FormLabel>
+    <FormControl className="w-full">
+      {!isErrandReadOnly(errand) ?
+        <FormLabel>Sök på personnummer</FormLabel>
+      : null}
+      {!isErrandReadOnly(errand) ?
+        <div className="w-full max-w-[52.5rem]">
+          <Input.Group size="md" className="rounded-12 flex items-stretch overflow-hidden">
+            <Input.LeftAddin icon>
+              <LucideIcon name="search" />
+            </Input.LeftAddin>
 
-      <div className="w-full max-w-[52.5rem]">
-        <Input.Group size="md" className="rounded-12 flex items-stretch overflow-hidden">
-          <Input.LeftAddin icon>
-            <LucideIcon name="search" />
-          </Input.LeftAddin>
+            <Input
+              data-cy="personal-number-input"
+              className="w-full"
+              {...register('personalNumber')}
+              readOnly={fetchedSsn}
+              invalid={!!errors.personalNumber}
+            />
+            <Input.RightAddin icon className="flex gap-2">
+              <Button
+                data-cy="clear-person-button"
+                iconButton
+                size="sm"
+                variant="primary"
+                inverted
+                className="min-w-[2.5rem] h-full"
+                onClick={() => {
+                  setValue('personalNumber', '');
+                  clearErrors('personalNumber');
+                  setSearchResult(false);
+                  setFetchedSsn(false);
+                  reset();
+                }}
+              >
+                <LucideIcon name="x" />
+              </Button>
 
-          <Input
-            data-cy="personal-number-input"
-            className="w-full"
-            {...register('personalNumber')}
-            readOnly={fetchedSsn}
-            invalid={!!errors.personalNumber}
-          />
-          <Input.RightAddin icon className="flex gap-2">
-            <Button
-              data-cy="clear-person-button"
-              iconButton
-              size="sm"
-              variant="primary"
-              inverted
-              className="min-w-[2.5rem] h-full"
-              onClick={() => {
-                setValue('personalNumber', '');
-                clearErrors('personalNumber');
-                setSearchResult(false);
-                setFetchedSsn(false);
-                reset();
-              }}
-            >
-              <LucideIcon name="x" />
-            </Button>
+              <Button
+                data-cy="search-person-button"
+                size="sm"
+                variant="primary"
+                className="h-full"
+                onClick={doSearch}
+                loading={searching}
+                loadingText="Söker"
+              >
+                Sök
+              </Button>
+            </Input.RightAddin>
+          </Input.Group>
 
-            <Button
-              data-cy="search-person-button"
-              size="sm"
-              variant="primary"
-              className="h-full"
-              onClick={doSearch}
-              loading={searching}
-              loadingText="Söker"
-            >
-              Sök
-            </Button>
-          </Input.RightAddin>
-        </Input.Group>
-
-        {errors.personalNumber && <div className="text-error text-md mt-1">{errors.personalNumber.message}</div>}
-      </div>
+          {errors.personalNumber && <div className="text-error text-md mt-1">{errors.personalNumber.message}</div>}
+        </div>
+      : null}
 
       {searchResult && !notFound && (
         <div className="border-1 rounded-12 bg-background-content w-max-[52.5rem] my-15">
@@ -442,7 +447,7 @@ export const StakeholderList: React.FC<{
         return (
           <DisplayCard
             key={index}
-            isEditable={true}
+            isEditable
             roles={owner.roles}
             availableRoles={roles}
             userName={owner.adAccount}
@@ -464,22 +469,24 @@ export const StakeholderList: React.FC<{
         );
       })}
 
-      <Button
-        data-cy="add-manual-person-button"
-        variant="primary"
-        size="sm"
-        color="vattjom"
-        inverted={true}
-        className="mt-6"
-        leftIcon={<LucideIcon name="pen" />}
-        disabled={ownerAlreadyExists}
-        onClick={() => {
-          setManualEntryOpen((prev) => !prev);
-          reset();
-        }}
-      >
-        Lägg till manuellt
-      </Button>
+      {!isErrandReadOnly(errand) ?
+        <Button
+          data-cy="add-manual-person-button"
+          variant="primary"
+          size="sm"
+          color="vattjom"
+          inverted={true}
+          className="mt-6 max-w-[16.5rem]"
+          leftIcon={<LucideIcon name="pen" />}
+          disabled={ownerAlreadyExists}
+          onClick={() => {
+            setManualEntryOpen((prev) => !prev);
+            reset();
+          }}
+        >
+          Lägg till manuellt
+        </Button>
+      : null}
 
       <StakeholderFormModal
         show={manualEntryOpen}
@@ -509,6 +516,6 @@ export const StakeholderList: React.FC<{
           setManualEntryOpen(false);
         }}
       />
-    </div>
+    </FormControl>
   );
 };
