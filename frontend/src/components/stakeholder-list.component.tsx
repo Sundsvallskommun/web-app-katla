@@ -59,6 +59,34 @@ export const StakeholderList: React.FC<{
   const municipalityMismatch = isApplicantList && !!outsideMunicipalityWarning;
   const manualEntryAllowed = !isApplicantList;
 
+  const clearSearch = () => {
+    reset({
+      personId: '',
+      personalNumber: '',
+      firstName: '',
+      lastName: '',
+      street: '',
+      careof: '',
+      zip: '',
+      city: '',
+      roles: roles.length === 1 ? [roles[0]] : [],
+    });
+    setValue('personalNumber', '');
+    setFetchedSsn(false);
+    setSearchResult(false);
+    setSearching(false);
+    setNotFound(false);
+    setOutsideMunicipalityWarning(null);
+    clearErrors();
+    setValidationMessages({
+      email: '',
+      phone: '',
+      role: '',
+      municipality: '',
+      address: '',
+    });
+  };
+
   useEffect(() => {
     const currentRoles = getValues('roles');
     if (roles.length === 1 && (!currentRoles || currentRoles.length === 0)) {
@@ -252,14 +280,7 @@ export const StakeholderList: React.FC<{
                 variant="primary"
                 inverted
                 className="min-w-[2.5rem] h-full"
-                onClick={() => {
-                  setValue('personalNumber', '');
-                  clearErrors('personalNumber');
-                  setSearchResult(false);
-                  setFetchedSsn(false);
-                  reset();
-                  setOutsideMunicipalityWarning(null);
-                }}
+                onClick={clearSearch}
               >
                 <LucideIcon name="x" />
               </Button>
@@ -396,11 +417,16 @@ export const StakeholderList: React.FC<{
             )}
 
             {outsideMunicipalityWarning && (
-              <div className="flex h-auto w-full items-center gap-12 rounded-2xl bg-warning-background-200 p-12 mt-12 mb-16">
-                <LucideIcon color="warning" name="info" className="w-24 h-24 mt-0.5 shrink-0" />
-                <span className="text-warning text-md leading-[1.8rem] font-normal font-sans break-words flex-1 min-w-0">
-                  {outsideMunicipalityWarning}
-                </span>
+              <div className="flex flex-col gap-10 rounded-2xl bg-warning-background-200 p-12 mt-12 mb-16 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-12">
+                  <LucideIcon color="warning" name="info" className="w-24 h-24 mt-0.5 shrink-0" />
+                  <span className="text-warning text-md leading-[1.8rem] font-normal font-sans break-words flex-1 min-w-0">
+                    {outsideMunicipalityWarning}
+                  </span>
+                </div>
+                <Button variant="primary" size="sm" className="w-full sm:w-auto" onClick={clearSearch}>
+                  Ny sökning
+                </Button>
               </div>
             )}
           </div>
