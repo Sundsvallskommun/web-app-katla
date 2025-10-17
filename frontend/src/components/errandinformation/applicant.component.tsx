@@ -30,7 +30,7 @@ export const Applicant: React.FC<{
         labelColor={'gronsta'}
       >
         <p>En sökande kan vara en individ som berörs av ärendet.</p>
-        <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} isReadOnly={isReadOnly} />
+        <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
         <SectionCompletion
           checked={doneMark}
           onChange={() => {

@@ -15,6 +15,7 @@ import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { EXTRAPARAMETER_SEPARATOR } from '@services/casedata-extra-parameters-service';
 import { getMe } from '@services/user-service';
 import { Divider, MenuBar, useThemeQueries } from '@sk-web-gui/react';
+import { isErrandReadOnly } from '@utils/errand-utils';
 import { usePathname } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -182,9 +183,11 @@ const Arende: React.FC = () => {
                         <button onClick={() => setCurrent(1)}>Meddelanden</button>
                       </MenuBar.Item>
                     )}
-                    <MenuBar.Item>
-                      <button onClick={() => setCurrent(2)}>Bilagor</button>
-                    </MenuBar.Item>
+                    {!isErrandReadOnly(errand) && (
+                      <MenuBar.Item>
+                        <button onClick={() => setCurrent(2)}>Bilagor</button>
+                      </MenuBar.Item>
+                    )}
                   </MenuBar>
                   <Divider />
                   <section

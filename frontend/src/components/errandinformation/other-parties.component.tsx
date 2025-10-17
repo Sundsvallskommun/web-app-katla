@@ -9,12 +9,11 @@ import { SectionCompletion } from './sectionCompletion.component';
 export const OtherParties: React.FC<{
   owners: CasedataOwnerOrContact[];
   setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-  isReadOnly?: boolean;
-}> = ({ owners, setOwners, isReadOnly = false }) => {
+}> = ({ owners, setOwners }) => {
   const [doneMark, setDoneMark] = useState(false);
   const allowedRoles = [Role.CONTACT_PERSON, Role.FELLOW_APPLICANT, Role.DOCTOR];
   return (
-    <FormControl className="w-full" disabled={isReadOnly}>
+    <FormControl className="w-full">
       <Disclosure
         icon={<LucideIcon name="users" />}
         header="Övriga parter"
@@ -26,7 +25,7 @@ export const OtherParties: React.FC<{
       >
         <p>En part kan vara en kontaktperson, läkare eller en anhörig vars roll är viktig för ärendet.</p>
         <div data-cy="otherparties-disclosure">
-          <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} isReadOnly={isReadOnly} />
+          <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
         </div>
 
         <SectionCompletion
