@@ -693,7 +693,7 @@ export const mockErrands_FT_draft = {
     namespace: 'SBK_PARKING_PERMIT',
     caseType: 'PARATRANSIT_NOTIFICATION',
     priority: 'MEDIUM',
-    caseTitleAddition: 'Anmälan av färdtjänst',
+    caseTitleAddition: 'Anmälan färdtjänst',
     status: {
       statusType: 'Utkast',
       created: '2025-06-13T08:08:38.426946+02:00',
@@ -774,7 +774,7 @@ export const mockErrands_FT_registered = {
     namespace: 'SBK_PARKING_PERMIT',
     caseType: 'PARATRANSIT_NOTIFICATION',
     priority: 'MEDIUM',
-    caseTitleAddition: 'Anmälan av färdtjänst',
+    caseTitleAddition: 'Anmälan färdtjänst',
     status: {
       statusType: 'Ärende inkommit',
       created: '2025-06-13T08:08:38.426946+02:00',

@@ -9,13 +9,13 @@ export enum FTCaseType {
 }
 
 export const FTCaseLabel: Record<FTCaseType, string> = {
-  PARATRANSIT_NOTIFICATION: 'Anmälan av färdtjänst',
-  PARATRANSIT_NOTIFICATION_CHANGE: 'Anmälan om förändring av insatser',
-  PARATRANSIT_NOTIFICATION_RENEWAL: 'Anmälan om fortsatt färdtjänst',
-  PARATRANSIT_NOTIFICATION_NATIONAL: 'Anmälan om riksfärdtjänst',
-  PARATRANSIT_NOTIFICATION_NATIONAL_RENEWAL: 'Anmälan om fortsatt riksfärdtjänst',
-  PARATRANSIT_NOTIFICATION_RIAK: 'Anmälan om RIAK',
-  PARATRANSIT_NOTIFICATION_BUS_CARD: 'Anmälan om busskort',
+  PARATRANSIT_NOTIFICATION: 'Anmälan färdtjänst',
+  PARATRANSIT_NOTIFICATION_CHANGE: 'Anmälan förändring av insatser',
+  PARATRANSIT_NOTIFICATION_RENEWAL: 'Anmälan fortsatt färdtjänst',
+  PARATRANSIT_NOTIFICATION_NATIONAL: 'Anmälan riksfärdtjänst',
+  PARATRANSIT_NOTIFICATION_NATIONAL_RENEWAL: 'Anmälan fortsatt riksfärdtjänst',
+  PARATRANSIT_NOTIFICATION_RIAK: 'Anmälan RIAK',
+  PARATRANSIT_NOTIFICATION_BUS_CARD: 'Anmälan busskort',
 };
 export const getCaseLabels = (): Record<FTCaseType, string> => ({
   [FTCaseType.PARATRANSIT_NOTIFICATION]: FTCaseLabel.PARATRANSIT_NOTIFICATION,
