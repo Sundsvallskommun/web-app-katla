@@ -29,7 +29,6 @@ export const Applicant: React.FC<{
         label={doneMark ? 'Komplett' : ''}
         labelColor={'gronsta'}
       >
-        <p>En sökande kan vara en individ som berörs av ärendet.</p>
         <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
         <SectionCompletion
           checked={doneMark}
