@@ -5,7 +5,6 @@ import { ExternalCircumstances } from '@components/errandinformation/external-ci
 import { HealthCareStaff } from '@components/errandinformation/healthcare-staff.component';
 import { MedicalOpinion } from '@components/errandinformation/medical-opinion.component';
 import { OtherParties } from '@components/errandinformation/other-parties.component';
-import { PersonalInformation } from '@components/errandinformation/personal-information.component';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { useThemeQueries } from '@sk-web-gui/react';
 import React from 'react';
@@ -47,7 +46,6 @@ export const ErrandReportedTab: React.FC<Props> = ({
 
       <div className={`${isMaxMediumDevice ? '' : 'px-32'}`}>
         <ExternalCircumstances />
-        <PersonalInformation />
         <MedicalOpinion />
       </div>
     </>
