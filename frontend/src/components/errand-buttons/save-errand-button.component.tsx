@@ -28,11 +28,19 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
       }
     }
 
-    const data = getValues() as IErrand & { attachments: UploadFile[] };
+    const data = getValues() as Partial<IErrand> & { attachments: UploadFile[] };
 
     data.stakeholders = owners;
-    delete (data as Partial<IErrand>).errandNumber;
-    delete (data as Partial<IErrand>).channel;
+    if (data.status) {
+      delete data.status;
+      delete data.statuses;
+    } else {
+      data.status = { statusType: ErrandStatus.Utkast };
+    }
+    delete data.errandNumber;
+    delete data.channel;
+
+    console.log('Submitting errand data:', data);
 
     const newAttachments = (data.attachments || [])
       .filter((attachment: UploadFile) => !attachment.id)

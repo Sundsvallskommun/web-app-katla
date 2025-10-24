@@ -20,15 +20,18 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
   const onSubmit = async () => {
     setIsLoading(true);
 
-    const data = getValues() as IErrand & { attachments: UploadFile[] };
+    const data = getValues() as Partial<IErrand> & { attachments: UploadFile[] };
 
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
 
     data.stakeholders = owners;
-    data.status = data.status || {};
-    data.status.statusType = ErrandStatus.Utkast;
-    delete (data as Partial<IErrand>).errandNumber;
-    delete (data as Partial<IErrand>).channel;
+    if (data.status) {
+      delete data.status;
+    } else {
+      data.status = { statusType: ErrandStatus.Utkast };
+    }
+    delete data.errandNumber;
+    delete data.channel;
 
     try {
       const res = await saveErrand(data, municipalityId);
