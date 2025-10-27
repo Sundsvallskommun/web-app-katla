@@ -82,7 +82,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const baseRequired = isOptional ? false : isRequired || isTypeRequiredByDefault;
   const isRequiredField = baseRequired || hasConditionalRequirement;
 
-  const formFieldClassName = 'flex flex-col w-full pt-10';
+  const formFieldClassName = 'flex flex-col w-full pt-8';
   const fieldDescriptionClassName = 'pt-8 w-full flex flex-col text-md leading-[1.8rem] font-normal font-[Arial]';
 
   const ErrorMessage = ({ error }: { error?: string }) =>
