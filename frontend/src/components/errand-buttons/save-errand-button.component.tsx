@@ -130,13 +130,13 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
   return (
     <Button
       data-cy="update-draft-errand-button"
-      variant="primary"
+      variant="secondary"
       color="vattjom"
       onClick={onSubmit}
       disabled={isLoading}
       rightIcon={isLoading ? <Spinner size={2} /> : undefined}
     >
-      {draftErrand ? 'Uppdatera utkast' : 'Uppdatera ärende'}
+      {draftErrand ? 'Spara utkast' : 'Uppdatera ärende'}
     </Button>
   );
 };
