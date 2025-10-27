@@ -8,7 +8,7 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
-import { Role } from '@interfaces/role';
+import { OTHER_PARTY_ROLES, Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
@@ -96,7 +96,7 @@ const Arende: React.FC = () => {
           setApplicants(applicants);
 
           const otherParties = res.errand.stakeholders
-            .filter((s) => s.roles.some((r) => [Role.FELLOW_APPLICANT, Role.CONTACT_PERSON, Role.DOCTOR].includes(r)))
+            .filter((s) => s.roles.some((r) => OTHER_PARTY_ROLES.includes(r)))
             .map((person) => ({
               ...person,
               newEmail: person.emails[0]?.value,
