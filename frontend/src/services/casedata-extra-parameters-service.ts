@@ -1,14 +1,14 @@
-import { apiService } from './api-service';
-import { ExtraParameter } from '@interfaces/extra-parameters';
-import { IErrand } from '@interfaces/errand';
-import { FTCaseType } from '@interfaces/case-type';
-import { notificationChange_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-change';
-import { notificationRenewal_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-renewal';
 import { notification_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification';
+import { notificationBusCard_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-bus-card';
+import { notificationChange_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-change';
 import { notificationNational_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-national';
 import { notificationNationalRenewal_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-national-renewal';
+import { notificationRenewal_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-renewal';
 import { notificationRiak_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-riak';
-import { notificationBusCard_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-bus-card';
+import { FTCaseType } from '@interfaces/case-type';
+import { IErrand } from '@interfaces/errand';
+import { ExtraParameter } from '@interfaces/extra-parameters';
+import { apiService } from './api-service';
 
 export const EXTRAPARAMETER_SEPARATOR = '@';
 
@@ -27,16 +27,18 @@ export interface UppgiftField {
     | { type: 'datetime-local' }
     | { type: 'textarea'; options?: { placeholder?: string } }
     | { type: 'select'; options: OptionBase[] }
+    | { type: 'combobox'; options: OptionBase[]; placeholder?: string; multiple?: boolean }
     | { type: 'radio'; options: OptionBase[]; inline?: boolean }
     | { type: 'radioPlus'; options: OptionBase[]; ownOption: string }
     | { type: 'checkbox'; options: OptionBase[] };
   section: string;
   dependsOn?: {
     field: string;
-    value: string;
+    value: string | string[];
     validationMessage?: string;
   }[];
   description?: string;
+  required?: boolean;
 }
 
 export interface ExtraParametersObject {
@@ -74,12 +76,14 @@ export const extraParametersToUppgiftMapper = (
 
     if (Array.isArray(param.values)) {
       const filtered = param.values.filter((v) => typeof v === 'string' && v.trim() !== '');
-      const isMultiSelect = templateField?.formField.type === 'checkbox';
+      const formField = templateField?.formField;
+      const isMultiSelect =
+        formField?.type === 'checkbox' || (formField?.type === 'combobox' && Array.isArray(templateField?.value));
       value = isMultiSelect ? filtered : filtered[0] || '';
     }
 
     if (templateField) {
-      const { label, formField, section, dependsOn } = templateField;
+      const { label, formField, section, dependsOn, required } = templateField;
 
       obj[caseType] = obj[caseType] || [];
       const fields = obj[caseType]!;
@@ -91,6 +95,7 @@ export const extraParametersToUppgiftMapper = (
         formField,
         section,
         dependsOn,
+        required,
       };
 
       const index = fields.findIndex((f) => f.field === field);
@@ -107,19 +112,22 @@ export const extraParametersToUppgiftMapper = (
 };
 
 export const saveExtraParameters = (municipalityId: string, data: ExtraParameter[], errand: IErrand) => {
-  const nullFilteredData: ExtraParameter[] = data.filter(
-    (d) => d.values && d.values[0] !== null && typeof d.values[0] !== 'undefined'
-  );
-  let newExtraParameters = [...errand.extraParameters];
-  nullFilteredData.forEach((p) => {
-    newExtraParameters = replaceExtraParameter(newExtraParameters, p);
-  });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return apiService.patch<any, { id: string; extraParameters: ExtraParameter[] }>(
+  const sanitizedData: ExtraParameter[] = data.map((param) => ({
+    ...param,
+    values: (param.values ?? [])
+      .map((value) => (value === null || typeof value === 'undefined' ? '' : String(value).trim()))
+      .filter((value) => value !== ''),
+  }));
+
+  const mergedExtraParameters = errand.extraParameters
+    .filter((existing) => !sanitizedData.some((param) => param.key === existing.key))
+    .concat(sanitizedData);
+
+  return apiService.patch<unknown, { id: string; extraParameters: ExtraParameter[] }>(
     `casedata/${municipalityId}/errands/${errand.id}`,
     {
       id: errand.id.toString(),
-      extraParameters: newExtraParameters,
+      extraParameters: mergedExtraParameters,
     }
   );
 };
@@ -136,24 +144,34 @@ export const extractExtraParameters = <T extends Record<string, unknown>>(
   getValues: () => T
 ): ExtraParameter[] => {
   const rawValues = getValues();
+  const extracted: ExtraParameter[] = [];
 
-  return fields
-    .map((field) => {
-      const formKey = field.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
-      const value = rawValues[formKey];
+  fields.forEach((field) => {
+    const formKey = field.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+    const value = rawValues[formKey];
 
-      let values: string[] = [];
+    let values: string[] = [];
 
-      if (Array.isArray(value)) {
-        values = value.filter((v) => typeof v === 'string' && v.trim() !== '');
-      } else if (typeof value === 'string' && value.trim() !== '') {
-        values = [value];
-      }
+    if (Array.isArray(value)) {
+      values = value.filter((v) => typeof v === 'string' && v.trim() !== '');
+    } else if (typeof value === 'string' && value.trim() !== '') {
+      values = [value];
+    }
 
-      return {
-        key: field.field,
-        values,
-      };
-    })
-    .filter((param) => param.values.length > 0);
+    const hadExistingValue =
+      Array.isArray(field.value) ?
+        field.value.length > 0
+      : typeof field.value === 'string' && field.value.trim() !== '';
+
+    if (values.length === 0 && !hadExistingValue) {
+      return;
+    }
+
+    extracted.push({
+      key: field.field,
+      values,
+    });
+  });
+
+  return extracted;
 };

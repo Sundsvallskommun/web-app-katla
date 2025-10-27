@@ -1,8 +1,12 @@
 import { AppContext } from '@contexts/app-context-interface';
+import { IErrand } from '@interfaces/errand';
+import { Priority } from '@interfaces/priority';
+import { EXTRAPARAMETER_SEPARATOR } from '@services/casedata-extra-parameters-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Disclosure, Divider, FormControl } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { SectionCompletion } from './sectionCompletion.component';
 import { UppgiftFieldRenderer } from './uppgift-field-renderer';
 import { useUppgiftFields } from './useUppgiftFields';
@@ -11,8 +15,39 @@ export const MedicalOpinion: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
   const fields = useUppgiftFields('Medicinskt utlåtande');
   const { errand } = useContext(AppContext);
+  const readOnly = isErrandReadOnly(errand);
+  const { setValue } = useFormContext<IErrand>();
+  const diagnosesFieldName = `medical${EXTRAPARAMETER_SEPARATOR}diagnoses`;
+  const diagnoses = useWatch({ name: diagnosesFieldName });
+  const priority = useWatch({ name: 'priority' });
+  const autoSetByPalliativeRef = useRef(false);
+
+  useEffect(() => {
+    if (readOnly) return;
+    const diagnosesList =
+      Array.isArray(diagnoses) ? diagnoses
+      : diagnoses ? [diagnoses]
+      : [];
+    const hasPalliativeCare = diagnosesList.includes('PALLIATIVE_CARE');
+
+    if (hasPalliativeCare) {
+      autoSetByPalliativeRef.current = true;
+      if (priority !== Priority.HIGH) {
+        setValue('priority', Priority.HIGH, { shouldDirty: true });
+      }
+      return;
+    }
+
+    if (autoSetByPalliativeRef.current) {
+      autoSetByPalliativeRef.current = false;
+      if (priority !== Priority.MEDIUM) {
+        setValue('priority', Priority.MEDIUM, { shouldDirty: true });
+      }
+    }
+  }, [diagnoses, priority, readOnly, setValue]);
+
   return (
-    <FormControl className="w-full" disabled={isErrandReadOnly(errand)}>
+    <FormControl className="w-full" disabled={readOnly}>
       <Disclosure
         icon={<LucideIcon name="clipboard-signature" />}
         header="Medicinskt utlåtande"
@@ -31,7 +66,7 @@ export const MedicalOpinion: React.FC = () => {
             </div>
           : <p>Inga fält att visa.</p>}
 
-          {fields.length > 0 && !isErrandReadOnly(errand) && (
+          {fields.length > 0 && !readOnly && (
             <>
               <Divider className="pt-20" />
               <SectionCompletion

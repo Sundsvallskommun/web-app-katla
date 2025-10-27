@@ -5,6 +5,7 @@ import { ErrandReportedTab } from '@components/errand-reported-tab.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
+import { Priority } from '@interfaces/priority';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { getMe } from '@services/user-service';
 import { useThemeQueries } from '@sk-web-gui/react';
@@ -14,7 +15,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 const Registrera: React.FC = () => {
   const method = useForm<IErrand>({
     mode: 'onChange',
-    defaultValues: { caseType: 'PARATRANSIT_NOTIFICATION' },
+    defaultValues: { caseType: 'PARATRANSIT_NOTIFICATION', priority: Priority.MEDIUM },
   });
   const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
   const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
