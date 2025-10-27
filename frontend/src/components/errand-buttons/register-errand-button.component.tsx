@@ -12,46 +12,52 @@ import { Button, Dialog, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/re
 import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
-import { useFormContext, UseFormReturn } from 'react-hook-form';
-import { scrollToFirstError } from './errand-buttons-utils';
+import { useFormContext } from 'react-hook-form';
+import { scrollToElement, scrollToFirstError, setApplicantError, clearApplicantError } from './errand-buttons-utils';
 
-export const RegisterErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
+export const RegisterErrandButton: React.FC<{
+  owners: CasedataOwnerOrContact[];
+}> = ({ owners }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toastMessage = useSnackbar();
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const { getValues, trigger, formState, setError, clearErrors } = useFormContext();
   const applicantHasPartyId = owners.some(
     (owner) => owner.roles?.includes(Role.APPLICANT) && Boolean(owner.personId?.trim?.())
   );
 
   const closeDialog = () => setIsOpen(false);
 
-  const handleOpenClick = () => {
+  const handleOpenClick = async () => {
+    setIsLoading(true);
+
     if (!applicantHasPartyId) {
-      toastMessage({
-        position: 'bottom',
-        message: 'Det går inte att registrera ärendet eftersom ingen sökande part är tillagd.',
-        status: 'error',
-      });
-      console.warn('Cannot register errand, stakeholder missing partyId');
+      setApplicantError(
+        setError,
+        'Det går inte att registrera ärendet eftersom ingen sökande part är tillagd.'
+      );
+      setIsLoading(false);
+      scrollToElement('[data-cy="applicant-diclosure"]');
       return;
     }
 
+    clearApplicantError(clearErrors);
+
+    const isValid = await trigger();
+    if (!isValid) {
+      scrollToFirstError(formState.errors);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(false);
     setIsOpen(true);
   };
 
   const onSubmit = async () => {
     setIsLoading(true);
-
-    const isValid = await trigger();
-    if (!isValid) {
-      setIsLoading(false);
-      closeDialog();
-      scrollToFirstError(formState.errors);
-      return;
-    }
 
     const data = getValues() as IErrand & { attachments: UploadFile[] };
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);

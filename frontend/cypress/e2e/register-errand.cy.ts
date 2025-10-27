@@ -406,6 +406,13 @@ describe('Registrera ärende-sida', () => {
     cy.get('.sk-dialog').find('button').contains('Ja').click();
   });
 
+  it('prevents registration when applicant is missing', () => {
+    cy.get('[data-cy="register-errand-button"]').should('exist').click();
+    cy.get('[data-cy="confirm-register-dialog"]').should('not.exist');
+    cy.get('[data-cy="applicant-disclosure"]').should('be.visible');
+    cy.url().should('include', '/registrera');
+  });
+
   it('register errand', () => {
     cy.intercept('POST', '**/api/casedata/2281/errands', mockErrands_FT_registered).as('registerErrand');
     cy.intercept('GET', '**/attachments', {
