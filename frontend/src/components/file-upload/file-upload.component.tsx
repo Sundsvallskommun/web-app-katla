@@ -61,7 +61,10 @@ const FileUploadComponent: React.FC = () => {
     <FileUpload.Area onChange={onChange}>
       <div className="w-full pb-[2rem] pt-[5rem] lg:px-32">
         <div className="flex justify-between">
-          <h2>Bilagor</h2>
+          <div className="flex flex-col">
+            <h2>Bilagor</h2>
+            <span>Ladda upp bilagor av relevans för ansökan.</span>
+          </div>
           <div data-cy="upload-button-wrapper">
             <FileUpload.Button onChange={onChange} />
           </div>
