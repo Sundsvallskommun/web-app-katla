@@ -40,8 +40,6 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
     delete data.errandNumber;
     delete data.channel;
 
-    console.log('Submitting errand data:', data);
-
     const newAttachments = (data.attachments || [])
       .filter((attachment: UploadFile) => !attachment.id)
       .map((attachment: UploadFile) => ({
