@@ -1,15 +1,11 @@
 import { StakeholderList } from '@components/stakeholder-list.component';
 import { OTHER_PARTY_ROLES } from '@interfaces/role';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Disclosure, FormControl } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { SectionCompletion } from './sectionCompletion.component';
 
-export const OtherParties: React.FC<{
-  owners: CasedataOwnerOrContact[];
-  setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-}> = ({ owners, setOwners }) => {
+export const OtherParties: React.FC<{}> = ({}) => {
   const [doneMark, setDoneMark] = useState(false);
   const allowedRoles = [...OTHER_PARTY_ROLES];
   return (
@@ -24,7 +20,7 @@ export const OtherParties: React.FC<{
         labelColor={'gronsta'}
       >
         <div data-cy="otherparties-disclosure">
-          <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
+          <StakeholderList roles={allowedRoles} />
         </div>
 
         <SectionCompletion

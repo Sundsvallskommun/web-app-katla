@@ -132,10 +132,10 @@ export const isErrandLocked: (errand: IErrand | CasedataFormModel) => boolean = 
 };
 
 export const emptyErrand: Partial<IErrand> = {
-  caseType: '',
+  caseType: 'PARATRANSIT_NOTIFICATION',
   channel: Channels.ESERVICE_KATLA,
   description: '',
-  municipalityId: '2281',
+  municipalityId: process.env.NEXT_PUBLIC_MUNICIPALITY_ID,
   phase: ErrandPhase.aktualisering,
   priority: Priority.MEDIUM,
   status: { statusType: ErrandStatus.ArendeInkommit },

@@ -2,7 +2,6 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import { Button, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/react';
@@ -10,7 +9,7 @@ import { useContext } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 import { scrollToFirstError } from './errand-buttons-utils';
 
-export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
+export const SaveErrandButton: React.FC<{}> = () => {
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
@@ -30,15 +29,12 @@ export const SaveErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = 
 
     const data = getValues() as Partial<IErrand> & { attachments: UploadFile[] };
 
-    data.stakeholders = owners;
     if (data.status) {
       delete data.status;
       delete data.statuses;
     } else {
       data.status = { statusType: ErrandStatus.Utkast };
     }
-    delete data.errandNumber;
-    delete data.channel;
 
     console.log('Submitting errand data:', data);
 

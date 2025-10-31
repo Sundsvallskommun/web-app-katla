@@ -1,8 +1,6 @@
 'use client';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
-import { ErrandStatus } from '@interfaces/errand-status';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import { Button, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/react';
@@ -11,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 
-export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> = ({ owners }) => {
+export const DraftErrandButton: React.FC<{ }> = ({ }) => {
   const toastMessage = useSnackbar();
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
@@ -23,15 +21,6 @@ export const DraftErrandButton: React.FC<{ owners: CasedataOwnerOrContact[] }> =
     const data = getValues() as Partial<IErrand> & { attachments: UploadFile[] };
 
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
-
-    data.stakeholders = owners;
-    if (data.status) {
-      delete data.status;
-    } else {
-      data.status = { statusType: ErrandStatus.Utkast };
-    }
-    delete data.errandNumber;
-    delete data.channel;
 
     try {
       const res = await saveErrand(data, municipalityId);

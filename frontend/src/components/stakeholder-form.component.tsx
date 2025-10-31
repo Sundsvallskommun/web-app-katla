@@ -1,30 +1,19 @@
-import { yupResolver } from '@hookform/resolvers/yup';
 import { Role, RoleDisplayNames } from '@interfaces/role';
-import { Button, FormLabel, Input, Modal, Select } from '@sk-web-gui/react';
+import { CasedataOwnerOrContact, emptyCasedataOwnerOrContact } from '@interfaces/stakeholder';
+import { Button, FormControl, FormErrorMessage, FormLabel, Input, Modal, Select } from '@sk-web-gui/react';
 import { stakeholderSchema } from '@utils/validation-schema';
 import { useEffect } from 'react';
 import { Resolver, useForm } from 'react-hook-form';
-
-export type StakeholderFormValues = {
-  ssn?: string;
-  firstName: string;
-  lastName: string;
-  newEmail?: string;
-  newPhoneNumber?: string;
-  street: string;
-  careof?: string;
-  zip?: string;
-  city: string;
-  roles?: Role[];
-};
+import { yupResolver } from '@hookform/resolvers/yup';
 
 export const StakeholderFormModal: React.FC<{
-  onSubmit: (values: StakeholderFormValues) => void;
+  onSubmit: (values: CasedataOwnerOrContact) => void;
   onClose: () => void;
   show: boolean;
   roles: Role[];
-  initialValues?: StakeholderFormValues;
-}> = ({ onSubmit, onClose, show, roles, initialValues }) => {
+  initialValues?: Partial<CasedataOwnerOrContact>;
+  edit?: boolean;
+}> = ({ onSubmit, onClose, show, roles, initialValues, edit }) => {
   const {
     register,
     handleSubmit,
@@ -32,11 +21,10 @@ export const StakeholderFormModal: React.FC<{
     setValue,
     watch,
     reset,
-  } = useForm<StakeholderFormValues>({
+  } = useForm<CasedataOwnerOrContact>({
     mode: 'onSubmit',
-    resolver: yupResolver(stakeholderSchema) as Resolver<StakeholderFormValues>,
+    resolver: yupResolver(stakeholderSchema) as unknown as Resolver<CasedataOwnerOrContact>,
     defaultValues: initialValues ?? {
-      ssn: '',
       firstName: '',
       lastName: '',
       newEmail: '',
@@ -45,7 +33,7 @@ export const StakeholderFormModal: React.FC<{
       careof: '',
       zip: '',
       city: '',
-      roles: roles.length === 1 ? [roles[0]] : [],
+      roles: [roles[0]],
     },
   });
 
@@ -64,92 +52,114 @@ export const StakeholderFormModal: React.FC<{
       className="w-full max-w-[48rem]"
       show={show}
       onClose={onClose}
-      label="Lägg till person manuellt"
+      label={
+        edit && selectedRole ?
+          `Redigera ${RoleDisplayNames[selectedRole].toLocaleLowerCase()}`
+        : 'Lägg till person manuellt'
+      }
     >
       <Modal.Content>
-        <FormLabel>Personnummer*</FormLabel>
-        <Input {...register('ssn')} name="ssn" invalid={!!errors.ssn} readOnly={true} />
-        {errors.ssn && <div className="text-error text-md mt-1">{errors.ssn.message}</div>}
-
+        <FormControl>
+          <FormLabel>Personnummer</FormLabel>
+          <Input {...register('personalNumber')} invalid={!!errors} readOnly={true} />
+        </FormControl>
         <div className="flex gap-8">
           <div className="flex flex-col">
-            <FormLabel>Förnamn*</FormLabel>
-            <Input {...register('firstName')} name="firstName" className="w-full" invalid={!!errors.firstName} />
-            {errors.firstName && <div className="text-error text-md mt-1">{errors.firstName.message}</div>}
+            <FormControl required>
+              <FormLabel>Förnamn</FormLabel>
+              <Input {...register('firstName')} className="w-full" invalid={!!errors.firstName} />
+              {errors.firstName && (
+                <FormErrorMessage className="text-error">{errors.firstName.message}</FormErrorMessage>
+              )}
+            </FormControl>
           </div>
           <div className="flex flex-col">
-            <FormLabel>Efternamn*</FormLabel>
-            <Input {...register('lastName')} name="lastName" className="w-full" invalid={!!errors.lastName} />
-            {errors.lastName && <div className="text-error text-md mt-1">{errors.lastName.message}</div>}
+            <FormControl required>
+              <FormLabel>Efternamn</FormLabel>
+              <Input {...register('lastName')} className="w-full" invalid={!!errors.lastName} />
+              {errors.lastName && <FormErrorMessage className="text-error">{errors.lastName.message}</FormErrorMessage>}
+            </FormControl>
           </div>
         </div>
 
         <div className="flex gap-8">
           <div className="flex flex-col">
-            <FormLabel>E-postadress</FormLabel>
-            <Input {...register('newEmail')} name="newEmail" className="w-full" invalid={!!errors.newEmail} />
-            {errors.newEmail && <div className="text-error text-md mt-1">{errors.newEmail.message}</div>}
+            <FormControl>
+              <FormLabel>E-postadress</FormLabel>
+              <Input {...register('newEmail')} className="w-full" invalid={!!errors.newEmail} />
+              {errors.newEmail && <FormErrorMessage className="text-error">{errors.newEmail.message}</FormErrorMessage>}
+            </FormControl>
           </div>
           <div className="flex flex-col">
-            <FormLabel>Telefonnummer</FormLabel>
-            <Input
-              {...register('newPhoneNumber')}
-              name="newPhoneNumber"
-              className="w-full"
-              invalid={!!errors.newPhoneNumber}
-            />
-            {errors.newPhoneNumber && <div className="text-error text-md mt-1">{errors.newPhoneNumber.message}</div>}
-          </div>
-        </div>
-
-        <div className="flex gap-8">
-          <div className="flex flex-col">
-            <FormLabel>Adress{isOwner ? '*' : ''}</FormLabel>
-            <Input {...register('street')} name="street" className="w-full" invalid={!!errors.street} />
-            {errors.street && <div className="text-error text-md mt-1">{errors.street.message}</div>}
-          </div>
-          <div className="flex flex-col">
-            <FormLabel>C/o adress</FormLabel>
-            <Input {...register('careof')} name="careof" className="w-full" />
+            <FormControl>
+              <FormLabel>Telefonnummer</FormLabel>
+              <Input {...register('newPhoneNumber')} className="w-full" invalid={!!errors.newPhoneNumber} />
+              {errors.newPhoneNumber && (
+                <FormErrorMessage className="text-error">{errors.newPhoneNumber.message}</FormErrorMessage>
+              )}
+            </FormControl>
           </div>
         </div>
 
         <div className="flex gap-8">
           <div className="flex flex-col">
-            <FormLabel>Postnummer{isOwner ? '*' : ''}</FormLabel>
-            <Input {...register('zip')} name="zip" className="w-full" invalid={!!errors.zip} />
-            {errors.zip && <div className="text-error text-md mt-1">{errors.zip.message}</div>}
+            <FormControl readOnly={isOwner} required={isOwner}>
+              <FormLabel>Adress</FormLabel>
+              <Input {...register('street')} className="w-full" invalid={!!errors.street} />
+              {errors.street && <FormErrorMessage className="text-error">{errors.street?.message}</FormErrorMessage>}
+            </FormControl>
           </div>
           <div className="flex flex-col">
-            <FormLabel>Ort{isOwner ? '*' : ''}</FormLabel>
-            <Input {...register('city')} name="city" className="w-full" invalid={!!errors.city} />
-            {errors.city && <div className="text-error text-md mt-1">{errors.city.message}</div>}
+            <FormControl>
+              <FormLabel>C/o adress</FormLabel>
+              <Input {...register('careof')} name="careof" className="w-full" />
+            </FormControl>
+          </div>
+        </div>
+
+        <div className="flex gap-8">
+          <div className="flex flex-col">
+            <FormControl readOnly={isOwner} required={isOwner} invalid={!!errors.zip}>
+              <FormLabel>Postnummer</FormLabel>
+              <Input {...register('zip')} className="w-full" />
+              {errors.zip && <FormErrorMessage className="text-error">{errors.zip?.message}</FormErrorMessage>}
+            </FormControl>
+          </div>
+          <div className="flex flex-col">
+            <FormControl readOnly={isOwner} required={isOwner}>
+              <FormLabel>Ort</FormLabel>
+              <Input {...register('city')} className="w-full" invalid={!!errors.city} />
+              {errors.city && <FormErrorMessage className="text-error">{errors.city?.message}</FormErrorMessage>}
+            </FormControl>
           </div>
         </div>
 
         <div className="flex flex-col">
-          <FormLabel>Roll*</FormLabel>
-          <Select
-            data-cy="modal-stakeholder-role-select"
-            className="w-full"
-            invalid={!!errors.roles}
-            value={watch('roles')?.[0] ?? ''}
-            onChange={(e) => {
-              const value = e.target.value as Role;
-              setValue('roles', value ? [value] : [], {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-            }}
-          >
-            {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
-            {roles.map((role) => (
-              <Select.Option key={role} value={role}>
-                {RoleDisplayNames[role]}
-              </Select.Option>
-            ))}
-          </Select>
-          {errors.roles && <div className="text-error text-md mt-1">{errors.roles.message}</div>}
+          <FormControl required>
+            <FormLabel>Roll</FormLabel>
+            <Select
+              data-cy="modal-stakeholder-role-select"
+              className="w-full"
+              invalid={!!errors.roles}
+              value={watch('roles')?.[0] ?? ''}
+              onChange={(e) => {
+                const value = e.target.value as Role;
+                setValue('roles', value ? [value] : [], {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                setValue('newRole', value);
+              }}
+            >
+              {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
+              {roles.map((role) => (
+                <Select.Option key={role} value={role}>
+                  {RoleDisplayNames[role]}
+                </Select.Option>
+              ))}
+            </Select>
+            {errors.roles && <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>}
+          </FormControl>
         </div>
       </Modal.Content>
 
@@ -157,8 +167,15 @@ export const StakeholderFormModal: React.FC<{
         <Button data-cy="modal-cancel-person-button" variant="secondary" onClick={onClose}>
           Avbryt
         </Button>
-        <Button data-cy="modal-add-person-button" variant="primary" onClick={handleSubmit(onSubmit)}>
-          Lägg till
+        <Button
+          data-cy="modal-add-person-button"
+          variant="primary"
+          onClick={handleSubmit((values) => {
+            onSubmit(values);
+            reset(emptyCasedataOwnerOrContact)
+          })}
+        >
+          {edit ? 'Ändra uppgifter' : 'Lägg till'}
         </Button>
       </Modal.Footer>
     </Modal>

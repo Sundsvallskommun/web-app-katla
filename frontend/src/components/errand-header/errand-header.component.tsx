@@ -23,7 +23,7 @@ export const ErrandHeader: React.FC = () => {
       <Divider orientation="vertical" className="mx-[2.4rem]" />
       {!isMaxMediumDevice && (
         <>
-          <StatusLabelComponent status={normalizeStatus(errand?.status?.statusType)} />
+          {errand.id && <StatusLabelComponent status={normalizeStatus(errand?.status?.statusType)} />}
           <strong className="text-large ml-8 font-bold">{!errand.errandNumber ? 'Nytt ärende' : 'Ärende:'}</strong>
           {errand.errandNumber && <span className="text-large ml-4">{` ${errand.errandNumber}`}</span>}
         </>

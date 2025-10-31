@@ -54,7 +54,7 @@ const corsWhitelist = ORIGIN.split(',');
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
 // NOTE: memory uses ms while file uses seconds
-const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { sessionTTL, path: './data/sessions' });
+const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { ttl: sessionTTL, path: './data/sessions' });
 
 const apiService = new ApiService();
 
@@ -78,7 +78,7 @@ const samlStrategy = new Strategy(
     issuer: SAML_ISSUER,
     wantAssertionsSigned: false,
     wantAuthnResponseSigned: false,
-    acceptedClockSkewMs: 1000,
+    acceptedClockSkewMs: -1,
     audience: false,
     logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
   },
@@ -191,6 +191,9 @@ class App {
         resave: false,
         saveUninitialized: false,
         store: sessionStore,
+        cookie: {
+          path: BASE_URL_PREFIX,
+        },
       }),
     );
 

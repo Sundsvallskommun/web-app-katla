@@ -1,80 +1,60 @@
 import { DisplayCard } from '@components/display-card.component';
 import { AppContext } from '@contexts/app-context-interface';
+import { IErrand } from '@interfaces/errand';
 import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { searchADUser } from '@services/adress-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Disclosure, FormControl, isArray } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { usePathname } from 'next/navigation';
 import { useContext, useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import { SectionCompletion } from './sectionCompletion.component';
 
-export const HealthCareStaff: React.FC<{
-  staff?: CasedataOwnerOrContact[];
-  setStaff: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-}> = ({ staff, setStaff }) => {
+export const HealthCareStaff: React.FC<{}> = ({}) => {
   const [doneMark, setDoneMark] = useState(false);
   const { user, errand } = useContext(AppContext);
-  const pathname = usePathname();
-  const isOnRegisterPage = pathname?.includes('/registrera');
-  const hasStaff = Array.isArray(staff) && staff.length > 0;
-  const { control, getValues, setValue } = useForm<CasedataOwnerOrContact>({
-    mode: 'onChange',
-    defaultValues: staff?.[0] ?? {
-      firstName: '',
-      lastName: '',
-      street: '',
-      city: '',
-      careof: '',
-      zip: '',
-      adAccount: '',
-      emails: [],
-      phoneNumbers: [],
-      personalNumber: '',
-    },
-  });
 
-  const { append: appendPhonenumber } = useFieldArray({
+  const { control } = useFormContext<IErrand>();
+
+  const { fields, append } = useFieldArray({
     control,
-    name: `phoneNumbers`,
+    name: 'stakeholders',
   });
 
-  const { append: appendEmail } = useFieldArray({ control, name: 'emails' });
+  const reporterStakeholder = fields.filter((s) => s.roles?.includes(Role.REPORTER));
 
   useEffect(() => {
-    // Endast hämta från AD om vi är på registrera och ingen vårdpersonal finns
-    if (!user?.username || !isOnRegisterPage || (staff && staff.length > 0)) return;
-
-    searchADUser(user.username)
-      .then((res) => {
-        if (!isArray(res)) {
-          setValue(`firstName`, res.firstName, { shouldDirty: true });
-          setValue(`lastName`, res.lastName, { shouldDirty: true });
-          setValue(`street`, res.street, { shouldDirty: true });
-          setValue(`careof`, res.careof, { shouldDirty: true });
-          setValue(`zip`, res.zip, { shouldDirty: true });
-          setValue(`city`, res.city, { shouldDirty: true });
-          setValue(`personId`, res.personId, { shouldDirty: true });
-          setValue(`roles`, [Role.REPORTER], { shouldDirty: true });
-          setValue(`newRole`, Role.REPORTER, { shouldDirty: true });
-          setValue(`stakeholderType`, 'PERSON', { shouldDirty: true });
-          if (res.phone) appendPhonenumber({ value: res.phone });
-          if (res.workPhone) appendPhonenumber({ value: res.workPhone });
-          if (res.email) appendEmail({ value: res.email });
-          if (res.loginName) setValue('adAccount', res.loginName);
-
-          const formData = getValues();
-          setStaff([formData]);
-        }
-      })
-      .catch(() => {
-        console.error('Kunde inte hämta vårdpersonal från AD');
-      });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, staff, isOnRegisterPage]);
+    if (reporterStakeholder.length === 0 && user?.username) {
+      searchADUser(user.username)
+        .then((res) => {
+          if (!isArray(res)) {
+            const newReporter: CasedataOwnerOrContact = {
+              firstName: res.firstName ?? '',
+              lastName: res.lastName ?? '',
+              street: res.street ?? '',
+              city: res.city ?? '',
+              careof: res.careof ?? '',
+              zip: res.zip ?? '',
+              adAccount: res.loginName ?? '',
+              personalNumber: res.personId ?? '',
+              emails: res.email ? [{ value: res.email }] : [],
+              phoneNumbers: res.phone ? [{ value: res.phone }] : [],
+              newEmail: res.email,
+              newPhoneNumber: res.phone,
+              roles: [Role.REPORTER],
+              stakeholderType: 'PERSON',
+              id: '',
+              newRole: Role.REPORTER,
+            };
+            append(newReporter);
+          }
+        })
+        .catch(() => {
+          console.error('Kunde inte hämta vårdpersonal från AD');
+        });
+    }
+  }, [reporterStakeholder.length, user?.username, append]);
 
   return (
     <FormControl className="w-full" disabled={isErrandReadOnly(errand)}>
@@ -89,23 +69,10 @@ export const HealthCareStaff: React.FC<{
       >
         <div className="w-full">
           <p>Vårdpersonal är den person som initierat ärendet och vår primära kontakt när ärendet handläggs.</p>
-          {hasStaff &&
-            staff!.map((person, index) => (
-              <DisplayCard
-                key={index}
-                isEditable={false}
-                userName={person.adAccount}
-                personalNumber={person.personalNumber}
-                street={person.street}
-                city={person.city}
-                newEmail={person.newEmail || person.emails?.[0]?.value}
-                newPhoneNumber={person.newPhoneNumber || person.phoneNumbers?.[0]?.value}
-                roles={person.roles}
-                availableRoles={[Role.REPORTER]}
-                firstName={person.firstName}
-                lastName={person.lastName}
-              />
-            ))}
+
+          {reporterStakeholder?.map((person, index) => (
+            <DisplayCard key={index} person={person} availableRoles={[Role.REPORTER]} />
+          ))}
         </div>
         <SectionCompletion
           checked={doneMark}

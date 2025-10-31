@@ -51,20 +51,36 @@ export interface CasedataOwnerOrContact {
   organizationName?: string;
   organizationNumber?: string;
   relation?: string;
-  firstName: string;
-  lastName: string;
-  street: string;
-  careof: string;
-  zip: string;
-  city: string;
+  firstName?: string;
+  lastName?: string;
+  street?: string;
+  careof?: string;
+  zip?: string;
+  city?: string;
   newPhoneNumber?: string;
-  phoneNumbers: {
+  phoneNumbers?: {
     value: string;
   }[];
-  newEmail: string;
+  newEmail?: string;
   emails: {
     value: string;
   }[];
   adAccount?: string;
   extraInformation?: string;
+  municipality?: string;
+}
+
+export const emptyCasedataOwnerOrContact: CasedataOwnerOrContact = {
+  id: '',
+  stakeholderType: 'PERSON',
+  roles: [],
+  newRole: Role.APPLICANT,
+  firstName: '',
+  lastName: '',
+  street: '',
+  careof: '',
+  zip: '',
+  city: '',
+  phoneNumbers: [],
+  emails: []
 }
