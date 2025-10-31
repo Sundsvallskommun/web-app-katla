@@ -195,7 +195,7 @@ const Arende: React.FC = () => {
             ${isMaxMediumDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
           `}
                   >
-                    {current === 0 && (
+                    <div style={{ display: current === 0 ? 'block' : 'none' }}>
                       <ErrandReportedTab
                         healthCareStaff={healthCareStaff}
                         setHealthCareStaff={setHealthCareStaff}
@@ -204,7 +204,7 @@ const Arende: React.FC = () => {
                         otherParties={otherParties}
                         setOtherParties={setOtherParties}
                       />
-                    )}
+                    </div>
 
                     {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
                     {current === 2 && <FileUploadComponent />}

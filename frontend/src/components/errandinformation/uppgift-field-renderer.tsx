@@ -225,10 +225,8 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
               const currentValue =
                 isMultiSelect ?
                   Array.isArray(controllerField.value) ? controllerField.value
-                  : Array.isArray(field.value) ? field.value
                   : []
                 : typeof controllerField.value === 'string' ? controllerField.value
-                : typeof field.value === 'string' ? field.value
                 : '';
 
               const extractValue = (event: unknown) => {
