@@ -99,7 +99,6 @@ export interface IErrand {
   attachments: Attachment[];
   messageIds: { messageId: string; adAccount: string }[];
   extraParameters: ExtraParameter[];
-  extraParameterValues?: { [key: string]: string | string[] };
   suspension?: {
     suspendedFrom?: string;
     suspendedTo?: string;

@@ -8,8 +8,9 @@ import { Button, FormControl, FormLabel, Input, Select } from '@sk-web-gui/react
 import { isErrandReadOnly } from '@utils/errand-utils';
 import { emailSchema, phoneSchema, ssnSchema } from '@utils/validation-schema';
 import React, { useContext, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormContext } from 'react-hook-form';
 import * as yup from 'yup';
+import { getApplicantError } from './errand-buttons/errand-buttons-utils';
 import { DisplayCard } from './display-card.component';
 import { StakeholderFormModal } from './stakeholder-form.component';
 
@@ -18,6 +19,8 @@ export const StakeholderList: React.FC<{
   setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
   roles: Role[];
 }> = ({ owners, setOwners, roles }) => {
+  const { formState } = useFormContext();
+  const applicantValidationError = getApplicantError(formState.errors as Record<string, unknown>);
   const [fetchedSsn, setFetchedSsn] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(false);
@@ -55,6 +58,7 @@ export const StakeholderList: React.FC<{
   const zip = watch('zip');
   const city = watch('city');
   const isApplicantList = roles.includes(Role.APPLICANT);
+  const displayApplicantError = isApplicantList ? applicantValidationError : null;
   const ownerAlreadyExists = owners?.length > 0;
   const municipalityMismatch = isApplicantList && !!outsideMunicipalityWarning;
   const manualEntryAllowed = !isApplicantList;
@@ -256,7 +260,10 @@ export const StakeholderList: React.FC<{
   return (
     <FormControl className="w-full">
       {!isErrandReadOnly(errand) ?
-        <FormLabel>Sök på personnummer</FormLabel>
+        <FormLabel>
+          Sök på personnummer
+          {isApplicantList && <span className="text-error ml-4">*</span>}
+        </FormLabel>
       : null}
       {!isErrandReadOnly(errand) ?
         <div className="w-full max-w-[52.5rem]">
@@ -270,7 +277,7 @@ export const StakeholderList: React.FC<{
               className="w-full"
               {...register('personalNumber')}
               readOnly={fetchedSsn}
-              invalid={!!errors.personalNumber}
+              invalid={!!errors.personalNumber || !!displayApplicantError}
             />
             <Input.RightAddin icon className="flex gap-2">
               <Button
@@ -300,6 +307,7 @@ export const StakeholderList: React.FC<{
           </Input.Group>
 
           {errors.personalNumber && <div className="text-error text-md mt-1">{errors.personalNumber.message}</div>}
+          {displayApplicantError && <div className="text-error text-md mt-1">{displayApplicantError}</div>}
         </div>
       : null}
 

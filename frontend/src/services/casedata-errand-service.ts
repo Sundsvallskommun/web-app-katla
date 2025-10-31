@@ -644,6 +644,11 @@ export const phaseChangeInProgress = (errand: IErrand) => {
   if (!errand?.id) {
     return false;
   }
+
+  if (errand.status?.statusType === ErrandStatus.Utkast) {
+    return false;
+  }
+
   if (errand.extraParameters.find((p) => p.key === 'process.phaseAction')?.values?.[0] === 'CANCEL') {
     return (errand.extraParameters?.find((p) => p.key === 'process.phaseStatus')?.values?.[0] ?? '') !== 'CANCELED';
   }
