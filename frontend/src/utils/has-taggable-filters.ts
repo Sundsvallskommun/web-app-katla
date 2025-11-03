@@ -1,7 +1,6 @@
 import { CaseDataFilter } from '../components/filtering/errand-filter';
 import { useFormContext } from 'react-hook-form';
 import {
-  newStatuses,
   ongoingStatuses,
   assignedStatuses,
   draftStatuses,
@@ -14,7 +13,6 @@ export const useHasTags = () => {
   const filter = getValues();
 
   const nonTaggableStatusKeys: string[] = [
-    ...newStatuses,
     ...ongoingStatuses,
     ...assignedStatuses,
     ...draftStatuses,

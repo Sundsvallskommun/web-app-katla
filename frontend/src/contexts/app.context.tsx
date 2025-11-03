@@ -12,12 +12,9 @@ import { MessageNode } from '@interfaces/message';
 
 export function AppWrapper({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [subPage, setSubPage] = useState('');
   const [user, setUser] = useState<User>(emptyUser);
   const [avatar, setAvatar] = useState<string>('');
   const [errands, setErrands] = useState<ErrandsData>(emptyErrandList);
-  const [newErrands, setNewErrands] = useState<ErrandsData>(emptyErrandList);
   const [ongoingErrands, setOngoingErrands] = useState<ErrandsData>(emptyErrandList);
   const [suspendedErrands, setSuspendedErrands] = useState<ErrandsData>(emptyErrandList);
   const [assignedErrands, setAssignedErrands] = useState<ErrandsData>(emptyErrandList);
@@ -38,12 +35,6 @@ export function AppWrapper({ children }: { children: ReactNode }) {
       value={{
         isLoading,
         setIsLoading: (isLoading: boolean) => setIsLoading(isLoading),
-
-        subPage,
-        setSubPage: (subPage: string) => setSubPage(subPage),
-
-        isLoggedIn,
-        setIsLoggedIn: (isLoggedIn: boolean) => setIsLoggedIn(isLoggedIn),
 
         user,
         setUser: (user: User) => setUser(user),
@@ -69,9 +60,6 @@ export function AppWrapper({ children }: { children: ReactNode }) {
 
         errands,
         setErrands: (errands: ErrandsData) => setErrands(errands),
-
-        newErrands,
-        setNewErrands: (errands: ErrandsData) => setNewErrands(errands),
 
         ongoingErrands,
         setOngoingErrands: (errands: ErrandsData) => setOngoingErrands(errands),
