@@ -138,7 +138,7 @@ export const emptyErrand: Partial<IErrand> = {
   municipalityId: process.env.NEXT_PUBLIC_MUNICIPALITY_ID,
   phase: ErrandPhase.aktualisering,
   priority: Priority.MEDIUM,
-  status: { statusType: ErrandStatus.ArendeInkommit },
+  status: { statusType: ErrandStatus.Utkast },
 };
 export const mapErrandToIErrand: (e: ApiErrand, municipalityId: string) => IErrand | undefined = (
   e,
