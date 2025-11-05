@@ -11,7 +11,6 @@ import { ErrandStatus } from '@interfaces/errand-status';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
-import { EXTRAPARAMETER_SEPARATOR } from '@services/casedata-extra-parameters-service';
 import { getMe } from '@services/user-service';
 import { Divider, MenuBar, useThemeQueries } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
@@ -51,20 +50,6 @@ const Arende: React.FC = () => {
         if (res.errand) {
           setErrand(res.errand);
           method.reset(res.errand);
-
-          res.errand.extraParameters?.forEach((param) => {
-            const key = param.key.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
-            const values = param.values;
-
-            if (!Array.isArray(values)) return;
-
-            const valueToSet =
-              values.length > 1 ? values
-              : values.length === 1 ? values[0]
-              : '';
-
-            method.setValue(`extraParameterValues.${key}`, valueToSet);
-          });
 
           if (res.errand.attachments) {
             const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
@@ -157,7 +142,9 @@ const Arende: React.FC = () => {
             ${isMaxMediumDevice ? 'p-[1.6rem]' : 'pt-22 pl-5'}
           `}
                   >
-                    {current === 0 && <ErrandReportedTab />}
+                    <div style={{ display: current === 0 ? 'block' : 'none' }}>
+                      <ErrandReportedTab />
+                    </div>
 
                     {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
                     {current === 2 && <FileUploadComponent />}

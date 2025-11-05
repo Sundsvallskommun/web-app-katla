@@ -36,8 +36,6 @@ export const SaveErrandButton: React.FC<{}> = () => {
       data.status = { statusType: ErrandStatus.Utkast };
     }
 
-    console.log('Submitting errand data:', data);
-
     const newAttachments = (data.attachments || [])
       .filter((attachment: UploadFile) => !attachment.id)
       .map((attachment: UploadFile) => ({

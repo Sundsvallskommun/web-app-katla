@@ -45,10 +45,20 @@ export const CancelRegistrationButton: React.FC = () => {
             </div>
           </Dialog.Content>
           <Dialog.Buttons className="flex justify-center gap-7">
-            <Button className="w-[12.8rem]" variant="secondary" onClick={openHandler}>
+            <Button
+              data-cy="no-cancel-registration-button"
+              className="w-[12.8rem]"
+              variant="secondary"
+              onClick={openHandler}
+            >
               Nej
             </Button>
-            <Button className="w-[12.8rem]" variant="primary" onClick={handleClick}>
+            <Button
+              data-cy="yes-cancel-registration-button"
+              className="w-[12.8rem]"
+              variant="primary"
+              onClick={handleClick}
+            >
               Ja
             </Button>
           </Dialog.Buttons>

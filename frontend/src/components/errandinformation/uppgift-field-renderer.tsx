@@ -148,6 +148,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         <div className={formFieldClassName}>
           <Input
             className="w-full"
+            data-cy={`uppgift-field-${field.field}`}
             {...register(name, validationRules)}
             placeholder={field.formField.options?.placeholder}
           />
@@ -160,6 +161,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         <div className={formFieldClassName}>
           <Textarea
             className="w-full"
+            data-cy={`uppgift-field-${field.field}`}
             {...register(name, validationRules)}
             rows={3}
             placeholder={field.formField.options?.placeholder}
@@ -173,6 +175,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         <div className={formFieldClassName}>
           <Select
             className="w-full"
+            data-cy={`uppgift-field-${field.field}`}
             defaultValue={typeof field.value === 'string' ? field.value : ''}
             {...register(name, {
               ...validationRules,
@@ -225,10 +228,8 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
               const currentValue =
                 isMultiSelect ?
                   Array.isArray(controllerField.value) ? controllerField.value
-                  : Array.isArray(field.value) ? field.value
                   : []
                 : typeof controllerField.value === 'string' ? controllerField.value
-                : typeof field.value === 'string' ? field.value
                 : '';
 
               const extractValue = (event: unknown) => {
@@ -273,6 +274,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
               return (
                 <Combobox
                   className="w-full"
+                  data-cy={`uppgift-field-${field.field}`}
                   multiple={isMultiSelect}
                   value={currentValue}
                   onChange={(event) => handleValueChange(extractValue(event))}
@@ -304,7 +306,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
       {field.formField.type === 'radio' && (
         <div className={formFieldClassName}>
-          <RadioButton.Group inline={!isMaxMediumDevice && field.formField.options.length <= 3}>
+          <RadioButton.Group inline={!isMaxMediumDevice && field.formField.options.length <= 3} data-cy={`uppgift-field-${field.field}`}>
             {field.formField.options.map((o, i) => (
               <RadioButton
                 key={`${o.value}-${i}`}
@@ -351,6 +353,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
               return (
                 <Checkbox.Group
+                  data-cy={`uppgift-field-${field.field}`}
                   value={controllerField.value || []}
                   onChange={(val) => {
                     controllerField.onChange(val);
@@ -376,6 +379,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         <div className={formFieldClassName}>
           <DatePicker
             type="date"
+            data-cy={`uppgift-field-${field.field}`}
             value={watch(name) ?? ''}
             onChange={(e) => {
               const selectedDate = e.target?.value ?? '';

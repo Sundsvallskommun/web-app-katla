@@ -11,7 +11,6 @@ import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { useFieldArray, useFormContext, UseFormReturn } from 'react-hook-form';
-import { scrollToFirstError } from './errand-buttons-utils';
 
 export const RegisterErrandButton: React.FC<{ }> = ( ) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -42,20 +41,11 @@ export const RegisterErrandButton: React.FC<{ }> = ( ) => {
       console.warn('Cannot register errand, stakeholder missing partyId');
       return;
     }
-
     setIsOpen(true);
   };
 
   const onSubmit = async () => {
     setIsLoading(true);
-
-    const isValid = await trigger();
-    if (!isValid) {
-      setIsLoading(false);
-      closeDialog();
-      scrollToFirstError(formState.errors);
-      return;
-    }
 
     const data = getValues() as IErrand & { attachments: UploadFile[] };
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
