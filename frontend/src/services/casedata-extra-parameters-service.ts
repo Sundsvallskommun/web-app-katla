@@ -12,7 +12,7 @@ import { apiService } from './api-service';
 
 export const EXTRAPARAMETER_SEPARATOR = '@';
 
-type OptionBase = {
+export type OptionBase = {
   label: string;
   value: string;
   name?: string;
@@ -32,6 +32,7 @@ export interface UppgiftField {
     | { type: 'radioPlus'; options: OptionBase[]; ownOption: string }
     | { type: 'checkbox'; options: OptionBase[] };
   section: string;
+  dependsOnLogic?: 'AND' | 'OR';
   dependsOn?: {
     field: string;
     value: string | string[];
