@@ -54,9 +54,7 @@ export const ongoingCaseDataPTErrandLabels = [
   { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Prioritet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Inkom via', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-];
-
-export const newStatuses = [ErrandStatus.ArendeInkommit];
+]; 
 
 export const ongoingStatuses = [
   ErrandStatus.ArendeInkommit,
@@ -83,7 +81,7 @@ export const closedStatuses = [
 
 export const getStatusLabel = (statuses: ErrandStatus[]) => {
   if (statuses.length > 0) {
-    if (statuses.some((s) => newStatuses.includes(s))) {
+    if (statuses.some((s) => ongoingStatuses.includes(s))) {
       return 'Öppna ärenden';
     } else if (statuses.some((s) => draftStatuses.includes(s))) {
       return 'Utkast';
@@ -319,12 +317,10 @@ export const useErrands = (
   const {
     setIsLoading,
     setErrands,
-    setNewErrands,
     setOngoingErrands,
     setDraftErrands,
     setClosedErrands,
     errands,
-    newErrands,
     ongoingErrands,
     draftErrands,
     closedErrands,
@@ -358,24 +354,6 @@ export const useErrands = (
         });
 
       const fetchPromises = [
-        getErrands(
-          municipalityId,
-          page,
-          1,
-          { ...filter, status: newStatuses.map(findStatusKeyForStatusLabel).join(',') },
-          sort
-        )
-          .then((res) => {
-            setNewErrands(res);
-          })
-          .catch(() => {
-            toastMessage({
-              position: 'bottom',
-              closeable: false,
-              message: 'Nya ärenden kunde inte hämtas',
-              status: 'error',
-            });
-          }),
 
         getErrands(
           municipalityId,
@@ -448,12 +426,10 @@ export const useErrands = (
     //eslint-disable-next-line
     [
       setErrands,
-      setNewErrands,
       setOngoingErrands,
       setDraftErrands,
       setClosedErrands,
       errands,
-      newErrands,
       ongoingErrands,
       draftErrands,
       closedErrands,

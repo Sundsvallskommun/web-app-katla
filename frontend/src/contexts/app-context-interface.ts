@@ -13,12 +13,6 @@ export interface AppContextInterface {
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
 
-  subPage: string;
-  setSubPage: (subPage: string) => void;
-
-  isLoggedIn: boolean;
-  setIsLoggedIn: (isLoggedIn: boolean) => void;
-
   user: User;
   setUser: (user: User) => void;
 
@@ -45,9 +39,6 @@ export interface AppContextInterface {
 
   errands: ErrandsData;
   setErrands: (errands: ErrandsData) => void;
-
-  newErrands: ErrandsData;
-  setNewErrands: (errands: ErrandsData) => void;
 
   ongoingErrands: ErrandsData;
   setOngoingErrands: (errands: ErrandsData) => void;
@@ -78,12 +69,6 @@ export const AppContext = createContext<AppContextInterface>({
   isLoading: false,
   setIsLoading: () => {},
 
-  subPage: '',
-  setSubPage: () => {},
-
-  isLoggedIn: false,
-  setIsLoggedIn: () => {},
-
   user: emptyUser,
   setUser: () => {},
 
@@ -110,9 +95,6 @@ export const AppContext = createContext<AppContextInterface>({
 
   errands: emptyErrandList,
   setErrands: () => {},
-
-  newErrands: emptyErrandList,
-  setNewErrands: () => {},
 
   ongoingErrands: emptyErrandList,
   setOngoingErrands: () => {},

@@ -1,15 +1,15 @@
 import { AppContext } from '@contexts/app-context-interface';
+import { Channels } from '@interfaces/channels';
 import { ErrandStatus } from '@interfaces/errand-status';
+import { Priority } from '@interfaces/priority';
 import {
   assignedStatuses,
   closedStatuses,
   draftStatuses,
   findCaseLabelForCaseType,
   findStatusKeyForStatusLabel,
-  newStatuses,
+  ongoingStatuses
 } from '@services/casedata-errand-service';
-import { Channels } from '@interfaces/channels';
-import { Priority } from '@interfaces/priority';
 import { Chip, useThemeQueries } from '@sk-web-gui/react';
 import { useHasTags } from '@utils/has-taggable-filters';
 import dayjs from 'dayjs';
@@ -90,7 +90,7 @@ export const CasedataFilterTags: React.FC<{ mobileOverviewPage?: boolean }> = (m
       {statuses
         .filter(
           (status) =>
-            ![...newStatuses, ...closedStatuses, ...assignedStatuses, ...draftStatuses]
+            ![...ongoingStatuses, ...closedStatuses, ...assignedStatuses, ...draftStatuses]
               .map(findStatusKeyForStatusLabel)
               .includes(status)
         )

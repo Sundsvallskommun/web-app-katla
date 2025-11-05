@@ -36,7 +36,6 @@ export const STATUS_LABEL_SV: Record<ErrandStatus, string> = {
 
 export const STATUS_ALIASES: Record<string, ErrandStatus> = {
   'Ärende inkommit': ErrandStatus.ArendeInkommit,
-  'Ärende inskickat': ErrandStatus.ArendeInkommit,
   'Under granskning': ErrandStatus.UnderGranskning,
   'Väntar på komplettering': ErrandStatus.VantarPaKomplettering,
   'Internt återkoppling': ErrandStatus.InterntAterkoppling,

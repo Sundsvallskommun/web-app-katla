@@ -68,8 +68,19 @@ export const useOngoingCaseDataErrands = () => {
 
   const errandsData = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
 
+  useEffect(() => {
+    if (errandsData) {
+      setTableValue('page', errandsData.page);
+      setTableValue('size', errandsData.size);
+      setTableValue('totalPages', errandsData.totalPages);
+      setTableValue('totalElements', errandsData.totalElements);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errandsData]);
+
   const errands = useMemo(() => {
     if (!shouldFetchErrands) return undefined;
+
     return errandsData;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldFetchErrands]);
@@ -133,19 +144,19 @@ export const useOngoingCaseDataErrands = () => {
 
   useEffect(() => {
     const sortData = store.get('sort');
-    const sort = JSON.parse(sortData);
     if (sortData) {
       try {
+        const sort = JSON.parse(sortData);
         setTableValue('size', sort.size || 12);
         setTableValue('pageSize', sort.pageSize);
         setTableValue('sortOrder', sort.sortOrder);
         setTableValue('sortColumn', sort.sortColumn);
       } catch {
         store.set('sort', JSON.stringify({}));
-        setTableValue('pageSize', sort.pageSize);
       }
     }
-  }, [setTableValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useDebounceEffect(
     () => {
@@ -185,6 +196,14 @@ export const useOngoingCaseDataErrands = () => {
     },
     200,
     [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, channelFilter, queryFilter]
+  );
+
+  useDebounceEffect(
+    () => {
+      store.set('sort', JSON.stringify(watchTable()));
+    },
+    200,
+    [watchTable, sortObject, pageSize]
   );
 
   const currentValues = getValues();
