@@ -1,17 +1,13 @@
 import { StakeholderList } from '@components/stakeholder-list.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { Role } from '@interfaces/role';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Disclosure, FormControl } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
 import { useContext, useState } from 'react';
 import { SectionCompletion } from './sectionCompletion.component';
 
-export const Applicant: React.FC<{
-  owners: CasedataOwnerOrContact[];
-  setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-}> = ({ owners, setOwners }) => {
+export const Applicant: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
   const allowedRoles = [Role.APPLICANT];
   const { errand } = useContext(AppContext);
@@ -29,7 +25,7 @@ export const Applicant: React.FC<{
         label={doneMark ? 'Komplett' : ''}
         labelColor={'gronsta'}
       >
-        <StakeholderList owners={owners} setOwners={setOwners} roles={allowedRoles} />
+        <StakeholderList roles={allowedRoles} />
         <SectionCompletion
           checked={doneMark}
           onChange={() => {

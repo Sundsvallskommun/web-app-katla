@@ -1,10 +1,8 @@
 'use client';
 import { AppContext } from '@contexts/app-context-interface';
-import { Channels } from '@interfaces/channels';
 import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
 import { Role } from '@interfaces/role';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
@@ -12,47 +10,37 @@ import { Button, Dialog, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/re
 import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { scrollToElement, scrollToFirstError, setApplicantError, clearApplicantError } from './errand-buttons-utils';
+import { useFieldArray, useFormContext, UseFormReturn } from 'react-hook-form';
 
-export const RegisterErrandButton: React.FC<{
-  owners: CasedataOwnerOrContact[];
-}> = ({ owners }) => {
+export const RegisterErrandButton: React.FC = ( ) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toastMessage = useSnackbar();
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const { getValues, trigger, formState, setError, clearErrors } = useFormContext();
-  const applicantHasPartyId = owners.some(
-    (owner) => owner.roles?.includes(Role.APPLICANT) && Boolean(owner.personId?.trim?.())
-  );
+  const { getValues, control }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+
+
+    const { fields } = useFieldArray({
+      control,
+      name: 'stakeholders',
+    });
+
+    const ownerStakeholders = fields.filter((s) => s.roles?.includes(Role.APPLICANT));
+
 
   const closeDialog = () => setIsOpen(false);
 
-  const handleOpenClick = async () => {
-    setIsLoading(true);
-
-    if (!applicantHasPartyId) {
-      setApplicantError(
-        setError,
-        'Det går inte att registrera ärendet eftersom ingen sökande part är tillagd.'
-      );
-      setIsLoading(false);
-      scrollToElement('[data-cy="applicant-diclosure"]');
+  const handleOpenClick = () => {
+    if (!ownerStakeholders) {
+      toastMessage({
+        position: 'bottom',
+        message: 'Det går inte att registrera ärendet eftersom ingen sökande part är tillagd.',
+        status: 'error',
+      });
+      console.warn('Cannot register errand, stakeholder missing partyId');
       return;
     }
-
-    clearApplicantError(clearErrors);
-
-    const isValid = await trigger();
-    if (!isValid) {
-      scrollToFirstError(formState.errors);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(false);
     setIsOpen(true);
   };
 
@@ -62,8 +50,6 @@ export const RegisterErrandButton: React.FC<{
     const data = getValues() as IErrand & { attachments: UploadFile[] };
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
 
-    data.channel = Channels.ESERVICE_KATLA;
-    data.stakeholders = owners;
     data.status = {
       statusType: ErrandStatus.ArendeInkommit,
     };

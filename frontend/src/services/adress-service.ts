@@ -1,3 +1,4 @@
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { ApiResponse, apiService, Data } from '@services/api-service';
 import { formatOrgNr, luhnCheck, OrgNumberFormat } from '@services/helper-service';
 
@@ -55,7 +56,7 @@ export const isValidOrgNumber: (ssn: string) => boolean = (ssn) => {
   return passingLuhn && passingDigitTest;
 };
 
-export const searchPerson: (ssn: string) => Promise<AddressResult> = async (ssn: string) => {
+export const searchPerson: (ssn: string) => Promise<Partial<CasedataOwnerOrContact>> = async (ssn: string) => {
   ssn = ssn.replace(/\D/g, '');
   if (!isValidPersonalNumber(ssn)) {
     throw new Error('Invalid personal number');
@@ -73,16 +74,11 @@ export const searchPerson: (ssn: string) => Promise<AddressResult> = async (ssn:
     personId: data.personId,
     firstName: data.givenname,
     lastName: data.lastname,
-    organizationName: '',
     street: addressItem?.address || '',
     careof: addressItem?.co || '',
     zip: addressItem?.postalCode || '',
     city: addressItem?.city || '',
-    municipality: addressItem?.municipality || '',
-    loginName: '',
-    company: '',
-    administrationCode: '',
-    administrationName: '',
+    municipality: addressItem?.municipality
   };
 };
 

@@ -77,7 +77,7 @@ export const makeStakeholder: (data: CasedataOwnerOrContact, role: Role) => Crea
     ...(data.id && { id: data.id }),
     ...(data.personId && { personId: data.personId.toString() }),
     type: data.stakeholderType,
-    roles: [role],
+    roles: [role ?? data.roles[0]],
     contactInformation: [...phones, ...mails],
     firstName: data.firstName || '',
     lastName: data.lastName || '',
@@ -231,13 +231,13 @@ export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (
     careof: s.addresses?.[0]?.careOf || '',
     zip: s.addresses?.[0]?.postalCode || '',
     city: s.addresses?.[0]?.city || '',
-    newPhoneNumber: '+46',
+    newPhoneNumber: s.contactInformation?.find((c) => c.contactType === 'PHONE')?.value,
     phoneNumbers: (s.contactInformation ?? [])
       .filter((c) => c.contactType === 'PHONE')
       .map((c) => ({
         value: c.value,
       })),
-    newEmail: '',
+    newEmail: s.contactInformation?.find((c) => c.contactType === 'EMAIL')?.value,
     emails: (s.contactInformation ?? [])
       .filter((c) => c.contactType === 'EMAIL')
       .map((c) => ({

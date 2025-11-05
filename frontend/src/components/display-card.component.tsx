@@ -6,48 +6,15 @@ import { phoneNumberFormatter } from '@utils/contact-form-utils';
 import { isErrandReadOnly } from '@utils/errand-utils';
 import { useContext, useState } from 'react';
 import { StakeholderFormModal } from './stakeholder-form.component';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 
 export const DisplayCard: React.FC<{
-  isEditable: boolean;
-  roles: Role[];
+  person: CasedataOwnerOrContact;
   availableRoles: Role[];
-  userName?: string;
-  firstName: string;
-  lastName: string;
-  personalNumber?: string;
-  street: string;
-  newEmail?: string;
-  newPhoneNumber?: string;
-  careof?: string;
-  zip?: string;
-  city: string;
+  isEditable?: boolean;
   onRemove?: () => void;
-  onUpdate?: (updatedData: {
-    newEmail?: string;
-    newPhoneNumber?: string;
-    street?: string;
-    zip?: string;
-    city?: string;
-    careof?: string;
-    role?: Role[];
-  }) => void;
-}> = ({
-  isEditable,
-  roles,
-  availableRoles,
-  userName,
-  firstName,
-  lastName,
-  personalNumber,
-  street,
-  newEmail,
-  newPhoneNumber,
-  careof,
-  zip,
-  city,
-  onRemove,
-  onUpdate,
-}) => {
+  onUpdate?: (values: CasedataOwnerOrContact) => void;
+}> = ({ person, isEditable, availableRoles, onRemove, onUpdate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isMaxMediumDevice } = useThemeQueries();
   const { errand } = useContext(AppContext);
@@ -56,31 +23,33 @@ export const DisplayCard: React.FC<{
     <div className="border-1 rounded-12 bg-background-content w-full max-w-[52.5rem] my-15">
       <div className="rounded-t-12 bg-vattjom-background-200 h-[4rem] flex items-center mb-[1.5rem]">
         <strong className="px-[1rem]">
-          {Array.isArray(roles) ? roles.map(getRoleDisplayName).join(', ') : getRoleDisplayName(roles)}
+          {Array.isArray(person.roles) ?
+            person.roles.map(getRoleDisplayName).join(', ')
+          : getRoleDisplayName(person.roles)}
         </strong>
       </div>
       <div className="px-[1rem]">
         <p className="text-[1.6rem] font-semibold">
-          {firstName + ' ' + lastName}
-          {userName && ` (${userName})`}
+          {person.firstName + ' ' + person.lastName}
+          {person.adAccount && ` (${person.adAccount})`}
         </p>
         <div className={`flex text-md mb-10 ${isMaxMediumDevice ? 'flex-col' : 'flex-row'}`}>
-          {!roles.includes(Role.REPORTER) && (
+          {!person.roles.includes(Role.REPORTER) && (
             <div className="flex flex-col mr-10">
-              <div className={!personalNumber ? 'italic text-text-secondary' : ''}>
-                {personalNumber || 'Personnummer saknas'}
+              <div className={!person.personalNumber ? 'italic text-text-secondary' : ''}>
+                {person.personalNumber || 'Personnummer saknas'}
               </div>
-              <div className={!(street?.trim() && city?.trim()) ? 'italic text-text-secondary' : ''}>
-                {street?.trim() && city?.trim() ? `${street}, ${city}` : 'Adress saknas'}
+              <div className={!(person.street?.trim() && person.city?.trim()) ? 'italic text-text-secondary' : ''}>
+                {person.street?.trim() && person.city?.trim() ? `${person.street}, ${person.city}` : 'Adress saknas'}
               </div>
             </div>
           )}
           <div className="flex flex-col">
-            <div className={!newEmail?.trim() ? 'italic text-text-secondary' : ''}>
-              {newEmail?.trim() || 'E-post saknas'}
+            <div className={!person.newEmail?.trim() ? 'italic text-text-secondary' : ''}>
+              {person.newEmail?.trim() || 'E-post saknas'}
             </div>
-            <div className={!phoneNumberFormatter(newPhoneNumber) ? 'italic text-text-secondary' : ''}>
-              {phoneNumberFormatter(newPhoneNumber) || 'Telefonnummer saknas'}
+            <div className={!phoneNumberFormatter(person.newPhoneNumber) ? 'italic text-text-secondary' : ''}>
+              {phoneNumberFormatter(person.newPhoneNumber) || 'Telefonnummer saknas'}
             </div>
           </div>
         </div>
@@ -111,31 +80,13 @@ export const DisplayCard: React.FC<{
         <StakeholderFormModal
           show={isOpen}
           onClose={() => setIsOpen(false)}
-          initialValues={{
-            ssn: personalNumber,
-            firstName,
-            lastName,
-            newEmail,
-            newPhoneNumber,
-            street,
-            careof,
-            zip,
-            city,
-            roles,
-          }}
+          initialValues={person}
           roles={availableRoles}
-          onSubmit={(data) => {
-            onUpdate?.({
-              newEmail: data.newEmail,
-              newPhoneNumber: phoneNumberFormatter(data.newPhoneNumber),
-              street: data.street,
-              zip: data.zip,
-              city: data.city,
-              careof: data.careof,
-              role: data.roles,
-            });
+          onSubmit={(updatedValues) => {
+            onUpdate?.(updatedValues);
             setIsOpen(false);
           }}
+          edit
         />
       </div>
     </div>

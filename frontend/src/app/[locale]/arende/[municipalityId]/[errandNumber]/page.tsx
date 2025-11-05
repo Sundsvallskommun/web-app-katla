@@ -8,8 +8,6 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
-import { OTHER_PARTY_ROLES, Role } from '@interfaces/role';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
@@ -22,9 +20,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 const Arende: React.FC = () => {
   const method = useForm<IErrand>();
   const [current, setCurrent] = React.useState<number | undefined>(0);
-  const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
-  const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
-  const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
   const [forbidden, setForbidden] = useState(false);
   const { setMunicipalityId, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 
@@ -56,38 +51,6 @@ const Arende: React.FC = () => {
             const uploadFiles = mapAttachmentsToUploadFiles(res.errand.attachments);
             method.setValue('attachments', uploadFiles as unknown as Attachment[]);
           }
-
-          const reporter = res.errand.stakeholders.find((s) => s.roles.includes(Role.REPORTER));
-          if (reporter) {
-            setHealthCareStaff([
-              {
-                ...reporter,
-                newEmail: reporter.emails[0]?.value,
-                newPhoneNumber: reporter.phoneNumbers[0]?.value,
-              },
-            ]);
-          } else {
-            console.warn('Ingen vårdpersonal (REPORTER) hittades.');
-            setHealthCareStaff([]);
-          }
-
-          const applicants = res.errand.stakeholders
-            .filter((s) => s.roles.includes(Role.APPLICANT))
-            .map((applicant) => ({
-              ...applicant,
-              newEmail: applicant.emails[0]?.value,
-              newPhoneNumber: applicant.phoneNumbers[0]?.value,
-            }));
-          setApplicants(applicants);
-
-          const otherParties = res.errand.stakeholders
-            .filter((s) => s.roles.some((r) => OTHER_PARTY_ROLES.includes(r)))
-            .map((person) => ({
-              ...person,
-              newEmail: person.emails[0]?.value,
-              newPhoneNumber: person.phoneNumbers[0]?.value,
-            }));
-          setOtherParties(otherParties);
         }
       } catch (err) {
         console.error('Error initializing data:', err);
@@ -151,12 +114,7 @@ const Arende: React.FC = () => {
                 >
                   <h1 className="text-h2-lg">Ärende {errand?.errandNumber}</h1>
 
-                  {!isMaxMediumDevice && (
-                    <ErrandActionButtons
-                      className="flex gap-x-md"
-                      owners={applicants.concat(otherParties).concat(healthCareStaff)}
-                    />
-                  )}
+                  {!isMaxMediumDevice && <ErrandActionButtons className="flex gap-x-md" />}
                 </header>
                 <div className="border-1 rounded-12 bg-background-content">
                   <MenuBar className="py-[1rem] pl-[1.6rem]" current={current}>
@@ -181,14 +139,7 @@ const Arende: React.FC = () => {
           `}
                   >
                     <div style={{ display: current === 0 ? 'block' : 'none' }}>
-                      <ErrandReportedTab
-                        healthCareStaff={healthCareStaff}
-                        setHealthCareStaff={setHealthCareStaff}
-                        applicants={applicants}
-                        setApplicants={setApplicants}
-                        otherParties={otherParties}
-                        setOtherParties={setOtherParties}
-                      />
+                      <ErrandReportedTab />
                     </div>
 
                     {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
@@ -197,17 +148,11 @@ const Arende: React.FC = () => {
                 </div>
                 {!isMaxMediumDevice && (
                   <div className="flex justify-end mt-md pt-8 mb-[3.2rem]">
-                    <ErrandActionButtons
-                      className="flex gap-x-md"
-                      owners={applicants.concat(otherParties).concat(healthCareStaff)}
-                    />
+                    <ErrandActionButtons className="flex gap-x-md" />
                   </div>
                 )}
                 {isMaxMediumDevice && (
-                  <ErrandActionButtons
-                    className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 py-16"
-                    owners={applicants.concat(otherParties).concat(healthCareStaff)}
-                  />
+                  <ErrandActionButtons className="flex flex-col gap-[1.6rem] [&>button]:mb-0 px-12 py-16" />
                 )}
               </section>
             </main>

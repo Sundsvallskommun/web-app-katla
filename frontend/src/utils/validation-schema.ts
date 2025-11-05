@@ -85,11 +85,28 @@ export const zipSchema = yup
  * Stakeholder-schema
  */
 export const stakeholderSchema = yup.object().shape({
-  ssn: ssnSchema,
   firstName: yup.string().required('Förnamn är obligatoriskt'),
   lastName: yup.string().required('Efternamn är obligatoriskt'),
   newEmail: emailSchema,
   newPhoneNumber: phoneSchema,
+  emails: yup
+    .array()
+    .of(
+      yup.object({
+        value: emailSchema,
+      })
+    )
+    .nullable()
+    .notRequired(),
+  phoneNumbers: yup
+    .array()
+    .of(
+      yup.object({
+        value: phoneSchema,
+      })
+    )
+    .nullable()
+    .notRequired(),
   careof: yup.string(),
 
   roles: yup.array().of(yup.string().required()).min(1, 'Välj en roll').required('Välj en roll'),
