@@ -8,7 +8,7 @@ import { OtherParties } from '@components/errandinformation/other-parties.compon
 import { useThemeQueries } from '@sk-web-gui/react';
 import React from 'react';
 
-export const ErrandReportedTab: React.FC<{}> = ({}) => {
+export const ErrandReportedTab: React.FC = () => {
   const { isMaxMediumDevice } = useThemeQueries();
   return (
     <>

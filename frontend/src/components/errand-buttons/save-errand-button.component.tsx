@@ -9,7 +9,7 @@ import { useContext } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 import { scrollToFirstError } from './errand-buttons-utils';
 
-export const SaveErrandButton: React.FC<{}> = () => {
+export const SaveErrandButton: React.FC = () => {
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();

@@ -8,7 +8,6 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
@@ -21,9 +20,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 const Arende: React.FC = () => {
   const method = useForm<IErrand>();
   const [current, setCurrent] = React.useState<number | undefined>(0);
-  const [healthCareStaff, setHealthCareStaff] = useState<CasedataOwnerOrContact[]>([]);
-  const [applicants, setApplicants] = useState<CasedataOwnerOrContact[]>([]);
-  const [otherParties, setOtherParties] = useState<CasedataOwnerOrContact[]>([]);
   const [forbidden, setForbidden] = useState(false);
   const { setMunicipalityId, setUser, errand, setErrand, setIsLoading } = useContext(AppContext);
 

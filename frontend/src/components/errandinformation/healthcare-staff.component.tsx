@@ -11,7 +11,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { SectionCompletion } from './sectionCompletion.component';
 
-export const HealthCareStaff: React.FC<{}> = ({}) => {
+export const HealthCareStaff: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
   const { user, errand } = useContext(AppContext);
 

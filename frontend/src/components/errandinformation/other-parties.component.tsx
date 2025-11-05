@@ -5,7 +5,7 @@ import { Disclosure, FormControl } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { SectionCompletion } from './sectionCompletion.component';
 
-export const OtherParties: React.FC<{}> = ({}) => {
+export const OtherParties: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
   const allowedRoles = [...OTHER_PARTY_ROLES];
   return (

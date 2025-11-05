@@ -22,7 +22,6 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
     setSelectedErrandStatuses,
     selectedErrandStatuses,
     setSidebarLabel,
-    newErrands,
     ongoingErrands,
     draftErrands,
     closedErrands,
@@ -71,7 +70,7 @@ export const CasedataFilterSidebarStatusSelector: React.FC<{ iconButton: boolean
         totalStatusErrands: closedErrands.totalElements,
       },
     ],
-    [newErrands, ongoingErrands, draftErrands, closedErrands]
+    [ongoingErrands, draftErrands, closedErrands]
   );
 
   return (

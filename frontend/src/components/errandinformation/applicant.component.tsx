@@ -7,7 +7,7 @@ import { isErrandReadOnly } from '@utils/errand-utils';
 import { useContext, useState } from 'react';
 import { SectionCompletion } from './sectionCompletion.component';
 
-export const Applicant: React.FC<{}> = ({}) => {
+export const Applicant: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
   const allowedRoles = [Role.APPLICANT];
   const { errand } = useContext(AppContext);

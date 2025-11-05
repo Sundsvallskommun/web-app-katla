@@ -12,13 +12,13 @@ import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { useFieldArray, useFormContext, UseFormReturn } from 'react-hook-form';
 
-export const RegisterErrandButton: React.FC<{ }> = ( ) => {
+export const RegisterErrandButton: React.FC = ( ) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toastMessage = useSnackbar();
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const { getValues, trigger, formState, control }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const { getValues, control }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
 
     const { fields } = useFieldArray({

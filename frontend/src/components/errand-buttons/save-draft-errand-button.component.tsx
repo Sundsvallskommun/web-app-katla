@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 
-export const DraftErrandButton: React.FC<{ }> = ({ }) => {
+export const DraftErrandButton: React.FC = () => {
   const toastMessage = useSnackbar();
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
