@@ -12,7 +12,7 @@ import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
-import { scrollToElement, scrollToFirstError } from './errand-buttons-utils';
+import { scrollToFirstError } from './errand-buttons-utils';
 
 export const RegisterErrandButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -33,27 +33,20 @@ export const RegisterErrandButton: React.FC = () => {
     );
 
     if (!hasApplicant) {
-      scrollToElement('[data-cy="applicant-diclosure"]');
+      toastMessage({
+        position: 'bottom',
+        message: 'En sökande part krävs för att registrera ärendet.',
+        status: 'error',
+      });
       return;
     }
 
     const isValid = await trigger();
     if (!isValid) {
-      const errorFields = Object.keys(formState.errors);
       scrollToFirstError(formState.errors);
-      const errorCount = errorFields.length;
-      const errorMessage =
-        errorCount === 1 ?
-          'Ett obligatoriskt fält saknas eller är felaktigt ifyllt.'
-        : `${errorCount} obligatoriska fält saknas eller är felaktigt ifyllda.`;
-
-      toastMessage({
-        position: 'bottom',
-        message: errorMessage,
-        status: 'error',
-      });
       return;
     }
+
     setIsOpen(true);
   };
 
