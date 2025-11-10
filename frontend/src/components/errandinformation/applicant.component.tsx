@@ -17,7 +17,6 @@ export const Applicant: React.FC = () => {
 
   const { watch } = useFormContext();
 
-  // Watch stakeholders to check if applicant exists
   const stakeholders = watch('stakeholders') || [];
   const applicantStakeholders = stakeholders.filter((s: CasedataOwnerOrContact) => s?.roles?.includes(Role.APPLICANT));
   const showWarning = !isReadOnly && applicantStakeholders.length === 0;
