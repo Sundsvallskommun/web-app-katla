@@ -30,7 +30,8 @@ export interface UppgiftField {
     | { type: 'combobox'; options: OptionBase[]; placeholder?: string; multiple?: boolean }
     | { type: 'radio'; options: OptionBase[]; inline?: boolean }
     | { type: 'radioPlus'; options: OptionBase[]; ownOption: string }
-    | { type: 'checkbox'; options: OptionBase[] };
+    | { type: 'checkbox'; options: OptionBase[] }
+    | { type: 'repeatableGroup' };
   section: string;
   dependsOnLogic?: 'AND' | 'OR';
   dependsOn?: {
@@ -40,10 +41,36 @@ export interface UppgiftField {
   }[];
   description?: string;
   required?: boolean;
+  pairWith?: string;
 }
 
+export interface RepeatableGroupConfig {
+  groupName: string;
+  basePath: string;
+  section: string;
+  repeatableConfig: {
+    minItems: number;
+    addButtonText: string;
+    removeButtonText: string;
+  };
+  fields: UppgiftField[];
+}
+
+export interface UppgiftFieldWithRepeatableGroup extends UppgiftField {
+  formField: { type: 'repeatableGroup' };
+  repeatableGroup: RepeatableGroupConfig;
+  initialData?: Record<number, Record<string, string | string[]>>;
+}
+
+export type UppgiftFieldExtended = UppgiftField | UppgiftFieldWithRepeatableGroup;
+
+// Type guard to check if a field has a repeatable group
+export const hasRepeatableGroup = (field: UppgiftFieldExtended): field is UppgiftFieldWithRepeatableGroup => {
+  return 'repeatableGroup' in field;
+};
+
 export interface ExtraParametersObject {
-  [key: string]: UppgiftField[] | undefined;
+  [key: string]: UppgiftFieldExtended[] | undefined;
 }
 
 const template: ExtraParametersObject = {
@@ -54,6 +81,39 @@ const template: ExtraParametersObject = {
   PARATRANSIT_NOTIFICATION_NATIONAL_RENEWAL: notificationNationalRenewal_UppgiftFieldTemplate,
   PARATRANSIT_NOTIFICATION_RIAK: notificationRiak_UppgiftFieldTemplate,
   PARATRANSIT_NOTIFICATION_BUS_CARD: notificationBusCard_UppgiftFieldTemplate,
+};
+
+export const getTemplateFields = (caseType?: string): UppgiftField[] => {
+  if (!caseType || !template[caseType]) {
+    return [];
+  }
+  return template[caseType] ?? [];
+};
+
+// Helper function to group indexed parameters into repeatable groups
+const groupRepeatableParameters = (
+  extraParameters: ExtraParameter[],
+  basePath: string
+): Record<number, Record<string, string | string[]>> => {
+  const grouped: Record<number, Record<string, string | string[]>> = {};
+  const pattern = new RegExp(`^${basePath.replace(/\./g, '\\.')}\\.([0-9]+)\\.(.+)$`);
+
+  extraParameters.forEach((param) => {
+    const match = param.key.match(pattern);
+    if (match) {
+      const index = parseInt(match[1], 10);
+      const fieldKey = match[2];
+
+      if (!grouped[index]) {
+        grouped[index] = {};
+      }
+
+      const filtered = param.values?.filter((v) => typeof v === 'string' && v.trim() !== '') ?? [];
+      grouped[index][fieldKey] = filtered.length === 1 ? filtered[0] : filtered;
+    }
+  });
+
+  return grouped;
 };
 
 export const extraParametersToUppgiftMapper = (
@@ -68,12 +128,38 @@ export const extraParametersToUppgiftMapper = (
     return obj;
   }
 
+  const templateFields = template[caseType] as UppgiftFieldExtended[] | undefined;
+  const repeatableGroupFields = templateFields?.filter(hasRepeatableGroup) ?? [];
+
+  repeatableGroupFields.forEach((field) => {
+    const groupConfig = field.repeatableGroup;
+    const basePath = groupConfig.basePath;
+    const groupedData = groupRepeatableParameters(extraParameters, basePath);
+
+    if (Object.keys(groupedData).length > 0) {
+      obj[caseType] = obj[caseType] || [];
+      const fields = obj[caseType]!;
+      const index = fields.findIndex((f) => f.field === field.field);
+
+      if (index > -1 && hasRepeatableGroup(fields[index])) {
+        fields[index].initialData = groupedData;
+      }
+    }
+  });
+
   extraParameters.forEach((param) => {
     const field = param.key;
     let value: string | string[] = '';
 
-    const templateFields = template[caseType] as UppgiftField[] | undefined;
     const templateField = templateFields?.find((f) => f.field === field);
+    const isPartOfRepeatableGroup = repeatableGroupFields.some((rgField) => {
+      const groupConfig = rgField.repeatableGroup;
+      return field.startsWith(`${groupConfig.basePath}.`) && /\.[0-9]+\./.test(field);
+    });
+
+    if (isPartOfRepeatableGroup) {
+      return;
+    }
 
     if (Array.isArray(param.values)) {
       const filtered = param.values.filter((v) => typeof v === 'string' && v.trim() !== '');
@@ -84,7 +170,7 @@ export const extraParametersToUppgiftMapper = (
     }
 
     if (templateField) {
-      const { label, formField, section, dependsOn, required } = templateField;
+      const { label, formField, section, dependsOn, dependsOnLogic, description, required, pairWith } = templateField;
 
       obj[caseType] = obj[caseType] || [];
       const fields = obj[caseType]!;
@@ -96,7 +182,10 @@ export const extraParametersToUppgiftMapper = (
         formField,
         section,
         dependsOn,
+        dependsOnLogic,
+        description,
         required,
+        pairWith,
       };
 
       const index = fields.findIndex((f) => f.field === field);
@@ -120,8 +209,29 @@ export const saveExtraParameters = (municipalityId: string, data: ExtraParameter
       .filter((value) => value !== ''),
   }));
 
+  const repeatableGroupPaths = new Set<string>();
+  sanitizedData.forEach((param) => {
+    // IMPORTANT Pattern: basePath.index.fieldName (e.g., personal.journey.0.destination)
+    const match = param.key.match(/^(.+)\.\d+\..+$/);
+    if (match) {
+      repeatableGroupPaths.add(match[1]);
+    }
+  });
+
   const mergedExtraParameters = errand.extraParameters
-    .filter((existing) => !sanitizedData.some((param) => param.key === existing.key))
+    .filter((existing) => {
+      if (sanitizedData.some((param) => param.key === existing.key)) {
+        return false;
+      }
+
+      for (const basePath of repeatableGroupPaths) {
+        if (existing.key.match(new RegExp(`^${basePath.replace(/\./g, '\\.')}\\.\\d+\\..+$`))) {
+          return false;
+        }
+      }
+
+      return true;
+    })
     .concat(sanitizedData);
 
   return apiService.patch<unknown, { id: string; extraParameters: ExtraParameter[] }>(
@@ -140,14 +250,60 @@ export const replaceExtraParameter = (extraParameters: ExtraParameter[], newPara
     : [...extraParameters, newParameter];
 };
 
+const extractRepeatableGroupData = <T extends Record<string, unknown>>(
+  rawValues: T,
+  basePath: string
+): ExtraParameter[] => {
+  const extracted: ExtraParameter[] = [];
+  const formKeyPrefix = basePath.replace(/\./g, EXTRAPARAMETER_SEPARATOR) + EXTRAPARAMETER_SEPARATOR;
+
+  const pattern = new RegExp(
+    `^${formKeyPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\d+)${EXTRAPARAMETER_SEPARATOR}(.+)$`
+  );
+
+  Object.keys(rawValues).forEach((key) => {
+    const match = key.match(pattern);
+    if (match) {
+      const index = match[1];
+      const fieldName = match[2];
+      const value = rawValues[key];
+      const fullKey = `${basePath}.${index}.${fieldName}`;
+
+      let values: string[] = [];
+
+      if (Array.isArray(value)) {
+        values = value.filter((v) => typeof v === 'string' && v.trim() !== '');
+      } else if (typeof value === 'string' && value.trim() !== '') {
+        values = [value];
+      }
+
+      if (values.length > 0) {
+        extracted.push({
+          key: fullKey,
+          values,
+        });
+      }
+    }
+  });
+
+  return extracted;
+};
+
 export const extractExtraParameters = <T extends Record<string, unknown>>(
-  fields: UppgiftField[],
+  fields: UppgiftFieldExtended[],
   getValues: () => T
 ): ExtraParameter[] => {
   const rawValues = getValues();
   const extracted: ExtraParameter[] = [];
 
   fields.forEach((field) => {
+    if (hasRepeatableGroup(field)) {
+      const groupConfig = field.repeatableGroup;
+      const repeatableData = extractRepeatableGroupData(rawValues, groupConfig.basePath);
+      extracted.push(...repeatableData);
+      return;
+    }
+
     const formKey = field.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
     const value = rawValues[formKey];
 

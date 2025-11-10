@@ -4,7 +4,6 @@ import { IErrand } from '@interfaces/errand';
 import { Role, RoleDisplayNames } from '@interfaces/role';
 import { CasedataOwnerOrContact, emptyCasedataOwnerOrContact, StakeholderType } from '@interfaces/stakeholder';
 import { searchPerson } from '@services/adress-service';
-import { addStakeholder } from '@services/casedata-stakeholder-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, FormControl, FormErrorMessage, FormLabel, Input, Select } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
@@ -24,7 +23,7 @@ export const StakeholderList: React.FC<{
   const [outsideMunicipalityWarning, setOutsideMunicipalityWarning] = useState<boolean>(false);
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
 
-  const { municipalityId, errand } = useContext(AppContext);
+  const { errand } = useContext(AppContext);
 
   const context = useFormContext<IErrand>();
 
@@ -46,7 +45,7 @@ export const StakeholderList: React.FC<{
     setValue,
     getValues,
     reset,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = method;
 
   const { personalNumber, firstName, lastName, street, city } = watch();
@@ -54,6 +53,9 @@ export const StakeholderList: React.FC<{
   const isApplicantList = roles.includes(Role.APPLICANT);
   const municipalityMismatch = isApplicantList && !!outsideMunicipalityWarning;
   const manualEntryAllowed = !isApplicantList;
+
+  const existingApplicants = fields.filter((f: CasedataOwnerOrContact) => f.roles?.includes(Role.APPLICANT));
+  const hasExistingApplicant = isApplicantList && existingApplicants.length > 0;
 
   const doSearch = () => {
     ssnSchema
@@ -66,11 +68,6 @@ export const StakeholderList: React.FC<{
 
         searchPerson(personalNumber ?? '')
           .then((res) => {
-            if (res.municipality !== process.env.NEXT_PUBLIC_MUNICIPALITY_ID && isApplicantList) {
-              setOutsideMunicipalityWarning(true);
-              return;
-            }
-
             const normalizedData = {
               personalNumber,
               ...res,
@@ -78,6 +75,14 @@ export const StakeholderList: React.FC<{
               stakeholderType: 'PERSON' as StakeholderType,
             };
             reset(normalizedData);
+
+            if (res.municipality !== process.env.NEXT_PUBLIC_MUNICIPALITY_ID && isApplicantList) {
+              setOutsideMunicipalityWarning(true);
+              setSearching(false);
+              setSearchResult(true);
+              return;
+            }
+
             setSearching(false);
             setSearchResult(true);
           })
@@ -94,6 +99,19 @@ export const StakeholderList: React.FC<{
 
   const addStakeholderToErrand = () => {
     const values = getValues();
+
+    const existingStakeholders = context.getValues('stakeholders') || [];
+    const isDuplicate = existingStakeholders.some(
+      (stakeholder: CasedataOwnerOrContact) =>
+        stakeholder.personId && values.personId && stakeholder.personId === values.personId
+    );
+
+    if (isDuplicate) {
+      console.warn('Stakeholder with personId already exists:', values.personId);
+      setSearchResult(false);
+      return;
+    }
+
     append({
       ...values,
       stakeholderType: 'PERSON',
@@ -101,15 +119,13 @@ export const StakeholderList: React.FC<{
       newPhoneNumber: values?.phoneNumbers?.[0]?.value,
     });
 
-    if (errand.id) addStakeholder(municipalityId, errand.id, getValues());
-
     setSearchResult(false);
   };
 
   return (
     <FormProvider {...method}>
       <FormControl className="w-full">
-        {!isErrandReadOnly(errand) ?
+        {!isErrandReadOnly(errand) && !hasExistingApplicant ?
           <>
             <FormLabel>Sök på personnummer</FormLabel>
             <div className="w-full max-w-[52.5rem]">
@@ -133,8 +149,12 @@ export const StakeholderList: React.FC<{
                     variant="primary"
                     inverted
                     className="min-w-[2.5rem] h-full"
-                    onClick={() => {reset();
-                      setFetchedSsn(false)
+                    onClick={() => {
+                      setSearchResult(false);
+                      setFetchedSsn(false);
+                      setNotFound(false);
+                      setOutsideMunicipalityWarning(false);
+                      reset(emptyCasedataOwnerOrContact);
                     }}
                   >
                     <LucideIcon name="x" />
@@ -159,7 +179,7 @@ export const StakeholderList: React.FC<{
           </>
         : null}
 
-        {searchResult && !notFound && (
+        {searchResult && !notFound && !hasExistingApplicant && (
           <div className="border-1 rounded-12 bg-background-content w-max-[52.5rem] my-15">
             <div className="px-16 py-8">
               <p className="text-[1.6rem] font-semibold py-10">
@@ -191,7 +211,7 @@ export const StakeholderList: React.FC<{
                         {...register('emails.0.value')}
                       />
                       {errors.emails?.[0]?.value && (
-                        <FormErrorMessage className='text-error'>{errors.emails[0].value.message}</FormErrorMessage>
+                        <FormErrorMessage className="text-error">{errors.emails[0].value.message}</FormErrorMessage>
                       )}
                     </div>
                     <div className="flex-col w-full">
@@ -203,7 +223,9 @@ export const StakeholderList: React.FC<{
                         {...register('phoneNumbers.0.value')}
                       />
                       {errors.phoneNumbers?.[0]?.value && (
-                        <FormErrorMessage className='text-error'>{errors.phoneNumbers[0].value.message}</FormErrorMessage>
+                        <FormErrorMessage className="text-error">
+                          {errors.phoneNumbers[0].value.message}
+                        </FormErrorMessage>
                       )}
                     </div>
                   </div>
@@ -235,7 +257,7 @@ export const StakeholderList: React.FC<{
                       </Select>
 
                       {errors.roles && (
-                        <FormErrorMessage className='text-error'>{errors.roles.message}</FormErrorMessage>
+                        <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>
                       )}
                     </div>
                   </div>
@@ -246,9 +268,13 @@ export const StakeholderList: React.FC<{
                       variant="primary"
                       onClick={handleSubmit(addStakeholderToErrand)}
                       className="w-full lg:w-auto"
-                      disabled={municipalityMismatch
-                        || isValid 
+                      disabled={
+                        municipalityMismatch ||
+                        (isApplicantList && !isValid) ||
+                        (!isApplicantList && !watch('roles')?.[0]) ||
+                        isSubmitting
                       }
+                      loading={isSubmitting}
                     >
                       Lägg till person
                     </Button>
@@ -264,7 +290,18 @@ export const StakeholderList: React.FC<{
                       Den sökande som du försöker lägga till är inte folkbokförd i kommunen.
                     </span>
                   </div>
-                  <Button variant="primary" size="sm" className="w-full sm:w-auto" onClick={() => reset()}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                    onClick={() => {
+                      setSearchResult(false);
+                      setFetchedSsn(false);
+                      setNotFound(false);
+                      setOutsideMunicipalityWarning(false);
+                      reset(emptyCasedataOwnerOrContact);
+                    }}
+                  >
                     Ny sökning
                   </Button>
                 </div>
@@ -282,7 +319,10 @@ export const StakeholderList: React.FC<{
               person={person}
               isEditable
               availableRoles={roles}
-              onRemove={() => {remove(index); reset(emptyCasedataOwnerOrContact)}}
+              onRemove={() => {
+                remove(index);
+                reset(emptyCasedataOwnerOrContact);
+              }}
               onUpdate={(values) => update(index, { ...person, ...values })}
             />
           );
@@ -319,4 +359,3 @@ export const StakeholderList: React.FC<{
     </FormProvider>
   );
 };
- 

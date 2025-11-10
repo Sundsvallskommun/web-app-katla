@@ -89,6 +89,7 @@ export const notification_UppgiftFieldTemplate: UppgiftField[] = [
         { label: 'Gymnasieresor', value: 'GYMNASIUM', name: 'travelTypes' },
       ],
     },
+    required: true,
     section: 'Yttre omständigheter',
   },
   {

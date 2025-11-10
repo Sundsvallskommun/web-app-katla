@@ -19,6 +19,7 @@ import { get, useFormContext } from 'react-hook-form';
 export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field }) => {
   const {
     register,
+    unregister,
     watch,
     setValue,
     getValues,
@@ -80,23 +81,6 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
       })()
     : undefined;
 
-  useEffect(() => {
-    if (fieldValue === undefined && field.value !== undefined) {
-      const valueToSet =
-        Array.isArray(field.value) ? field.value
-        : typeof field.value === 'string' && field.value.trim() !== '' ? field.value
-        : undefined;
-
-      if (valueToSet !== undefined) {
-        setValue(name, valueToSet, { shouldDirty: false });
-      }
-    }
-  }, [field.value, fieldValue, name, setValue]);
-
-  if (field.dependsOn && !dependentSatisfied) {
-    return null;
-  }
-
   const fieldType = field.formField.type;
   const hasConditionalRequirement = field.dependsOn?.some((dep) => Boolean(dep.validationMessage)) ?? false;
   const defaultRequiredTypes = ['select', 'radio', 'checkbox', 'combobox'];
@@ -107,6 +91,44 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
   const baseRequired = isOptional ? false : isRequired || isTypeRequiredByDefault;
   const isRequiredField = baseRequired || hasConditionalRequirement;
+
+  useEffect(() => {
+    if (fieldValue === undefined && field.value !== undefined) {
+      const valueToSet =
+        Array.isArray(field.value) ? field.value
+        : typeof field.value === 'string' && field.value.trim() !== '' ? field.value
+        : undefined;
+
+      if (valueToSet !== undefined) {
+        setValue(name, valueToSet, { shouldDirty: false, shouldValidate: false });
+      }
+    }
+  }, [field.value, fieldValue, name, setValue]);
+
+  // Register combobox field once on mount, unregister on unmount
+  useEffect(() => {
+    if (field.formField.type === 'combobox') {
+      const validationRules = getConditionalValidationRules(field, getValues);
+      if (isRequiredField) {
+        register(name, {
+          ...validationRules,
+          required: 'Vänligen välj ett alternativ.',
+        });
+      } else {
+        register(name, validationRules);
+      }
+    }
+
+    // Cleanup: unregister field when component unmounts (when switching case type)
+    return () => {
+      unregister(name);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (field.dependsOn && !dependentSatisfied) {
+    return null;
+  }
 
   const formFieldClassName = 'flex flex-col w-full pt-8';
   const fieldDescriptionClassName = 'pt-8 w-full flex flex-col text-md leading-[1.8rem] font-normal font-[Arial]';
@@ -183,10 +205,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   };
 
   return (
-    <FormControl
-      disabled={isErrandReadOnly(errand)}
-      className="flex flex-col gap-2 items-start justify-start max-w-[80rem] w-full"
-    >
+    <FormControl disabled={isErrandReadOnly(errand)} className="flex flex-col gap-2 items-start justify-start w-full">
       <FormLabel className="self-stretch justify-center text-dark-primary text-md leading-24 ">
         {field.label}
         {isRequiredField && <span className="text-error ml-4">*</span>}
@@ -243,7 +262,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
       )}
 
       {field.formField.type === 'combobox' && (
-        <>
+        <div className={formFieldClassName}>
           <Combobox
             className="w-full"
             data-cy={`${field.field}-combobox`}
@@ -266,19 +285,24 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
           </Combobox>
           {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
           <ErrorMessage error={error} />
-        </>
+        </div>
       )}
 
       {field.formField.type === 'radio' && (
         <div className={formFieldClassName}>
-          <RadioButton.Group inline={!isMaxMediumDevice && field.formField.options.length <= 3} data-cy={`uppgift-field-${field.field}`}>
+          <RadioButton.Group
+            inline={!isMaxMediumDevice && field.formField.options.length <= 3}
+            data-cy={`uppgift-field-${field.field}`}
+          >
             {field.formField.options.map((o, i) => (
               <RadioButton
                 key={`${o.value}-${i}`}
                 value={o.value}
                 {...register(name, {
                   ...validationRules,
-                  required: 'Vänligen välj ett alternativ.',
+                  ...(isRequiredField && !validationRules.validate ?
+                    { required: 'Vänligen välj ett alternativ.' }
+                  : {}),
                 })}
               >
                 {o.label}
@@ -291,8 +315,12 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
       )}
 
       {field.formField.type === 'checkbox' && (
-        <>
-          <Checkbox.Group data-cy={`uppgift-field-${field.field}`} direction="row" defaultValue={field.value as string[]}>
+        <div className={formFieldClassName}>
+          <Checkbox.Group
+            data-cy={`uppgift-field-${field.field}`}
+            direction="row"
+            defaultValue={field.value as string[]}
+          >
             {options.map((option, index) => (
               <Checkbox
                 key={`${option.value}-${index}`}
@@ -304,8 +332,9 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
               </Checkbox>
             ))}
           </Checkbox.Group>
-          {error && <span className="text-error text-md">{error}</span>}
-        </>
+          {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
+          <ErrorMessage error={error} />
+        </div>
       )}
 
       {field.formField.type === 'date' && (

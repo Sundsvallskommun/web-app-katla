@@ -18,12 +18,15 @@ import {
   useSnackbar,
 } from '@sk-web-gui/react';
 import dynamic from 'next/dynamic';
-import type Quill from 'quill';
-import { Delta } from 'quill';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageWrapper } from './message-wrapper.component';
 const TextEditor = dynamic(() => import('@sk-web-gui/text-editor'), { ssr: false });
+
+interface TextEditorValue {
+  markup?: string;
+  text?: string;
+}
 
 export interface CasedataMessageTabFormModel {
   contactMeans: 'email' | 'sms' | 'webmessage' | 'digitalmail' | 'paper';
@@ -71,27 +74,25 @@ export const MessageComposer: React.FC<{
 }> = (props) => {
   const { municipalityId, errand, user }: { municipalityId: string; errand: IErrand; user: User } =
     useContext(AppContext);
-  const quillRef = useRef<Quill>(null);
   const [isLoading, setIsLoading] = useState(false);
   const closeConfirm = useConfirm();
   const [files, setFiles] = useState<UploadFile[]>([]);
   const toastMessage = useSnackbar();
-  const [richText] = useState<string>('');
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState<boolean>(false);
 
-  const { register, handleSubmit, getValues, setValue, trigger, watch, formState, reset } = useForm<CasedataMessageTabFormModel>({
-    defaultValues: defaultMessage,
-    mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
-  });
+  const { register, handleSubmit, getValues, setValue, trigger, watch, formState, reset } =
+    useForm<CasedataMessageTabFormModel>({
+      defaultValues: defaultMessage,
+      mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
+    });
 
-  const messageBodyPlaintext = watch('messageBodyPlaintext')
+  const messageBodyPlaintext = watch('messageBodyPlaintext');
 
   const clearAndClose = () => {
     setTimeout(() => {
       setValue('messageBody', '', { shouldDirty: false });
       setValue('messageBodyPlaintext', '', { shouldDirty: false });
       setValue('emails', [], { shouldDirty: false });
-      quillRef?.current?.setText('');
       props.closeHandler();
       reset();
     }, 0);
@@ -161,17 +162,6 @@ export const MessageComposer: React.FC<{
     setFiles((prevFiles) => prevFiles.filter((f) => f.id !== file.id));
   };
 
-    const onRichTextChange = (delta: Delta, oldDelta: Delta, source: string) => {
-    if (source === 'api') {
-      return;
-    }
-    setValue('messageBody', sanitized(typeof delta.ops[0].retain === "number" && delta.ops[0].retain > 1 ? quillRef.current?.root.innerHTML ?? "" : ''), {
-      shouldDirty: true,
-    });
-    setValue('messageBodyPlaintext', quillRef.current?.getText() ?? "", { shouldDirty: true });
-    trigger('messageBody');
-  };
-
   return (
     <>
       <MessageWrapper label="Nytt meddelande" closeHandler={clearAndClose} show={props.show}>
@@ -179,16 +169,18 @@ export const MessageComposer: React.FC<{
           <Input type="hidden" {...register('headerReplyTo')} />
           <Input type="hidden" {...register('headerReferences')} />
 
-          <TextEditor
-                  className="h-[30rem] mb-[4rem]"
-                  key={richText}
-                  ref={quillRef}
-                  defaultValue={richText}
-                  onTextChange={(delta, oldDelta, source) => {
-                    props.setUnsaved(true);
-                    return onRichTextChange(delta, oldDelta, source);
-                  }}
-                />
+          <div className="h-[30rem] mb-[4rem]">
+            <TextEditor
+              className="h-[80%]"
+              onChange={(e: { target: { value: TextEditorValue } }) => {
+                props.setUnsaved(true);
+                setValue('messageBody', sanitized(e.target.value.markup ?? ''), { shouldDirty: true });
+                setValue('messageBodyPlaintext', e.target.value.text ?? '', { shouldDirty: true });
+                trigger('messageBody');
+              }}
+              value={{ markup: watch('messageBody') }}
+            />
+          </div>
         </div>
         <div className="flex mb-24 mt-8 px-40">
           <Button

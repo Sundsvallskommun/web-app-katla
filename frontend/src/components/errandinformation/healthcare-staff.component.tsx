@@ -7,13 +7,14 @@ import { searchADUser } from '@services/adress-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Disclosure, FormControl, isArray } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { SectionCompletion } from './sectionCompletion.component';
 
 export const HealthCareStaff: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
   const { user, errand } = useContext(AppContext);
+  const hasAddedReporter = useRef(false);
 
   const { control } = useFormContext<IErrand>();
 
@@ -25,7 +26,8 @@ export const HealthCareStaff: React.FC = () => {
   const reporterStakeholder = fields.filter((s) => s.roles?.includes(Role.REPORTER));
 
   useEffect(() => {
-    if (reporterStakeholder.length === 0 && user?.username) {
+    if (reporterStakeholder.length === 0 && user?.username && !hasAddedReporter.current) {
+      hasAddedReporter.current = true;
       searchADUser(user.username)
         .then((res) => {
           if (!isArray(res)) {

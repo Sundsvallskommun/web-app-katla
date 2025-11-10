@@ -3,6 +3,7 @@ import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
 import { Role } from '@interfaces/role';
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
@@ -10,35 +11,47 @@ import { Button, Dialog, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/re
 import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
-import { useFieldArray, useFormContext, UseFormReturn } from 'react-hook-form';
+import { useFormContext, UseFormReturn } from 'react-hook-form';
+import { scrollToElement, scrollToFirstError } from './errand-buttons-utils';
 
-export const RegisterErrandButton: React.FC = ( ) => {
+export const RegisterErrandButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toastMessage = useSnackbar();
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
-  const { getValues, control }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
-
-
-    const { fields } = useFieldArray({
-      control,
-      name: 'stakeholders',
-    });
-
-    const ownerStakeholders = fields.filter((s) => s.roles?.includes(Role.APPLICANT));
-
+  const { getValues, trigger, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const closeDialog = () => setIsOpen(false);
 
-  const handleOpenClick = () => {
-    if (!ownerStakeholders) {
+  const { formState } = useFormContext();
+
+  const handleOpenClick = async () => {
+    const data = getValues();
+    const hasApplicant = (data.stakeholders || []).some((s: CasedataOwnerOrContact) =>
+      s?.roles?.includes(Role.APPLICANT)
+    );
+
+    if (!hasApplicant) {
+      scrollToElement('[data-cy="applicant-diclosure"]');
+      return;
+    }
+
+    const isValid = await trigger();
+    if (!isValid) {
+      const errorFields = Object.keys(formState.errors);
+      scrollToFirstError(formState.errors);
+      const errorCount = errorFields.length;
+      const errorMessage =
+        errorCount === 1 ?
+          'Ett obligatoriskt fält saknas eller är felaktigt ifyllt.'
+        : `${errorCount} obligatoriska fält saknas eller är felaktigt ifyllda.`;
+
       toastMessage({
         position: 'bottom',
-        message: 'Det går inte att registrera ärendet eftersom ingen sökande part är tillagd.',
+        message: errorMessage,
         status: 'error',
       });
-      console.warn('Cannot register errand, stakeholder missing partyId');
       return;
     }
     setIsOpen(true);
@@ -96,6 +109,7 @@ export const RegisterErrandButton: React.FC = ( ) => {
           }
 
           setErrand(e.errand);
+          reset(e.errand);
           router.push(`/arende/${municipalityId}/${e.errand.errandNumber}`);
         }
         toastMessage({

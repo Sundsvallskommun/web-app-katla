@@ -12,16 +12,14 @@ export const CasedataMessagesTab: React.FC<{
   setUnsaved: (unsaved: boolean) => void;
   update: () => void;
 }> = (props) => {
-  const { municipalityId, errand, conversation, setConversation } =
-    useContext(AppContext);
+  const { municipalityId, errand, conversation, setConversation } = useContext(AppContext);
   const [selectedMessage, setSelectedMessage] = useState<MessageResponse>();
   const [showMessageComposer, setShowMessageComposer] = useState<boolean>(false);
   const [sortMessages, setSortMessages] = useState<number>(0);
   const [sortedMessages, setSortedMessages] = useState(conversation);
 
-
   const setMessageViewed = (msg: MessageResponse) => {
-      console.warn('Not implemented', msg); //Unsure of how acknowledge for conversation messages will work
+    console.warn('Not implemented', msg); //Unsure of how acknowledge for conversation messages will work
   };
 
   useEffect(() => {
@@ -58,18 +56,16 @@ export const CasedataMessagesTab: React.FC<{
     if (conversation) {
       let filteredMessages = conversation;
       if (sortMessages === 1) {
-         filteredMessages = conversation.filter((message) => message.direction === 'INBOUND');
+        filteredMessages = conversation.filter((message) => message.direction === 'INBOUND');
       } else if (sortMessages === 2) {
-         filteredMessages = conversation.filter((message) => message.direction === 'OUTBOUND');
-      } 
+        filteredMessages = conversation.filter((message) => message.direction === 'OUTBOUND');
+      }
 
-     const sorted = [...filteredMessages].sort(
-      (a, b) => {
+      const sorted = [...filteredMessages].sort((a, b) => {
         if (!a.sent || !b.sent) return 0;
         return new Date(b.sent).getTime() - new Date(a.sent).getTime();
-      }
-    );
-    setSortedMessages(sorted);
+      });
+      setSortedMessages(sorted);
     }
   }, [sortMessages, conversation]);
 
