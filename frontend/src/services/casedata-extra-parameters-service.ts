@@ -8,6 +8,7 @@ import { notificationRiak_UppgiftFieldTemplate } from '@components/errandinforma
 import { FTCaseType } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import { ExtraParameter } from '@interfaces/extra-parameters';
+import escapeStringRegexp from 'escape-string-regexp';
 import { apiService } from './api-service';
 
 export const EXTRAPARAMETER_SEPARATOR = '@';
@@ -96,7 +97,7 @@ const groupRepeatableParameters = (
   basePath: string
 ): Record<number, Record<string, string | string[]>> => {
   const grouped: Record<number, Record<string, string | string[]>> = {};
-  const pattern = new RegExp(`^${basePath.replace(/\./g, '\\.')}\\.([0-9]+)\\.(.+)$`);
+  const pattern = new RegExp(`^${escapeStringRegexp(basePath)}\\.([0-9]+)\\.(.+)$`);
 
   extraParameters.forEach((param) => {
     const match = param.key.match(pattern);
@@ -225,7 +226,7 @@ export const saveExtraParameters = (municipalityId: string, data: ExtraParameter
       }
 
       for (const basePath of repeatableGroupPaths) {
-        if (existing.key.match(new RegExp(`^${basePath.replace(/\./g, '\\.')}\\.\\d+\\..+$`))) {
+        if (existing.key.match(new RegExp(`^${escapeStringRegexp(basePath)}\\.\\d+\\..+$`))) {
           return false;
         }
       }
@@ -255,10 +256,10 @@ const extractRepeatableGroupData = <T extends Record<string, unknown>>(
   basePath: string
 ): ExtraParameter[] => {
   const extracted: ExtraParameter[] = [];
-  const formKeyPrefix = basePath.replace(/\./g, EXTRAPARAMETER_SEPARATOR) + EXTRAPARAMETER_SEPARATOR;
+  const formKeyPrefix = basePath.replaceAll('.', EXTRAPARAMETER_SEPARATOR) + EXTRAPARAMETER_SEPARATOR;
 
   const pattern = new RegExp(
-    `^${formKeyPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\d+)${EXTRAPARAMETER_SEPARATOR}(.+)$`
+    `^${escapeStringRegexp(formKeyPrefix)}(\\d+)${EXTRAPARAMETER_SEPARATOR}(.+)$`
   );
 
   Object.keys(rawValues).forEach((key) => {
@@ -304,7 +305,7 @@ export const extractExtraParameters = <T extends Record<string, unknown>>(
       return;
     }
 
-    const formKey = field.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+    const formKey = field.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
     const value = rawValues[formKey];
 
     let values: string[] = [];

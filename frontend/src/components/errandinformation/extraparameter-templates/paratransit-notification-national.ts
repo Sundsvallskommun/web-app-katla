@@ -1,8 +1,4 @@
-import {
-  RepeatableGroupConfig,
-  UppgiftField,
-  UppgiftFieldExtended,
-} from '@services/casedata-extra-parameters-service';
+import { RepeatableGroupConfig, UppgiftField, UppgiftFieldExtended } from '@services/casedata-extra-parameters-service';
 import { swedishMunicipalities } from './municipalities';
 
 export const journeyFieldsGroup: RepeatableGroupConfig = {
@@ -78,7 +74,7 @@ export const journeyFieldsGroup: RepeatableGroupConfig = {
         type: 'date',
       },
       section: 'Yttre omständigheter',
-      dependsOn: [{ field: 'travelDateKnown', value: 'YES', validationMessage: 'Vänligen ange reisdatum.' }],
+      dependsOn: [{ field: 'travelDateKnown', value: 'YES', validationMessage: 'Vänligen ange resedatum.' }],
     },
     {
       field: 'travelMonth',

@@ -27,7 +27,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     clearErrors,
     formState: { errors },
   } = useFormContext();
-  const name = field.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+  const name = field.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
   const error = get(errors, name)?.message;
   const fieldValue = watch(name);
   const { isMaxMediumDevice } = useThemeQueries();
@@ -62,7 +62,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         if (logicOperator === 'OR') {
           // OR logic: at least one dependency must be satisfied
           const result = field.dependsOn.some((dep) => {
-            const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+            const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
             const depValue = allFormValues[depName];
             const matches = matchesDependency(depValue, dep.value);
             return matches;
@@ -71,7 +71,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         } else {
           // AND logic (default): all dependencies must be satisfied
           const result = field.dependsOn.every((dep) => {
-            const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+            const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
             const depValue = allFormValues[depName];
             const matches = matchesDependency(depValue, dep.value);
             return matches;
@@ -155,14 +155,14 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         if (logicOperator === 'OR') {
           shouldValidate =
             field.dependsOn?.some((dep) => {
-              const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+              const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
               const depValue = allValues[depName];
               return matchesDependency(depValue, dep.value);
             }) ?? false;
         } else {
           shouldValidate =
             field.dependsOn?.every((dep) => {
-              const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+              const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
               const depValue = allValues[depName];
               return matchesDependency(depValue, dep.value);
             }) ?? false;

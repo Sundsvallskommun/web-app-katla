@@ -45,7 +45,7 @@ export const RepeatableFieldGroup: React.FC<RepeatableFieldGroupProps> = ({
 
   const handleRemove = (index: number) => {
     if (itemIndices.length > minItems) {
-      const fieldArrayName = basePath.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+      const fieldArrayName = basePath.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
 
       fields.forEach((field) => {
         const fieldKey = field.field.split('.').pop() || field.field;
