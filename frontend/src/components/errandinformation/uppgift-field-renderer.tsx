@@ -13,14 +13,13 @@ import {
   useThemeQueries,
 } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useEffect, useState } from 'react';
-import { get, useFormContext } from 'react-hook-form';
+import { useContext, useMemo, useState } from 'react';
+import { get, useFormContext, useWatch } from 'react-hook-form';
 
 export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field }) => {
   const {
     register,
-    unregister,
-    watch,
+    control,
     setValue,
     getValues,
     setError,
@@ -28,15 +27,17 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     formState: { errors },
   } = useFormContext();
   const name = field.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
+
+  const dependencyNames = (field.dependsOn ?? []).map((d) => d.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR));
+  const dependencyValues = dependencyNames.length > 0 ? useWatch({ control, name: dependencyNames }) : undefined;
+
   const error = get(errors, name)?.message;
-  const fieldValue = watch(name);
   const { isMaxMediumDevice } = useThemeQueries();
   const { errand } = useContext(AppContext);
   const options: OptionBase[] = (field.formField as { options?: OptionBase[] }).options ?? [];
 
   //TODO: Refactor this component and use a general form for extraparameters instead of hijacking IErrand form.
   //      Refactoring of this component should include better rendering from parent component to elimit rerenderings.
-  const allFormValues = watch();
   const [initialComboBoxValue] = useState<string | string[]>(field.value);
 
   const matchesDependency = (depValue: unknown, requirement: string | string[]) => {
@@ -54,32 +55,26 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     return depValue === requirement;
   };
 
-  const dependentSatisfied =
-    field.dependsOn && field.dependsOn.length > 0 ?
-      (() => {
-        const logicOperator = field.dependsOnLogic ?? 'AND';
+  const dependentSatisfied = useMemo(() => {
+    if (!field.dependsOn || field.dependsOn.length === 0) return undefined;
 
-        if (logicOperator === 'OR') {
-          // OR logic: at least one dependency must be satisfied
-          const result = field.dependsOn.some((dep) => {
-            const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
-            const depValue = allFormValues[depName];
-            const matches = matchesDependency(depValue, dep.value);
-            return matches;
-          });
-          return result;
-        } else {
-          // AND logic (default): all dependencies must be satisfied
-          const result = field.dependsOn.every((dep) => {
-            const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
-            const depValue = allFormValues[depName];
-            const matches = matchesDependency(depValue, dep.value);
-            return matches;
-          });
-          return result;
-        }
-      })()
-    : undefined;
+    const logicOperator = field.dependsOnLogic ?? 'AND';
+    const depValsArray =
+      Array.isArray(dependencyValues) ? dependencyValues
+      : dependencyValues === undefined ? []
+      : [dependencyValues];
+
+    const results = field.dependsOn.map((dep, idx) => {
+      const depVal = depValsArray[idx];
+      return matchesDependency(depVal, dep.value);
+    });
+
+    return logicOperator === 'OR' ? results.some(Boolean) : results.every(Boolean);
+  }, [field.dependsOn, field.dependsOnLogic, dependencyValues, matchesDependency]);
+
+  if (field.dependsOn && !dependentSatisfied) {
+    return null;
+  }
 
   const fieldType = field.formField.type;
   const hasConditionalRequirement = field.dependsOn?.some((dep) => Boolean(dep.validationMessage)) ?? false;
@@ -91,44 +86,6 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
   const baseRequired = isOptional ? false : isRequired || isTypeRequiredByDefault;
   const isRequiredField = baseRequired || hasConditionalRequirement;
-
-  useEffect(() => {
-    if (fieldValue === undefined && field.value !== undefined) {
-      const valueToSet =
-        Array.isArray(field.value) ? field.value
-        : typeof field.value === 'string' && field.value.trim() !== '' ? field.value
-        : undefined;
-
-      if (valueToSet !== undefined) {
-        setValue(name, valueToSet, { shouldDirty: false, shouldValidate: false });
-      }
-    }
-  }, [field.value, fieldValue, name, setValue]);
-
-  // Register combobox field once on mount, unregister on unmount
-  useEffect(() => {
-    if (field.formField.type === 'combobox') {
-      const validationRules = getConditionalValidationRules(field, getValues);
-      if (isRequiredField) {
-        register(name, {
-          ...validationRules,
-          required: 'Vänligen välj ett alternativ.',
-        });
-      } else {
-        register(name, validationRules);
-      }
-    }
-
-    // Cleanup: unregister field when component unmounts (when switching case type)
-    return () => {
-      unregister(name);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (field.dependsOn && !dependentSatisfied) {
-    return null;
-  }
 
   const formFieldClassName = 'flex flex-col w-full pt-8';
   const fieldDescriptionClassName = 'pt-8 w-full flex flex-col text-md leading-[1.8rem] font-normal font-[Arial]';
@@ -175,17 +132,16 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     };
   }
 
+  const validationRules = getConditionalValidationRules(field, getValues);
+
   function validateAndSetError(
-    field: UppgiftField,
-    getValues: () => Record<string, unknown>,
     setError: (name: string, error: { type: string; message?: string }) => void,
     clearErrors: (name: string) => void,
     name: string,
     value: unknown
   ) {
-    const rules = getConditionalValidationRules(field, getValues);
-    if (rules.validate) {
-      const result = rules.validate(value);
+    if (validationRules.validate) {
+      const result = validationRules.validate(value);
       if (result !== true) {
         setError(name, { type: 'manual', message: result });
       } else {
@@ -193,8 +149,6 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
       }
     }
   }
-
-  const validationRules = getConditionalValidationRules(field, getValues);
 
   const handleChange = (e: unknown) => {
     setValue(name, e, {
@@ -342,11 +296,11 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
           <DatePicker
             type="date"
             data-cy={`uppgift-field-${field.field}`}
-            value={watch(name) ?? ''}
+            {...register(name)}
             onChange={(e) => {
               const selectedDate = e.target?.value ?? '';
               setValue(name, selectedDate, { shouldDirty: true });
-              validateAndSetError(field, getValues, setError, clearErrors, name, selectedDate);
+              validateAndSetError(setError, clearErrors, name, selectedDate);
             }}
             className="w-full"
             aria-label={field.label}

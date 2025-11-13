@@ -1,18 +1,60 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { hasRepeatableGroup } from '@services/casedata-extra-parameters-service';
+import { IErrand } from '@interfaces/errand';
+import {
+  EXTRAPARAMETER_SEPARATOR,
+  extraParametersToUppgiftMapper,
+  hasRepeatableGroup,
+  UppgiftFieldExtended,
+} from '@services/casedata-extra-parameters-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Disclosure, Divider, FormControl } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { RepeatableFieldGroup } from './repeatable-field-group';
 import { SectionCompletion } from './sectionCompletion.component';
 import { UppgiftFieldRenderer } from './uppgift-field-renderer';
-import { useUppgiftFields } from './useUppgiftFields';
+import { buildRenderableFields } from '@components/field-rendering/renderable-fields';
 
 export const ExternalCircumstances: React.FC = () => {
   const [doneMark, setDoneMark] = useState(false);
   const { errand } = useContext(AppContext);
-  const fields = useUppgiftFields('Yttre omständigheter');
+  const [fields, setFields] = useState<UppgiftFieldExtended[]>([]);
+  const context = useFormContext<IErrand>();
+  const caseType = context.watch('caseType');
+
+  useEffect(() => {
+    const uppgifter = extraParametersToUppgiftMapper({
+      caseType: caseType || '',
+      extraParameters: errand?.extraParameters ?? [],
+    });
+    const f = caseType ? (uppgifter[caseType] ?? []).filter((f) => f.section === 'Yttre omständigheter') : [];
+    setFields(f);
+
+    f?.forEach((f) => {
+      const key = f.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+      const rawValue = f.value;
+      if (f.formField.type === 'checkbox' || Array.isArray(rawValue)) {
+        const normalizedArray =
+          Array.isArray(rawValue) ? rawValue
+          : typeof rawValue === 'string' ?
+            rawValue
+              .split(',')
+              .map((v) => v.trim())
+              .filter((v) => v !== '')
+          : [];
+        context.setValue<any>(key, normalizedArray, { shouldDirty: false });
+      } else {
+        context.setValue<any>(key, rawValue, { shouldDirty: false });
+      }
+    });
+  }, [caseType, errand]);
+
+  const renderable = useMemo(
+    () => buildRenderableFields(fields, { RepeatableFieldGroup, UppgiftFieldRenderer }),
+    [fields]
+  );
+
   return (
     <FormControl className="w-full" disabled={isErrandReadOnly(errand)}>
       <Disclosure
@@ -26,66 +68,13 @@ export const ExternalCircumstances: React.FC = () => {
       >
         <div className="mt-24">
           {fields.length > 0 ?
-            <div className="flex flex-col gap-32">
-              {(() => {
-                const renderedFields = new Set<string>();
-                return fields.map((field, index) => {
-                  if (renderedFields.has(field.field)) {
-                    return null;
-                  }
-
-                  if (hasRepeatableGroup(field)) {
-                    renderedFields.add(field.field);
-                    const groupConfig = field.repeatableGroup;
-                    const initialData = field.initialData;
-                    return (
-                      <RepeatableFieldGroup
-                        key={`repeatable-${field.field}-${index}`}
-                        groupName={groupConfig.groupName}
-                        basePath={groupConfig.basePath}
-                        fields={groupConfig.fields}
-                        minItems={groupConfig.repeatableConfig.minItems}
-                        addButtonText={groupConfig.repeatableConfig.addButtonText}
-                        removeButtonText={groupConfig.repeatableConfig.removeButtonText}
-                        initialData={initialData}
-                      />
-                    );
-                  }
-
-                  if (field.pairWith) {
-                    const pairedField = fields.find((f) => f.field === field.pairWith);
-                    if (pairedField && !renderedFields.has(pairedField.field)) {
-                      renderedFields.add(field.field);
-                      renderedFields.add(pairedField.field);
-                      return (
-                        <div key={`pair-${field.field}-${index}`} className="grid grid-cols-2 gap-16 w-full">
-                          <div className="min-w-0">
-                            <UppgiftFieldRenderer field={field} />
-                          </div>
-                          <div className="min-w-0">
-                            <UppgiftFieldRenderer field={pairedField} />
-                          </div>
-                        </div>
-                      );
-                    }
-                  }
-
-                  renderedFields.add(field.field);
-                  return <UppgiftFieldRenderer key={`${field.field}-${index}`} field={field} />;
-                });
-              })()}
-            </div>
+            <div className="flex flex-col gap-32">{renderable}</div>
           : <p>Inga fält att visa.</p>}
 
           {fields.length > 0 && !isErrandReadOnly(errand) && (
             <>
               <Divider className="pt-20" />
-              <SectionCompletion
-                checked={doneMark}
-                onChange={() => {
-                  setDoneMark(!doneMark);
-                }}
-              />
+              <SectionCompletion checked={doneMark} onChange={() => setDoneMark((s) => !s)} />
             </>
           )}
         </div>
