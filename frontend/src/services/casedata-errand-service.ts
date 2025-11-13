@@ -22,7 +22,7 @@ import { ApiResponse, apiService } from './api-service';
 import { fetchErrandAttachments, MAX_FILE_SIZE_MB } from './casedata-attachment-service';
 import {
   extractExtraParameters,
-  extraParametersToUppgiftMapper,
+  getTemplateFields,
   replaceExtraParameter,
   saveExtraParameters,
 } from './casedata-extra-parameters-service';
@@ -54,7 +54,7 @@ export const ongoingCaseDataPTErrandLabels = [
   { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Prioritet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Inkom via', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-]; 
+];
 
 export const ongoingStatuses = [
   ErrandStatus.ArendeInkommit,
@@ -354,7 +354,6 @@ export const useErrands = (
         });
 
       const fetchPromises = [
-
         getErrands(
           municipalityId,
           page,
@@ -499,7 +498,7 @@ export const saveErrand: (data: Partial<IErrand>, municipalityId: string) => Pro
   };
 
   const errandData: Partial<RegisterErrandData> = createApiErrandData(data);
-  const uppgiftFields = extraParametersToUppgiftMapper(data)[data.caseType ?? ''] ?? [];
+  const uppgiftFields = getTemplateFields(data.caseType);
   const extractedExtraParameters = extractExtraParameters(uppgiftFields, () => data);
 
   return errandData.id ?

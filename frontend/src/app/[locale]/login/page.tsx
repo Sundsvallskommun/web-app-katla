@@ -5,6 +5,7 @@ import EmptyLayout from '@layouts/empty-layout/empty-layout.component';
 import { Button, FormErrorMessage } from '@sk-web-gui/react';
 import { apiURL } from '@utils/api-url';
 import { appURL } from '@utils/app-url';
+import escapeStringRegexp from 'escape-string-regexp';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,7 +40,10 @@ const Login: React.FC = () => {
     const path = nonLoginPath || nonLoginSearch || '/';
 
     //Basepath problem, lägger till FT/FT vid login. Detta löser buggen men inte en bra lösning.
-    const cleanedPath = path.replace(new RegExp(`^${process.env.NEXT_PUBLIC_BASE_PATH}`), '');
+    const cleanedPath = path.replace(
+      new RegExp(`^${escapeStringRegexp(process.env.NEXT_PUBLIC_BASE_PATH ?? '')}`),
+      ''
+    );
 
     const url = new URL(apiURL('/saml/login'));
     const queries = new URLSearchParams({

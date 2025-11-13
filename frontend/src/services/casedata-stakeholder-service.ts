@@ -8,7 +8,7 @@ import {
   StakeholderType,
 } from '@interfaces/stakeholder';
 import { ApiResponse, apiService } from '@services/api-service';
-import { OrgNumberFormat, formatOrgNr, latestBy } from '@services/helper-service';
+import { formatOrgNr, latestBy, OrgNumberFormat } from '@services/helper-service';
 import { Admin } from '@services/user-service';
 import { getErrand } from './casedata-errand-service';
 
@@ -126,9 +126,12 @@ export const makeStakeholdersList: (data: Partial<IErrand>) => Partial<CreateSta
   //   stakeholders = stakeholders.concat(contacts);
   // }
   if ((data.stakeholders ?? []).length > 0) {
-    const items = (data.stakeholders ?? []).filter(isValidStakeholder).map((s) => {
-      return makeStakeholder(s, s.newRole);
-    });
+    const items = (data.stakeholders ?? [])
+      .filter(isValidStakeholder)
+      .filter((s) => !s.id) // Filter out existing stakeholders
+      .map((s) => {
+        return makeStakeholder(s, s.newRole);
+      });
     stakeholders = stakeholders.concat(items);
   }
   if (data.administrator) {

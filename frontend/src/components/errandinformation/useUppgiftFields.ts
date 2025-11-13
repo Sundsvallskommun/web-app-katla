@@ -1,19 +1,21 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { extraParametersToUppgiftMapper, UppgiftField } from '@services/casedata-extra-parameters-service';
+import {
+  extraParametersToUppgiftMapper,
+  UppgiftFieldExtended,
+} from '@services/casedata-extra-parameters-service';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
 
-export const useUppgiftFields = (section: string): UppgiftField[] => {
+export const useUppgiftFields = (section: string): UppgiftFieldExtended[] => {
   const { errand } = useContext(AppContext);
-
   const caseType = useWatch({ name: 'caseType' });
 
-  if (!caseType) return [];
-
   const uppgifter = extraParametersToUppgiftMapper({
-    caseType,
+    caseType: caseType || '',
     extraParameters: errand?.extraParameters ?? [],
   });
 
-  return (uppgifter[caseType] ?? []).filter((f) => f.section === section);
+  const fields = caseType ? (uppgifter[caseType] ?? []).filter((f) => f.section === section) : [];
+
+  return fields;
 };

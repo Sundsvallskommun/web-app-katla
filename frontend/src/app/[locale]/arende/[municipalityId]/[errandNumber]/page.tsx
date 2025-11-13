@@ -11,7 +11,7 @@ import { ErrandStatus } from '@interfaces/errand-status';
 import { mapAttachmentsToUploadFiles } from '@services/casedata-attachment-service';
 import { getErrandByErrandNumber } from '@services/casedata-errand-service';
 import { getMe } from '@services/user-service';
-import { Divider, MenuBar, useThemeQueries } from '@sk-web-gui/react';
+import { Divider, NavigationBar, useThemeQueries } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
 import { usePathname } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
@@ -117,21 +117,21 @@ const Arende: React.FC = () => {
                   {!isMaxMediumDevice && <ErrandActionButtons className="flex gap-x-md" />}
                 </header>
                 <div className="border-1 rounded-12 bg-background-content">
-                  <MenuBar className="py-[1rem] pl-[1.6rem]" current={current}>
-                    <MenuBar.Item>
+                  <NavigationBar className="py-[1rem] pl-[1.6rem]" current={current}>
+                    <NavigationBar.Item>
                       <button onClick={() => setCurrent(0)}>Rapporterat</button>
-                    </MenuBar.Item>
+                    </NavigationBar.Item>
                     {errand?.status?.statusType != ErrandStatus.Utkast && (
-                      <MenuBar.Item>
+                      <NavigationBar.Item>
                         <button onClick={() => setCurrent(1)}>Meddelanden</button>
-                      </MenuBar.Item>
+                      </NavigationBar.Item>
                     )}
                     {!isErrandReadOnly(errand) && (
-                      <MenuBar.Item>
+                      <NavigationBar.Item>
                         <button onClick={() => setCurrent(2)}>Bilagor</button>
-                      </MenuBar.Item>
+                      </NavigationBar.Item>
                     )}
-                  </MenuBar>
+                  </NavigationBar>
                   <Divider />
                   <section
                     className={`

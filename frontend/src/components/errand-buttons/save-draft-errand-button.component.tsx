@@ -13,7 +13,7 @@ export const DraftErrandButton: React.FC = () => {
   const toastMessage = useSnackbar();
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
-  const { getValues }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const { getValues, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -64,6 +64,7 @@ export const DraftErrandButton: React.FC = () => {
           }
 
           setErrand(e.errand);
+          reset(e.errand);
           router.push(`/arende/${municipalityId}/${e.errand.errandNumber}`);
         }
         toastMessage({

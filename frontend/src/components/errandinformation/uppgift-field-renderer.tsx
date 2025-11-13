@@ -1,5 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { EXTRAPARAMETER_SEPARATOR, UppgiftField } from '@services/casedata-extra-parameters-service';
+import { EXTRAPARAMETER_SEPARATOR, OptionBase, UppgiftField } from '@services/casedata-extra-parameters-service';
 import {
   Checkbox,
   Combobox,
@@ -13,26 +13,35 @@ import {
   useThemeQueries,
 } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useEffect } from 'react';
-import { Controller, get, useFormContext } from 'react-hook-form';
+import { useContext, useMemo, useState } from 'react';
+import { get, useFormContext, useWatch } from 'react-hook-form';
 
 export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field }) => {
   const {
     register,
-    watch,
+    control,
     setValue,
     getValues,
-    control,
     setError,
     clearErrors,
     formState: { errors },
   } = useFormContext();
-  const name = field.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
+  const name = field.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
+
+  const dependencyNames = (field.dependsOn ?? []).map((d) => d.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR));
+  // eslint-disable-next-line  react-hooks/rules-of-hooks
+  const dependencyValues = dependencyNames.length > 0 ? useWatch({ control, name: dependencyNames }) : undefined;
+
   const error = get(errors, name)?.message;
-  const fieldValue = watch(name);
   const { isMaxMediumDevice } = useThemeQueries();
   const { errand } = useContext(AppContext);
+  const options: OptionBase[] = (field.formField as { options?: OptionBase[] }).options ?? [];
 
+  //TODO: Refactor this component and use a general form for extraparameters instead of hijacking IErrand form.
+  //      Refactoring of this component should include better rendering from parent component to elimit rerenderings.
+  const [initialComboBoxValue] = useState<string | string[]>(field.value);
+
+  // eslint-disable-next-line  react-hooks/exhaustive-deps
   const matchesDependency = (depValue: unknown, requirement: string | string[]) => {
     if (Array.isArray(requirement)) {
       if (Array.isArray(depValue)) {
@@ -48,24 +57,22 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     return depValue === requirement;
   };
 
-  const dependentSatisfied = field.dependsOn?.every((dep) => {
-    const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
-    const depValue = watch(depName);
-    return matchesDependency(depValue, dep.value);
-  });
+  const dependentSatisfied = useMemo(() => {
+    if (!field.dependsOn || field.dependsOn.length === 0) return undefined;
 
-  useEffect(() => {
-    if (fieldValue === undefined && field.value !== undefined) {
-      const valueToSet =
-        Array.isArray(field.value) ? field.value
-        : typeof field.value === 'string' && field.value.trim() !== '' ? field.value
-        : undefined;
+    const logicOperator = field.dependsOnLogic ?? 'AND';
+    const depValsArray =
+      Array.isArray(dependencyValues) ? dependencyValues
+      : dependencyValues === undefined ? []
+      : [dependencyValues];
 
-      if (valueToSet !== undefined) {
-        setValue(name, valueToSet, { shouldDirty: false });
-      }
-    }
-  }, [field.value, fieldValue, name, setValue]);
+    const results = field.dependsOn.map((dep, idx) => {
+      const depVal = depValsArray[idx];
+      return matchesDependency(depVal, dep.value);
+    });
+
+    return logicOperator === 'OR' ? results.some(Boolean) : results.every(Boolean);
+  }, [field.dependsOn, field.dependsOnLogic, dependencyValues, matchesDependency]);
 
   if (field.dependsOn && !dependentSatisfied) {
     return null;
@@ -100,11 +107,25 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     return {
       validate: (value: unknown) => {
         const allValues = getValues();
-        const shouldValidate = field.dependsOn?.some((dep) => {
-          const depName = dep.field.replace(/\./g, EXTRAPARAMETER_SEPARATOR);
-          const depValue = allValues[depName];
-          return matchesDependency(depValue, dep.value);
-        });
+        const logicOperator = field.dependsOnLogic ?? 'AND';
+
+        let shouldValidate: boolean;
+
+        if (logicOperator === 'OR') {
+          shouldValidate =
+            field.dependsOn?.some((dep) => {
+              const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
+              const depValue = allValues[depName];
+              return matchesDependency(depValue, dep.value);
+            }) ?? false;
+        } else {
+          shouldValidate =
+            field.dependsOn?.every((dep) => {
+              const depName = dep.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
+              const depValue = allValues[depName];
+              return matchesDependency(depValue, dep.value);
+            }) ?? false;
+        }
 
         if (!shouldValidate) return true;
 
@@ -113,17 +134,16 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     };
   }
 
+  const validationRules = getConditionalValidationRules(field, getValues);
+
   function validateAndSetError(
-    field: UppgiftField,
-    getValues: () => Record<string, unknown>,
     setError: (name: string, error: { type: string; message?: string }) => void,
     clearErrors: (name: string) => void,
     name: string,
     value: unknown
   ) {
-    const rules = getConditionalValidationRules(field, getValues);
-    if (rules.validate) {
-      const result = rules.validate(value);
+    if (validationRules.validate) {
+      const result = validationRules.validate(value);
       if (result !== true) {
         setError(name, { type: 'manual', message: result });
       } else {
@@ -132,13 +152,16 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     }
   }
 
-  const validationRules = getConditionalValidationRules(field, getValues);
+  const handleChange = (e: unknown) => {
+    setValue(name, e, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+  };
 
   return (
-    <FormControl
-      disabled={isErrandReadOnly(errand)}
-      className="flex flex-col gap-2 items-start justify-start max-w-[80rem] w-full"
-    >
+    <FormControl disabled={isErrandReadOnly(errand)} className="flex flex-col gap-2 items-start justify-start w-full">
       <FormLabel className="self-stretch justify-center text-dark-primary text-md leading-24 ">
         {field.label}
         {isRequiredField && <span className="text-error ml-4">*</span>}
@@ -196,109 +219,26 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
       {field.formField.type === 'combobox' && (
         <div className={formFieldClassName}>
-          <Controller
-            name={name}
-            control={control}
-            defaultValue={
-              Array.isArray(field.value) ? field.value
-              : typeof field.value === 'string' ?
-                field.value
-              : ''
-            }
-            rules={{
-              validate: (value: unknown) => {
-                const conditionalValidation = getConditionalValidationRules(field, getValues).validate;
-                if (conditionalValidation) {
-                  const conditionalResult = conditionalValidation(value);
-                  if (conditionalResult !== true) return conditionalResult;
-                }
-
-                if (!isRequiredField) return true;
-
-                if (Array.isArray(value)) {
-                  const arr = (value as string[]).filter((item) => typeof item === 'string' && item.trim() !== '');
-                  return arr.length > 0 ? true : 'Vänligen välj minst ett alternativ.';
-                }
-
-                return typeof value === 'string' && value.trim() !== '' ? true : 'Vänligen välj ett alternativ.';
-              },
-            }}
-            render={({ field: controllerField }) => {
-              const isMultiSelect = Array.isArray(controllerField.value) || Array.isArray(field.value);
-              const currentValue =
-                isMultiSelect ?
-                  Array.isArray(controllerField.value) ? controllerField.value
-                  : []
-                : typeof controllerField.value === 'string' ? controllerField.value
-                : '';
-
-              const extractValue = (event: unknown) => {
-                if (event && typeof event === 'object' && 'target' in event && event.target) {
-                  const target = (event as { target?: { value?: unknown } }).target;
-                  return target?.value;
-                }
-                return event;
-              };
-
-              const normalizeValue = (raw: unknown): string | string[] => {
-                if (isMultiSelect) {
-                  if (Array.isArray(raw)) {
-                    return raw
-                      .map((item) =>
-                        typeof item === 'string' ? item
-                        : item === undefined || item === null ? ''
-                        : String(item)
-                      )
-                      .filter((item) => item.trim() !== '');
-                  }
-                  if (typeof raw === 'string') {
-                    return raw.trim() !== '' ? [raw] : [];
-                  }
-                  return [];
-                }
-
-                if (typeof raw === 'string') return raw;
-                if (raw === undefined || raw === null) return '';
-                return String(raw);
-              };
-
-              const handleValueChange = (raw: unknown) => {
-                const normalized = normalizeValue(raw);
-                controllerField.onChange(normalized);
-                validateAndSetError(field, getValues, setError, clearErrors, name, normalized);
-              };
-
-              const comboboxOptions =
-                (field.formField as { options?: { label: string; value: string }[] }).options ?? [];
-
-              return (
-                <Combobox
-                  className="w-full"
+          <Combobox
+            className="w-full"
+            data-cy={`${field.field}-combobox`}
+            multiple={Array.isArray(field.value)}
+            value={initialComboBoxValue}
+            onSelect={(e) => handleChange(e.target.value)}
+          >
+            <Combobox.Input className="w-full" placeholder="Sök eller välj" />
+            <Combobox.List>
+              {options.map((option, index) => (
+                <Combobox.Option
+                  key={`${option.value}-${index}`}
+                  value={option.value}
                   data-cy={`uppgift-field-${field.field}`}
-                  multiple={isMultiSelect}
-                  value={currentValue}
-                  onChange={(event) => handleValueChange(extractValue(event))}
-                  onSelect={(event) => handleValueChange(extractValue(event))}
-                  disabled={isErrandReadOnly(errand)}
                 >
-                  <Combobox.Input
-                    className="w-full"
-                    placeholder={'Sök eller välj'}
-                    name={controllerField.name}
-                    onBlur={controllerField.onBlur}
-                    ref={controllerField.ref}
-                  />
-                  <Combobox.List>
-                    {comboboxOptions.map((option, index) => (
-                      <Combobox.Option key={`${option.value}-${index}`} value={option.value}>
-                        {option.label}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.List>
-                </Combobox>
-              );
-            }}
-          />
+                  {option.label}
+                </Combobox.Option>
+              ))}
+            </Combobox.List>
+          </Combobox>
           {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
           <ErrorMessage error={error} />
         </div>
@@ -306,14 +246,19 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
       {field.formField.type === 'radio' && (
         <div className={formFieldClassName}>
-          <RadioButton.Group inline={!isMaxMediumDevice && field.formField.options.length <= 3} data-cy={`uppgift-field-${field.field}`}>
+          <RadioButton.Group
+            inline={!isMaxMediumDevice && field.formField.options.length <= 3}
+            data-cy={`uppgift-field-${field.field}`}
+          >
             {field.formField.options.map((o, i) => (
               <RadioButton
                 key={`${o.value}-${i}`}
                 value={o.value}
                 {...register(name, {
                   ...validationRules,
-                  required: 'Vänligen välj ett alternativ.',
+                  ...(isRequiredField && !validationRules.validate ?
+                    { required: 'Vänligen välj ett alternativ.' }
+                  : {}),
                 })}
               >
                 {o.label}
@@ -325,51 +270,24 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         </div>
       )}
 
-      {field.formField.type === 'checkbox' && 'options' in field.formField && (
+      {field.formField.type === 'checkbox' && (
         <div className={formFieldClassName}>
-          <Controller
-            name={name}
-            control={control}
-            rules={{
-              ...validationRules,
-              validate: (value: unknown) => {
-                const hasSelection = Array.isArray(value) && value.length > 0;
-                const conditionalValidation = getConditionalValidationRules(field, getValues).validate;
-
-                if (conditionalValidation) {
-                  const conditionalResult = conditionalValidation(value);
-                  if (conditionalResult !== true) return conditionalResult;
-                }
-
-                if (!isRequiredField) return true;
-
-                return hasSelection ? true : 'Vänligen välj minst ett alternativ.';
-              },
-            }}
-            render={({ field: controllerField }) => {
-              const checkboxOptions =
-                (field.formField as { options?: { label: string; value: string }[] }).options ?? [];
-              const shouldStackCheckboxes = isMaxMediumDevice || checkboxOptions.length > 3;
-
-              return (
-                <Checkbox.Group
-                  data-cy={`uppgift-field-${field.field}`}
-                  value={controllerField.value || []}
-                  onChange={(val) => {
-                    controllerField.onChange(val);
-                    validateAndSetError(field, getValues, setError, clearErrors, name, val);
-                  }}
-                  direction={shouldStackCheckboxes ? 'column' : 'row'}
-                >
-                  {checkboxOptions.map((option, i) => (
-                    <Checkbox key={`${option.value}-${i}`} value={option.value}>
-                      {option.label}
-                    </Checkbox>
-                  ))}
-                </Checkbox.Group>
-              );
-            }}
-          />
+          <Checkbox.Group
+            data-cy={`uppgift-field-${field.field}`}
+            direction="row"
+            defaultValue={field.value as string[]}
+          >
+            {options.map((option, index) => (
+              <Checkbox
+                key={`${option.value}-${index}`}
+                value={option.value}
+                data-cy={`${field.field}-checkbox-${index}`}
+                {...register(name)}
+              >
+                {option.label}
+              </Checkbox>
+            ))}
+          </Checkbox.Group>
           {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
           <ErrorMessage error={error} />
         </div>
@@ -380,11 +298,11 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
           <DatePicker
             type="date"
             data-cy={`uppgift-field-${field.field}`}
-            value={watch(name) ?? ''}
+            {...register(name)}
             onChange={(e) => {
               const selectedDate = e.target?.value ?? '';
               setValue(name, selectedDate, { shouldDirty: true });
-              validateAndSetError(field, getValues, setError, clearErrors, name, selectedDate);
+              validateAndSetError(setError, clearErrors, name, selectedDate);
             }}
             className="w-full"
             aria-label={field.label}

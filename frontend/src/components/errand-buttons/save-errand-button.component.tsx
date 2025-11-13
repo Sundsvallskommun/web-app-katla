@@ -12,7 +12,7 @@ import { scrollToFirstError } from './errand-buttons-utils';
 export const SaveErrandButton: React.FC = () => {
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
-  const { getValues, trigger, formState }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const { getValues, trigger, formState, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
   const draftErrand = errand?.status?.statusType === ErrandStatus.Utkast;
 
   const onSubmit = async () => {
@@ -100,6 +100,7 @@ export const SaveErrandButton: React.FC = () => {
           }
 
           setErrand(e.errand);
+          reset(e.errand);
         }
         toastMessage({
           position: 'bottom',

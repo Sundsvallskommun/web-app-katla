@@ -6,11 +6,12 @@ import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { searchADUser } from '@services/adress-service';
 import { isArray } from '@sk-web-gui/react';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
 export const HealthCareStaff: React.FC = () => {
-  const { user} = useContext(AppContext);
+  const hasAddedReporter = useRef(false);
+  const { user } = useContext(AppContext);
 
   const { control } = useFormContext<IErrand>();
 
@@ -22,7 +23,8 @@ export const HealthCareStaff: React.FC = () => {
   const reporterStakeholder = fields.filter((s) => s.roles?.includes(Role.REPORTER));
 
   useEffect(() => {
-    if (reporterStakeholder.length === 0 && user?.username) {
+    if (reporterStakeholder.length === 0 && user?.username && !hasAddedReporter.current) {
+      hasAddedReporter.current = true;
       searchADUser(user.username)
         .then((res) => {
           if (!isArray(res)) {
