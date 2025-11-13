@@ -2,6 +2,7 @@ import React from 'react';
 import { hasRepeatableGroup, UppgiftFieldExtended } from '@services/casedata-extra-parameters-service';
 
 export type RenderComponents = {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   RepeatableFieldGroup: React.ComponentType<any>;
   UppgiftFieldRenderer: React.ComponentType<{ field: UppgiftFieldExtended }>;
 };

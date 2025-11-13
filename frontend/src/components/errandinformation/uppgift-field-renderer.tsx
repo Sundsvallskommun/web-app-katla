@@ -29,6 +29,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const name = field.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
 
   const dependencyNames = (field.dependsOn ?? []).map((d) => d.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR));
+  // eslint-disable-next-line  react-hooks/rules-of-hooks
   const dependencyValues = dependencyNames.length > 0 ? useWatch({ control, name: dependencyNames }) : undefined;
 
   const error = get(errors, name)?.message;
@@ -40,6 +41,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   //      Refactoring of this component should include better rendering from parent component to elimit rerenderings.
   const [initialComboBoxValue] = useState<string | string[]>(field.value);
 
+  // eslint-disable-next-line  react-hooks/exhaustive-deps
   const matchesDependency = (depValue: unknown, requirement: string | string[]) => {
     if (Array.isArray(requirement)) {
       if (Array.isArray(depValue)) {

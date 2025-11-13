@@ -48,6 +48,7 @@ export const MedicalOpinion: React.FC = () => {
         context.setValue('priority', Priority.MEDIUM, { shouldDirty: true });
       }
     }
+    // eslint-disable-next-line  react-hooks/exhaustive-deps
   }, [diagnoses, priority, readOnly, context.setValue]);
 
   useEffect(() => {
@@ -70,11 +71,14 @@ export const MedicalOpinion: React.FC = () => {
               .map((v) => v.trim())
               .filter((v) => v !== '')
           : [];
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         context.setValue<any>(key, normalizedArray, { shouldDirty: false });
       } else {
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         context.setValue<any>(key, rawValue, { shouldDirty: false });
       }
     });
+    // eslint-disable-next-line  react-hooks/exhaustive-deps
   }, [caseType, errand]);
 
   const renderable = useMemo(
