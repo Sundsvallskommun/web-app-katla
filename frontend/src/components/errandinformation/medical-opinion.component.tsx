@@ -56,7 +56,7 @@ export const MedicalOpinion: React.FC = () => {
       caseType: caseType || '',
       extraParameters: errand?.extraParameters ?? [],
     });
-    const f = caseType ? (uppgifter[caseType] ?? []).filter((f) => f.section === 'Yttre omständigheter') : [];
+    const f = caseType ? (uppgifter[caseType] ?? []).filter((f) => f.section === 'Medicinskt utlåtande') : [];
     setFields(f);
 
     f?.forEach((f) => {
