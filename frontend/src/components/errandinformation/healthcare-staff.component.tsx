@@ -1,20 +1,17 @@
 import { DisplayCard } from '@components/display-card.component';
+import { ErrandDisclosure } from '@components/errand-disclosures/errand-disclosure.component';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { Role } from '@interfaces/role';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { searchADUser } from '@services/adress-service';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Disclosure, FormControl, isArray } from '@sk-web-gui/react';
-import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { isArray } from '@sk-web-gui/react';
+import { useContext, useEffect, useRef } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { SectionCompletion } from './sectionCompletion.component';
 
 export const HealthCareStaff: React.FC = () => {
-  const [doneMark, setDoneMark] = useState(false);
-  const { user, errand } = useContext(AppContext);
   const hasAddedReporter = useRef(false);
+  const { user } = useContext(AppContext);
 
   const { control } = useFormContext<IErrand>();
 
@@ -59,30 +56,14 @@ export const HealthCareStaff: React.FC = () => {
   }, [reporterStakeholder.length, user?.username, append]);
 
   return (
-    <FormControl className="w-full" disabled={isErrandReadOnly(errand)}>
-      <Disclosure
-        icon={<LucideIcon name="user" />}
-        header="Vårdpersonal"
-        variant="alt"
-        className="w-full mobileVersion"
-        open={true}
-        label={doneMark ? 'Komplett' : ''}
-        labelColor={'gronsta'}
-      >
-        <div className="w-full">
-          <p>Vårdpersonal är den person som initierat ärendet och vår primära kontakt när ärendet handläggs.</p>
+    <ErrandDisclosure header="Vårdpersonal" lucideIconName="user">
+      <div className="w-full">
+        <p>Vårdpersonal är den person som initierat ärendet och vår primära kontakt när ärendet handläggs.</p>
 
-          {reporterStakeholder?.map((person, index) => (
-            <DisplayCard key={index} person={person} availableRoles={[Role.REPORTER]} />
-          ))}
-        </div>
-        <SectionCompletion
-          checked={doneMark}
-          onChange={() => {
-            setDoneMark(!doneMark);
-          }}
-        />
-      </Disclosure>
-    </FormControl>
+        {reporterStakeholder?.map((person, index) => (
+          <DisplayCard key={index} person={person} availableRoles={[Role.REPORTER]} />
+        ))}
+      </div>
+    </ErrandDisclosure>
   );
 };

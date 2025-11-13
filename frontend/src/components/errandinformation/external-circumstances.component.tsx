@@ -1,23 +1,18 @@
+import { ErrandDisclosure } from '@components/errand-disclosures/errand-disclosure.component';
+import { buildRenderableFields } from '@components/field-rendering/renderable-fields';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import {
   EXTRAPARAMETER_SEPARATOR,
   extraParametersToUppgiftMapper,
-  hasRepeatableGroup,
   UppgiftFieldExtended,
 } from '@services/casedata-extra-parameters-service';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Disclosure, Divider, FormControl } from '@sk-web-gui/react';
-import { isErrandReadOnly } from '@utils/errand-utils';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { RepeatableFieldGroup } from './repeatable-field-group';
-import { SectionCompletion } from './sectionCompletion.component';
 import { UppgiftFieldRenderer } from './uppgift-field-renderer';
-import { buildRenderableFields } from '@components/field-rendering/renderable-fields';
 
 export const ExternalCircumstances: React.FC = () => {
-  const [doneMark, setDoneMark] = useState(false);
   const { errand } = useContext(AppContext);
   const [fields, setFields] = useState<UppgiftFieldExtended[]>([]);
   const context = useFormContext<IErrand>();
@@ -56,29 +51,12 @@ export const ExternalCircumstances: React.FC = () => {
   );
 
   return (
-    <FormControl className="w-full" disabled={isErrandReadOnly(errand)}>
-      <Disclosure
-        icon={<LucideIcon name="clipboard-signature" />}
-        open={fields.length > 0}
-        header="Yttre omständigheter"
-        variant="alt"
-        className="w-full"
-        label={doneMark ? 'Komplett' : ''}
-        labelColor="gronsta"
-      >
-        <div className="mt-24">
-          {fields.length > 0 ?
-            <div className="flex flex-col gap-32">{renderable}</div>
-          : <p>Inga fält att visa.</p>}
-
-          {fields.length > 0 && !isErrandReadOnly(errand) && (
-            <>
-              <Divider className="pt-20" />
-              <SectionCompletion checked={doneMark} onChange={() => setDoneMark((s) => !s)} />
-            </>
-          )}
-        </div>
-      </Disclosure>
-    </FormControl>
+    <ErrandDisclosure header="Yttre omständigheter" lucideIconName="clipboard-signature" errandInformationSection>
+      <div className="mt-24">
+        {fields.length > 0 ?
+          <div className="flex flex-col gap-32">{renderable}</div>
+        : <p>Inga fält att visa.</p>}
+      </div>
+    </ErrandDisclosure>
   );
 };

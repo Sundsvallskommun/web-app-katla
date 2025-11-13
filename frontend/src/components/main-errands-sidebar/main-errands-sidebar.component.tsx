@@ -19,13 +19,14 @@ interface SidebarProps {
 
 export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, children }) => {
   const { user } = useContext(AppContext);
+  const applicationEnvironment = getApplicationEnvironment();
   const MainTitle = (open: boolean) => (
     <NextLink href="/" className="no-underline" aria-label={`Go to homepage`}>
       <Logo
         className={cx(open ? '' : 'w-[2.8rem]')}
         variant={open ? 'service' : 'symbol'}
         title={'Draken'}
-        subtitle={`${appConfig.applicationName} ` + ` ${getApplicationEnvironment()}`}
+        subtitle={`${appConfig.applicationName} ` + ` ${applicationEnvironment ? ` ${applicationEnvironment}` : ''}`}
       />
     </NextLink>
   );

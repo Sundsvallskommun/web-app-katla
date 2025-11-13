@@ -3,12 +3,13 @@ import { Logo } from '@sk-web-gui/react';
 import { appConfig } from 'src/config/app-config';
 
 export const MobileHeaderLogo: React.FC = () => {
+  const applicationEnvironment = getApplicationEnvironment();
   return (
     <div className="flex items-center min-w-0 flex-1">
       <Logo
         variant="service"
         title="Draken"
-        subtitle={`${appConfig.applicationName} ${getApplicationEnvironment()}`}
+        subtitle={`${appConfig.applicationName} ${applicationEnvironment ? ` ${applicationEnvironment}` : ''}`}
         className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
       />
     </div>

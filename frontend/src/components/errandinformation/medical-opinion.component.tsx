@@ -1,3 +1,4 @@
+import { ErrandDisclosure } from '@components/errand-disclosures/errand-disclosure.component';
 import { buildRenderableFields } from '@components/field-rendering/renderable-fields';
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
@@ -7,18 +8,13 @@ import {
   extraParametersToUppgiftMapper,
   UppgiftFieldExtended,
 } from '@services/casedata-extra-parameters-service';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Disclosure, Divider, FormControl } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { RepeatableFieldGroup } from './repeatable-field-group';
-import { SectionCompletion } from './sectionCompletion.component';
 import { UppgiftFieldRenderer } from './uppgift-field-renderer';
 
 export const MedicalOpinion: React.FC = () => {
-  const [doneMark, setDoneMark] = useState(false);
-
   const { errand } = useContext(AppContext);
   const readOnly = isErrandReadOnly(errand);
   const diagnosesFieldName = `medical${EXTRAPARAMETER_SEPARATOR}diagnoses`;
@@ -87,34 +83,12 @@ export const MedicalOpinion: React.FC = () => {
   );
 
   return (
-    <FormControl className="w-full" disabled={readOnly}>
-      <Disclosure
-        icon={<LucideIcon name="clipboard-signature" />}
-        header="Medicinskt utlåtande"
-        variant="alt"
-        open={fields.length > 0}
-        className="w-full"
-        label={doneMark ? 'Komplett' : ''}
-        labelColor="gronsta"
-      >
-        <div className="mt-24">
-          {fields.length > 0 ?
-            <div className="flex flex-col gap-32">{renderable}</div>
-          : <p>Inga fält att visa.</p>}
-
-          {fields.length > 0 && !readOnly && (
-            <>
-              <Divider className="pt-20" />
-              <SectionCompletion
-                checked={doneMark}
-                onChange={() => {
-                  setDoneMark(!doneMark);
-                }}
-              />
-            </>
-          )}
-        </div>
-      </Disclosure>
-    </FormControl>
+    <ErrandDisclosure header="Medicinskt utlåtande" lucideIconName="clipboard-signature" errandInformationSection>
+      <div className="mt-24">
+        {fields.length > 0 ?
+          <div className="flex flex-col gap-32">{renderable}</div>
+        : <p>Inga fält att visa.</p>}
+      </div>
+    </ErrandDisclosure>
   );
 };
