@@ -116,15 +116,7 @@ const isValidStakeholder: (c: CasedataOwnerOrContact) => boolean = (c) => {
 
 export const makeStakeholdersList: (data: Partial<IErrand>) => Partial<CreateStakeholderDto>[] = (data) => {
   let stakeholders: Partial<CreateStakeholderDto>[] = [];
-  // if (data.owner?.length === 1 && isValidStakeholder(data.owner[0])) {
-  //   stakeholders.push(makeStakeholder(data.owner[0], Role.APPLICANT));
-  // }
-  // if (data.contacts?.length > 0) {
-  //   const contacts = data.contacts.map((c) => {
-  //     return makeStakeholder(c, Role.CONTACT_PERSON);
-  //   });
-  //   stakeholders = stakeholders.concat(contacts);
-  // }
+
   if ((data.stakeholders ?? []).length > 0) {
     const items = (data.stakeholders ?? [])
       .filter(isValidStakeholder)
