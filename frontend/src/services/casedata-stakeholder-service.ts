@@ -252,9 +252,6 @@ export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (
   };
 };
 
-// export const getFellowApplicants: (e: IErrand) => CasedataOwnerOrContact[] = (e) =>
-//   e.stakeholders?.filter((s) => s.roles.includes(Role.FELLOW_APPLICANT)) || [];
-
 export const getOwnerStakeholder: (e: IErrand) => CasedataOwnerOrContact = (e) =>
   e.stakeholders?.filter((s) => s.roles.includes(Role.APPLICANT))?.[0];
 
