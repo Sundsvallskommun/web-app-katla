@@ -11,7 +11,7 @@ export interface ContactInfo {
 export type StakeholderType = 'PERSON' | 'ORGANIZATION';
 
 export interface CreateStakeholderDto {
-  id?: string;
+  id?: number;
   type: StakeholderType;
   roles: Role[];
   addresses?: Address[];
@@ -32,7 +32,7 @@ export interface CreateStakeholderDto {
 }
 
 export interface Stakeholder extends CreateStakeholderDto {
-  id: string;
+  id: number;
   created: string;
   updated: string;
 }
@@ -42,7 +42,7 @@ export interface StakeholderData extends Data {
 }
 
 export interface CasedataOwnerOrContact {
-  id: string;
+  id?: string;
   stakeholderType: StakeholderType;
   roles: Role[];
   newRole: Role;
@@ -57,11 +57,9 @@ export interface CasedataOwnerOrContact {
   careof?: string;
   zip?: string;
   city?: string;
-  newPhoneNumber?: string;
   phoneNumbers?: {
     value: string;
   }[];
-  newEmail?: string;
   emails: {
     value: string;
   }[];

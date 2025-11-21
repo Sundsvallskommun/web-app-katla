@@ -3,6 +3,7 @@ import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
+import { useRemoveDeletedStakeholders } from '@hooks/use-remove-deleted-stakeholders';
 import { Button, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/react';
 import { prepareAttachmentsForSubmit } from '@utils/prepare-attachments';
 import { useRouter } from 'next/navigation';
@@ -14,6 +15,7 @@ export const DraftErrandButton: React.FC = () => {
   const router = useRouter();
   const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
   const { getValues, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const handleRemoveDeletedStakeholders = useRemoveDeletedStakeholders();
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -23,6 +25,8 @@ export const DraftErrandButton: React.FC = () => {
     const { newAttachments, existingAttachments } = prepareAttachmentsForSubmit(data.attachments || []);
 
     try {
+      await handleRemoveDeletedStakeholders(data);
+
       const res = await saveErrand(data, municipalityId);
       if (!res.errandSuccessful) {
         throw new Error('Errand could not be registered');

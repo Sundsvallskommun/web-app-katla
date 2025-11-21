@@ -2,6 +2,7 @@ import { IErrand } from '@interfaces/errand';
 import { getRoleDisplayName, Role } from '@interfaces/role';
 import {
   CasedataOwnerOrContact,
+  ContactInfo,
   ContactInfoType,
   CreateStakeholderDto,
   Stakeholder,
@@ -63,18 +64,22 @@ export const makeAdministratorStakeholder: (data: Partial<IErrand>) => CreateSta
 };
 
 export const makeStakeholder: (data: CasedataOwnerOrContact, role: Role) => CreateStakeholderDto = (data, role) => {
-  const phones =
-    data.phoneNumbers?.map((p) => ({
+  const phones: ContactInfo[] = (data.phoneNumbers ?? [])
+    .filter((p) => p.value && p.value.trim() !== '')
+    .map((p) => ({
       contactType: 'PHONE' as ContactInfoType,
       value: p.value,
-    })) || [];
-  const mails =
-    data.emails?.map((p) => ({
+    }));
+
+  const mails: ContactInfo[] = (data.emails ?? [])
+    .filter((m) => m.value && m.value.trim() !== '')
+    .map((m) => ({
       contactType: 'EMAIL' as ContactInfoType,
-      value: p.value,
-    })) || [];
+      value: m.value,
+    }));
+
   return {
-    ...(data.id && { id: data.id }),
+    ...(data.id && data.id !== '' && { id: Number(data.id) }),
     ...(data.personId && { personId: data.personId.toString() }),
     type: data.stakeholderType,
     roles: [role ?? data.roles[0]],
@@ -102,11 +107,6 @@ export const makeStakeholder: (data: CasedataOwnerOrContact, role: Role) => Crea
   };
 };
 
-// const validateAddressInfo: (a: Address) => boolean = (a) =>
-//   a.addressCategory &&
-//   a.addressCategory === 'POSTAL_ADDRESS' &&
-//   (!!a.street || !!a.city || !!a.postalCode || !!a.careOf);
-
 const isValidStakeholder: (c: CasedataOwnerOrContact) => boolean = (c) => {
   return (
     (c.stakeholderType === 'PERSON' && c.firstName !== '') ||
@@ -116,22 +116,11 @@ const isValidStakeholder: (c: CasedataOwnerOrContact) => boolean = (c) => {
 
 export const makeStakeholdersList: (data: Partial<IErrand>) => Partial<CreateStakeholderDto>[] = (data) => {
   let stakeholders: Partial<CreateStakeholderDto>[] = [];
-  // if (data.owner?.length === 1 && isValidStakeholder(data.owner[0])) {
-  //   stakeholders.push(makeStakeholder(data.owner[0], Role.APPLICANT));
-  // }
-  // if (data.contacts?.length > 0) {
-  //   const contacts = data.contacts.map((c) => {
-  //     return makeStakeholder(c, Role.CONTACT_PERSON);
-  //   });
-  //   stakeholders = stakeholders.concat(contacts);
-  // }
+
   if ((data.stakeholders ?? []).length > 0) {
-    const items = (data.stakeholders ?? [])
-      .filter(isValidStakeholder)
-      .filter((s) => !s.id) // Filter out existing stakeholders
-      .map((s) => {
-        return makeStakeholder(s, s.newRole);
-      });
+    const items = (data.stakeholders ?? []).filter(isValidStakeholder).map((s) => {
+      return makeStakeholder(s, s.newRole);
+    });
     stakeholders = stakeholders.concat(items);
   }
   if (data.administrator) {
@@ -202,10 +191,6 @@ export const setAdministrator = async (municipalityId: string, errand: IErrand, 
 };
 
 export const removeStakeholder = (municipalityId: string, errandId: number, stakeholderId: string) => {
-  if (!stakeholderId) {
-    console.error('No id found, cannot continue.');
-    return;
-  }
   return apiService
     .deleteRequest<boolean>(`casedata/${municipalityId}/errands/${errandId}/stakeholders/${stakeholderId}`)
     .then((res) => {
@@ -219,7 +204,7 @@ export const removeStakeholder = (municipalityId: string, errandId: number, stak
 
 export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (s) => {
   return {
-    id: s.id,
+    id: s.id.toString(),
     stakeholderType: s.type,
     roles: s.roles,
     newRole: s.roles?.[0] || Role.CONTACT_PERSON,
@@ -234,15 +219,15 @@ export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (
     careof: s.addresses?.[0]?.careOf || '',
     zip: s.addresses?.[0]?.postalCode || '',
     city: s.addresses?.[0]?.city || '',
-    newPhoneNumber: s.contactInformation?.find((c) => c.contactType === 'PHONE')?.value,
     phoneNumbers: (s.contactInformation ?? [])
       .filter((c) => c.contactType === 'PHONE')
+      .filter((c) => c.value && c.value.trim() !== '')
       .map((c) => ({
         value: c.value,
       })),
-    newEmail: s.contactInformation?.find((c) => c.contactType === 'EMAIL')?.value,
     emails: (s.contactInformation ?? [])
       .filter((c) => c.contactType === 'EMAIL')
+      .filter((c) => c.value && c.value.trim() !== '')
       .map((c) => ({
         value: c.value,
       })),

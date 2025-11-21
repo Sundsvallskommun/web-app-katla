@@ -3,12 +3,10 @@ import { ErrandActionButtons } from '@components/errand-action-buttons.component
 import { ErrandHeader } from '@components/errand-header/errand-header.component';
 import { ErrandReportedTab } from '@components/errand-reported-tab.component';
 import FileUploadComponent from '@components/file-upload/file-upload.component';
-import { AppContext } from '@contexts/app-context-interface';
+import { useInitializeErrandForm } from '@hooks/use-initialize-errand-form';
 import { IErrand } from '@interfaces/errand';
 import { emptyErrand } from '@services/casedata-errand-service';
-import { getMe } from '@services/user-service';
 import { useThemeQueries } from '@sk-web-gui/react';
-import { useContext, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 const Registrera: React.FC = () => {
@@ -16,14 +14,9 @@ const Registrera: React.FC = () => {
     mode: 'onChange',
     defaultValues: emptyErrand,
   });
-  const { setMunicipalityId, setUser } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
 
-  useEffect(() => {
-    setMunicipalityId(process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '');
-    getMe().then((user) => setUser(user));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useInitializeErrandForm(method);
 
   return (
     <FormProvider {...method}>

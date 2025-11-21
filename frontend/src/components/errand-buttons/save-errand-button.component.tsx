@@ -4,6 +4,7 @@ import { IErrand } from '@interfaces/errand';
 import { ErrandStatus } from '@interfaces/errand-status';
 import { editAttachment, sendAttachments } from '@services/casedata-attachment-service';
 import { getErrand, saveErrand } from '@services/casedata-errand-service';
+import { useRemoveDeletedStakeholders } from '@hooks/use-remove-deleted-stakeholders';
 import { Button, Spinner, UploadFile, useSnackbar } from '@sk-web-gui/react';
 import { useContext } from 'react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
@@ -13,6 +14,7 @@ export const SaveErrandButton: React.FC = () => {
   const toastMessage = useSnackbar();
   const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, trigger, formState, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
+  const handleRemoveDeletedStakeholders = useRemoveDeletedStakeholders();
   const draftErrand = errand?.status?.statusType === ErrandStatus.Utkast;
 
   const onSubmit = async () => {
@@ -64,6 +66,8 @@ export const SaveErrandButton: React.FC = () => {
     });
 
     try {
+      await handleRemoveDeletedStakeholders(data);
+
       const res = await saveErrand(data, municipalityId);
       if (!res.errandSuccessful) {
         throw new Error('Errand could not be registered');

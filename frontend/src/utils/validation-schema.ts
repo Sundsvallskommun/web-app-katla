@@ -87,8 +87,6 @@ export const zipSchema = yup
 export const stakeholderSchema = yup.object().shape({
   firstName: yup.string().required('Förnamn är obligatoriskt'),
   lastName: yup.string().required('Efternamn är obligatoriskt'),
-  newEmail: emailSchema,
-  newPhoneNumber: phoneSchema,
   emails: yup
     .array()
     .of(
