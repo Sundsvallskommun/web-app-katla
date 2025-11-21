@@ -38,9 +38,9 @@ export const CancelRegistrationButton: React.FC = () => {
         <Dialog data-cy="cancel-registration-dialog" className="max-w-[36rem]" show={isOpen}>
           <Dialog.Content className="flex flex-col items-center justify-center text-center">
             <LucideIcon color="vattjom" name="hand" size={32} />
-            <div className="text-h4">Avbryt registrering</div>
+            <div className="text-h4">Avbryt inskickning</div>
             <div>
-              Du har valt att avbryta registreringen. Ej sparad data kommer att gå förlorad. Är du säker att du vill
+              Du har valt att avbryta inskickningen. Ej sparad data kommer att gå förlorad. Är du säker att du vill
               avbryta?
             </div>
           </Dialog.Content>

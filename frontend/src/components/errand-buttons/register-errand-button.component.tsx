@@ -35,7 +35,7 @@ export const RegisterErrandButton: React.FC = () => {
     if (!hasApplicant) {
       toastMessage({
         position: 'bottom',
-        message: 'En sökande part krävs för att registrera ärendet.',
+        message: 'En sökande part krävs för att skicka in ärendet.',
         status: 'error',
       });
       return;
@@ -121,7 +121,7 @@ export const RegisterErrandButton: React.FC = () => {
       toastMessage({
         position: 'bottom',
         closeable: false,
-        message: 'Ett fel uppstod vid registrering av ärendet',
+        message: 'Ett fel uppstod vid inskickning av ärendet',
         status: 'error',
       });
       setIsLoading(false);
@@ -139,19 +139,19 @@ export const RegisterErrandButton: React.FC = () => {
         disabled={isLoading}
         rightIcon={isLoading ? <Spinner size={2} /> : undefined}
       >
-        Registrera ärende
+        Skicka in ärende
       </Button>
 
       {isOpen && (
         <Dialog data-cy="confirm-register-dialog" className="max-w-[36rem]" show={isOpen}>
           <Dialog.Content className="flex flex-col items-center justify-center text-center">
             <LucideIcon color="vattjom" name="inbox" size={32} />
-            <div className="text-h4">Registrera ärende</div>
+            <div className="text-h4">Skicka in ärende</div>
             <div>
-              När du registrerar ett ärende, kommer det automatiskt att placeras under kategorin &apos;Inkomna
-              ärende&apos;. Därefter blir ärendet tillgängligt för alla behöriga medarbetare inom din verksamhet.
+              När du skickar in ett ärende, kommer det automatiskt att placeras under kategorin 'Inkomna
+              ärende'. Därefter blir ärendet tillgängligt för alla behöriga medarbetare inom din verksamhet.
             </div>
-            <p>Vill du fortsätta med registreringen?</p>
+            <p>Vill du fortsätta med inskickningen?</p>
           </Dialog.Content>
           <Dialog.Buttons className="flex justify-center gap-7">
             <Button className="w-[12.8rem]" variant="secondary" onClick={closeDialog}>
