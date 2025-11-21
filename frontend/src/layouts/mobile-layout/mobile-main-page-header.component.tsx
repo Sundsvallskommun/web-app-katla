@@ -26,9 +26,9 @@ export const MobileMainPageHeader: React.FC<MobileMainPageHeaderProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
-      <div className="flex h-[7rem] px-[1.6rem] gap-[1.2rem] items-center justify-between bg-vattjom-background-200 shadow-100 relative z-10">
+      <div className="flex h-[7rem] px-4 gap-3 items-center justify-between bg-vattjom-background-200 shadow-100 relative z-10">
         <MobileHeaderLogo />
-        <div className="flex items-center gap-[1.2rem] flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <NotificationsBell toggleShow={() => setOpenNotification(!openNotification)} />
           <Button
             color="primary"

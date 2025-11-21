@@ -51,9 +51,9 @@ export class CaseDataErrandController {
         .catch(e => ({ data: undefined, message: '404' }));
       applicant.personalNumber = personNumberRes.data;
     }
-    const fellowApplicants: (StakeholderDTO & { personalNumber?: string })[] =
-      errandData.stakeholders?.filter(s => s.roles.includes(Role.FELLOW_APPLICANT) || s.roles.includes(Role.CONTACT_PERSON)) || [];
-    const fellowApplicantsPromises = fellowApplicants.map(fa => {
+    const contactPersons: (StakeholderDTO & { personalNumber?: string })[] =
+      errandData.stakeholders?.filter(s => s.roles.includes(Role.CONTACT_PERSON)) || [];
+    const contactPersonsPromises = contactPersons.map(fa => {
       if (fa && fa.personId) {
         const personNumberUrl = `${this.CITIZEN_SERVICE}/${MUNICIPALITY_ID}/${fa.personId}/personnumber`;
         const getPersonalNumber = () =>
@@ -69,7 +69,7 @@ export class CaseDataErrandController {
         return Promise.resolve(true);
       }
     });
-    await Promise.all(fellowApplicantsPromises);
+    await Promise.all(contactPersonsPromises);
     const resToSend: SingleErrandResponseData = { data: errandData, message: 'success' };
     return resToSend;
   };

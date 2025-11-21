@@ -240,7 +240,7 @@ export const mockErrands_base = {
         created: '2024-05-27T13:47:05.957991+02:00',
         updated: '2024-05-27T13:48:10.724662+02:00',
         errandNumber: 'MEX-2024-000312',
-        caseType: 'PARATRANSIT_NOTIFICATION_RIAK',
+        caseType: 'PARATRANSIT_NOTIFICATION',
         priority: 'LOW',
         caseTitleAddition: 'Faktura',
         phase: 'Uppföljning',

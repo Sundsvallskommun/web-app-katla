@@ -8,11 +8,11 @@ import { MobileErrandsList } from '@layouts/mobile-layout/mobile-errands-list.co
 import { MobileMainPageHeader } from '@layouts/mobile-layout/mobile-main-page-header.component';
 import { MobileMenuBody } from '@layouts/mobile-layout/mobile-meny-body.component';
 import { MobileSearchBody } from '@layouts/mobile-layout/mobile-search-body.component';
-import { MobilePage } from '@layouts/mobile-layout/moible-page.component';
 import { Divider } from '@sk-web-gui/react';
 import { useOngoingCaseDataErrands } from '@utils/useOngoingCaseDataErrands';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { MobilePage } from './mobile-page.component';
 
 const MobileLayout: React.FC = () => {
   const [openNotification, setOpenNotification] = useState(false);
@@ -20,13 +20,7 @@ const MobileLayout: React.FC = () => {
   const [openMenu, setOpenMenu] = useState(false);
   const casedataFilterForm = useForm<CaseDataFilter>({ defaultValues: CaseStatusValues });
 
-  const {
-    filterForm,
-    tableForm,
-    ownerFilter,
-    setOwnerFilter,
-    sidebarLabel,
-  } = useOngoingCaseDataErrands();
+  const { filterForm, tableForm, ownerFilter, setOwnerFilter, sidebarLabel } = useOngoingCaseDataErrands();
 
   return (
     <>
