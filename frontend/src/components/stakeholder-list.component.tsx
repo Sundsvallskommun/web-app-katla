@@ -5,7 +5,7 @@ import { Role, RoleDisplayNames } from '@interfaces/role';
 import { CasedataOwnerOrContact, emptyCasedataOwnerOrContact, StakeholderType } from '@interfaces/stakeholder';
 import { searchPerson } from '@services/adress-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, FormControl, FormErrorMessage, FormLabel, Input, Select } from '@sk-web-gui/react';
+import { Button, FormControl, FormErrorMessage, FormLabel, Input, SearchField, Select } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
 import { ssnSchema, stakeholderSchema } from '@utils/validation-schema';
 import React, { useContext, useState } from 'react';
@@ -17,7 +17,6 @@ export const StakeholderList: React.FC<{
   roles: Role[];
 }> = ({ roles }) => {
   const [fetchedSsn, setFetchedSsn] = useState(false);
-  const [searching, setSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [outsideMunicipalityWarning, setOutsideMunicipalityWarning] = useState<boolean>(false);
@@ -45,6 +44,8 @@ export const StakeholderList: React.FC<{
     setValue,
     getValues,
     reset,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = method;
 
@@ -61,8 +62,8 @@ export const StakeholderList: React.FC<{
     ssnSchema
       .validate(personalNumber)
       .then(() => {
+        clearErrors('personalNumber');
         setFetchedSsn(true);
-        setSearching(true);
         setSearchResult(false);
         setNotFound(false);
 
@@ -78,22 +79,22 @@ export const StakeholderList: React.FC<{
 
             if (res.municipality !== process.env.NEXT_PUBLIC_MUNICIPALITY_ID && isApplicantList) {
               setOutsideMunicipalityWarning(true);
-              setSearching(false);
               setSearchResult(true);
               return;
             }
 
-            setSearching(false);
             setSearchResult(true);
           })
           .catch(() => {
             setFetchedSsn(false);
-            setSearching(false);
             setSearchResult(false);
           });
       })
       .catch((e) => {
-        console.error('Error when searching stakeholder', e);
+        setError('personalNumber', {
+          type: 'manual',
+          message: e.message,
+        });
       });
   };
 
@@ -123,59 +124,34 @@ export const StakeholderList: React.FC<{
   return (
     <FormProvider {...method}>
       <FormControl className="w-full">
-        {!isErrandReadOnly(errand) && !hasExistingApplicant ?
-          <>
+        {!isErrandReadOnly(errand) && !hasExistingApplicant && (
+          <div className="w-full max-w-[52.5rem]">
             <FormLabel>Sök på personnummer</FormLabel>
-            <div className="w-full max-w-[52.5rem]">
-              <Input.Group size="md" className="rounded-12 flex items-stretch overflow-hidden">
-                <Input.LeftAddin icon>
-                  <LucideIcon name="search" />
-                </Input.LeftAddin>
-
-                <Input
-                  data-cy="personal-number-input"
-                  className="w-full"
-                  {...register('personalNumber')}
-                  readOnly={fetchedSsn}
-                  invalid={!!errors.personalNumber}
-                />
-                <Input.RightAddin icon className="flex gap-2">
-                  <Button
-                    data-cy="clear-person-button"
-                    iconButton
-                    size="sm"
-                    variant="primary"
-                    inverted
-                    className="min-w-[2.5rem] h-full"
-                    onClick={() => {
-                      setSearchResult(false);
-                      setFetchedSsn(false);
-                      setNotFound(false);
-                      setOutsideMunicipalityWarning(false);
-                      reset(emptyCasedataOwnerOrContact);
-                    }}
-                  >
-                    <LucideIcon name="x" />
-                  </Button>
-
-                  <Button
-                    data-cy="search-person-button"
-                    size="sm"
-                    variant="primary"
-                    className="h-full"
-                    onClick={doSearch}
-                    loading={searching}
-                    loadingText="Söker"
-                  >
-                    Sök
-                  </Button>
-                </Input.RightAddin>
-              </Input.Group>
-
-              {errors.personalNumber && <div className="text-error text-md mt-1">{errors.personalNumber.message}</div>}
-            </div>
-          </>
-        : null}
+            <SearchField
+              data-cy="personal-number-input"
+              size="md"
+              value={watch('personalNumber') || ''}
+              onChange={(e) => {
+                setValue('personalNumber', e.target.value);
+                clearErrors('personalNumber');
+              }}
+              onSearch={doSearch}
+              onReset={() => {
+                setSearchResult(false);
+                setFetchedSsn(false);
+                setNotFound(false);
+                setOutsideMunicipalityWarning(false);
+                reset(emptyCasedataOwnerOrContact);
+              }}
+              showSearchButton={true}
+              placeholder="Personnummer"
+              readOnly={fetchedSsn}
+            />
+            {errors.personalNumber && (
+              <FormErrorMessage className="text-error">{errors.personalNumber.message}</FormErrorMessage>
+            )}
+          </div>
+        )}
 
         {searchResult && !notFound && !hasExistingApplicant && (
           <div className="border-1 rounded-12 bg-background-content w-max-[52.5rem] my-15">
