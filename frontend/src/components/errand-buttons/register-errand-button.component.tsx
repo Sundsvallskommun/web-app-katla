@@ -148,8 +148,8 @@ export const RegisterErrandButton: React.FC = () => {
             <LucideIcon color="vattjom" name="inbox" size={32} />
             <div className="text-h4">Skicka in ärende</div>
             <div>
-              När du skickar in ett ärende, kommer det automatiskt att placeras under kategorin 'Inkomna
-              ärende'. Därefter blir ärendet tillgängligt för alla behöriga medarbetare inom din verksamhet.
+              När du skickar in ett ärende, kommer det automatiskt att placeras under kategorin &apos;Inkomna
+              ärende&apos;. Därefter blir ärendet tillgängligt för alla behöriga medarbetare inom din verksamhet.
             </div>
             <p>Vill du fortsätta med inskickningen?</p>
           </Dialog.Content>
