@@ -11,7 +11,7 @@ import { mockProtectedInfo } from './fixtures/mockProtectedInfo';
 
 export const MOCK_INVALID_SEARCH = 'Ej giltigt personnummer (ange tolv siffror: ååååmmddxxxx)';
 
-describe('Registrera ärende-sida', () => {
+describe('Skicka in ärende-sida', () => {
   beforeEach(() => {
     cy.intercept('GET', '/api/me', mockMe).as('getMe');
     cy.intercept('GET', '**/casedatanotifications/**', mockNotifications).as('getNotifications');
@@ -42,7 +42,7 @@ describe('Registrera ärende-sida', () => {
     cy.get('h2').contains('Ärendeuppgifter').should('exist');
     cy.get('h2').contains('Bilagor').should('exist');
 
-    //Buttons to register case, save as draft and cancel
+    //Buttons to submit case, save as draft and cancel
     cy.get('[data-cy="register-errand-button"]').should('exist');
     cy.get('[data-cy="cancel-errand-button"]').should('exist');
     cy.get('[data-cy="save-draft-errand-button"]').should('exist');
@@ -278,10 +278,10 @@ describe('Registrera ärende-sida', () => {
     cy.get('[data-cy="register-errand-button"]').first().click();
   });
 
-  it('prevents registration when applicant is missing', () => {
+  it('prevents submission when applicant is missing', () => {
     cy.get('[data-cy="register-errand-button"]').first().should('exist').click();
     cy.get('[data-cy="confirm-register-dialog"]').should('not.exist');
-    cy.contains('Det går inte att registrera ärendet eftersom ingen sökande part är tillagd.').should('exist');
+    cy.contains('Det går inte att skicka in ärendet eftersom ingen sökande part är tillagd.').should('exist');
     cy.url().should('include', '/registrera');
   });
 
