@@ -32,7 +32,7 @@ export const ErrandHeader: React.FC = () => {
   );
 
   const RightPart = (
-    <div className="flex items-right flex-shrink-0 gap-[2.4rem]">
+    <div className={cx('flex items-right flex-shrink-0', isMaxMediumDevice ? 'gap-[1.2rem]' : 'gap-[2.4rem]')}>
       <UserMenu
         initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
         menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
@@ -73,8 +73,8 @@ export const ErrandHeader: React.FC = () => {
     <>
       <nav
         className={cx(
-          'w-full h-[7rem] flex items-center bg-background-DEFAULT shadow-100 relative z-10',
-          isMaxMediumDevice ? 'p-[1.2rem] gap-[2.4rem] justify-between' : 'px-24 justify-between'
+          'w-full h-[7rem] flex items-center bg-background-DEFAULT shadow-100 relative z-10 justify-between',
+          isMaxMediumDevice ? 'p-4 gap-3' : 'px-24'
         )}
       >
         {LogoPart}
@@ -83,7 +83,7 @@ export const ErrandHeader: React.FC = () => {
 
       {showNotifications && isMaxMediumDevice ?
         <div className="fixed inset-0 z-50 bg-vattjom-background-200">
-          <div className="h-[7rem] px-[1.6rem] py-[1.6rem] flex items-center justify-between bg-background-DEFAULT shadow-lg">
+          <div className="h-[7rem] px-4 py-4 flex items-center justify-between bg-background-DEFAULT shadow-lg">
             <div className="flex items-center gap-12 text-h4-sm">
               <LucideIcon name="bell" /> Notiser
             </div>
