@@ -4,7 +4,7 @@ import { FTCaseLabel, FTCaseType } from '@interfaces/case-type';
 import { Role, RoleDisplayNames } from '@interfaces/role';
 import { mockAddressResponse } from './fixtures/mockAddressRespons';
 import { mockAdUser } from './fixtures/mockAdUser';
-import { mockErrands_FT_draft, mockErrands_FT_registered } from './fixtures/mockErrands';
+import { mockErrands_FT_draft } from './fixtures/mockErrands';
 import { mockMe } from './fixtures/mockMe';
 import { mockNotifications } from './fixtures/mockNotifications';
 import { mockProtectedInfo } from './fixtures/mockProtectedInfo';
@@ -50,7 +50,7 @@ describe('Registrera ärende-sida', () => {
 
   it('displays all case types in the select and allows selecting a value', () => {
     const expectedLabels = Object.values(FTCaseLabel);
-    const labelToSelect = FTCaseLabel.PARATRANSIT_NOTIFICATION_RENEWAL;
+    const labelToSelect = FTCaseLabel.PARATRANSIT_NOTIFICATION;
 
     cy.get('[data-cy="errand-casetype-select"]')
       .should('exist')
@@ -254,7 +254,7 @@ describe('Registrera ärende-sida', () => {
         message: 'success',
         data: {
           ...mockErrands_FT_draft.data,
-          caseType: FTCaseType.PARATRANSIT_NOTIFICATION_RIAK,
+          caseType: FTCaseType.PARATRANSIT_NOTIFICATION,
         },
       },
     }).as('patchDraft');
@@ -268,9 +268,9 @@ describe('Registrera ärende-sida', () => {
     cy.contains('Ärendet sparades som utkast').should('exist');
 
     cy.get('[data-cy="errand-casetype-select"]').should('not.be.disabled');
-    cy.get('[data-cy="errand-casetype-select"]').select(FTCaseLabel.PARATRANSIT_NOTIFICATION_RIAK);
+    cy.get('[data-cy="errand-casetype-select"]').select(FTCaseLabel.PARATRANSIT_NOTIFICATION);
     cy.get('[data-cy="update-draft-errand-button"]').first().click();
-    cy.contains(FTCaseLabel.PARATRANSIT_NOTIFICATION_RIAK).should('exist');
+    cy.contains(FTCaseLabel.PARATRANSIT_NOTIFICATION).should('exist');
 
     cy.get('[data-cy="register-errand-button"]').first().should('exist').click();
 
@@ -285,73 +285,75 @@ describe('Registrera ärende-sida', () => {
     cy.url().should('include', '/registrera');
   });
 
-  it('register errand (PARATRANSIT_NOTIFICATION_RENEWAL)', () => {
-    const email = mockProtectedInfo.emails.user;
-    const phone = mockProtectedInfo.phoneNumbers.swedish;
-    const address = mockAddressResponse.data.addresses[0];
+  // NOTE: Hides until PARATRANSIT_NOTIFICATION_RENEWAL is enabled again
+  //
+  // it('register errand (PARATRANSIT_NOTIFICATION_RENEWAL)', () => {
+  //   const email = mockProtectedInfo.emails.user;
+  //   const phone = mockProtectedInfo.phoneNumbers.swedish;
+  //   const address = mockAddressResponse.data.addresses[0];
 
-    cy.intercept('POST', '**/api/casedata/2281/errands', mockErrands_FT_registered).as('registerErrand');
-    cy.intercept('GET', '**/attachments', {
-      statusCode: 200,
-      body: {
-        data: [],
-        message: 'success',
-      },
-    }).as('getAttachments');
-    cy.intercept('GET', '**/api/casedata/2281/errand/2557', mockErrands_FT_registered).as('getErrand');
-    cy.intercept('GET', '**/api/casedata/2281/errand/errandNumber/**', mockErrands_FT_registered).as('getByNumber');
+  //   cy.intercept('POST', '**/api/casedata/2281/errands', mockErrands_FT_registered).as('registerErrand');
+  //   cy.intercept('GET', '**/attachments', {
+  //     statusCode: 200,
+  //     body: {
+  //       data: [],
+  //       message: 'success',
+  //     },
+  //   }).as('getAttachments');
+  //   cy.intercept('GET', '**/api/casedata/2281/errand/2557', mockErrands_FT_registered).as('getErrand');
+  //   cy.intercept('GET', '**/api/casedata/2281/errand/errandNumber/**', mockErrands_FT_registered).as('getByNumber');
 
-    cy.get('[data-cy="errand-casetype-select"]').select(FTCaseLabel.PARATRANSIT_NOTIFICATION_RENEWAL);
+  //   cy.get('[data-cy="errand-casetype-select"]').select(FTCaseLabel.PARATRANSIT_NOTIFICATION_RENEWAL);
 
-    cy.contains('Sökande').should('exist');
-    cy.get('[data-cy="personal-number-input"]').first().type(Cypress.env('mockPersonNumber'));
-    cy.get('[data-cy="search-person-button"]').first().click();
+  //   cy.contains('Sökande').should('exist');
+  //   cy.get('[data-cy="personal-number-input"]').first().type(Cypress.env('mockPersonNumber'));
+  //   cy.get('[data-cy="search-person-button"]').first().click();
 
-    cy.contains(`${mockAddressResponse.data.givenname} ${mockAddressResponse.data.lastname}`).should('exist');
-    cy.contains(email).should('exist');
+  //   cy.contains(`${mockAddressResponse.data.givenname} ${mockAddressResponse.data.lastname}`).should('exist');
+  //   cy.contains(email).should('exist');
 
-    cy.get('[data-cy="stakeholder-email-input"]').first().type(email);
-    cy.get('[data-cy="stakeholder-mobilephone-input"]').first().type(phone);
-    cy.get('[data-cy="add-stakeholder-button"]').click();
+  //   cy.get('[data-cy="stakeholder-email-input"]').first().type(email);
+  //   cy.get('[data-cy="stakeholder-mobilephone-input"]').first().type(phone);
+  //   cy.get('[data-cy="add-stakeholder-button"]').click();
 
-    cy.contains('Ärendeägare').should('exist');
-    cy.contains(`${mockAddressResponse.data.givenname} ${mockAddressResponse.data.lastname}`).should('exist');
-    cy.contains(address.address).should('exist');
-    cy.contains(address.city).should('exist');
+  //   cy.contains('Ärendeägare').should('exist');
+  //   cy.contains(`${mockAddressResponse.data.givenname} ${mockAddressResponse.data.lastname}`).should('exist');
+  //   cy.contains(address.address).should('exist');
+  //   cy.contains(address.city).should('exist');
 
-    cy.get('[data-cy="uppgift-field-external.currentHousing"]').select('OWN_HOUSING');
+  //   cy.get('[data-cy="uppgift-field-external.currentHousing"]').select('OWN_HOUSING');
 
-    cy.contains('Klarar den sökande att gå till och från busshållplatsen närmast bostaden?').should('exist');
-    cy.get('[data-cy="uppgift-field-external.canReachNearestBusStop"]').within(() => {
-      cy.get('input[value="YES"]').click();
-    });
-    cy.get('[data-cy="uppgift-field-external.travelTypes"]').within(() => {
-      cy.get('input[type="checkbox"][value="PRIVATE"]').parent().click();
-    });
-    cy.get('[data-cy="uppgift-field-external.assistanceDuringTravel"]').within(() => {
-      cy.get('input[value="NO"]').click();
-    });
-    cy.get('[data-cy="uppgift-field-medical.onsetTime"]').within(() => {
-      cy.get('input[value="ONE_YEAR_OR_MORE"]').click();
-    });
-    cy.get('[data-cy="uppgift-field-medical.duration"]').within(() => {
-      cy.get('input[value="MORE_THAN_ONE_YEAR"]').click();
-    });
-    cy.get('[data-cy="uppgift-field-medical.consequencesDescription"]').type('abc.');
-    cy.get('[data-cy="uppgift-field-medical.treatmentsDescription"]').type('abc.');
-    cy.get('[data-cy="register-errand-button"]').first().should('exist').click();
+  //   cy.contains('Klarar den sökande att gå till och från busshållplatsen närmast bostaden?').should('exist');
+  //   cy.get('[data-cy="uppgift-field-external.canReachNearestBusStop"]').within(() => {
+  //     cy.get('input[value="YES"]').click();
+  //   });
+  //   cy.get('[data-cy="uppgift-field-external.travelTypes"]').within(() => {
+  //     cy.get('input[type="checkbox"][value="PRIVATE"]').parent().click();
+  //   });
+  //   cy.get('[data-cy="uppgift-field-external.assistanceDuringTravel"]').within(() => {
+  //     cy.get('input[value="NO"]').click();
+  //   });
+  //   cy.get('[data-cy="uppgift-field-medical.onsetTime"]').within(() => {
+  //     cy.get('input[value="ONE_YEAR_OR_MORE"]').click();
+  //   });
+  //   cy.get('[data-cy="uppgift-field-medical.duration"]').within(() => {
+  //     cy.get('input[value="MORE_THAN_ONE_YEAR"]').click();
+  //   });
+  //   cy.get('[data-cy="uppgift-field-medical.consequencesDescription"]').type('abc.');
+  //   cy.get('[data-cy="uppgift-field-medical.treatmentsDescription"]').type('abc.');
+  //   cy.get('[data-cy="register-errand-button"]').first().should('exist').click();
 
-    cy.get('[data-cy="confirm-register-dialog"]').should('exist');
-    cy.get('[data-cy="confirm-register-dialog"]').find('button').contains('Nej').click();
-    cy.get('[data-cy="confirm-register-dialog"]').should('not.exist');
+  //   cy.get('[data-cy="confirm-register-dialog"]').should('exist');
+  //   cy.get('[data-cy="confirm-register-dialog"]').find('button').contains('Nej').click();
+  //   cy.get('[data-cy="confirm-register-dialog"]').should('not.exist');
 
-    cy.get('[data-cy="register-errand-button"]').first().click();
-    cy.get('[data-cy="confirm-register-dialog"]').should('exist');
-    cy.get('.sk-dialog').find('button').contains('Ja').click();
+  //   cy.get('[data-cy="register-errand-button"]').first().click();
+  //   cy.get('[data-cy="confirm-register-dialog"]').should('exist');
+  //   cy.get('.sk-dialog').find('button').contains('Ja').click();
 
-    cy.wait('@registerErrand');
-    cy.wait('@getErrand');
+  //   cy.wait('@registerErrand');
+  //   cy.wait('@getErrand');
 
-    cy.url().should('include', `/arende/2281/${mockErrands_FT_registered.data.errandNumber}`);
-  });
+  //   cy.url().should('include', `/arende/2281/${mockErrands_FT_registered.data.errandNumber}`);
+  // });
 });
