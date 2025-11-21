@@ -27,8 +27,8 @@ export const StakeholderFormModal: React.FC<{
     defaultValues: initialValues ?? {
       firstName: '',
       lastName: '',
-      newEmail: '',
-      newPhoneNumber: '',
+      emails: [],
+      phoneNumbers: [],
       street: '',
       careof: '',
       zip: '',
@@ -59,9 +59,9 @@ export const StakeholderFormModal: React.FC<{
       }
     >
       <Modal.Content>
-        <FormControl>
+        <FormControl className="w-full">
           <FormLabel>Personnummer</FormLabel>
-          <Input {...register('personalNumber')} invalid={!!errors} readOnly={true} />
+          <Input {...register('personalNumber')} className="w-full" invalid={!!errors} readOnly={true} />
         </FormControl>
         <div className="flex gap-8">
           <div className="flex flex-col">
@@ -86,16 +86,16 @@ export const StakeholderFormModal: React.FC<{
           <div className="flex flex-col">
             <FormControl>
               <FormLabel>E-postadress</FormLabel>
-              <Input {...register('newEmail')} className="w-full" invalid={!!errors.newEmail} />
-              {errors.newEmail && <FormErrorMessage className="text-error">{errors.newEmail.message}</FormErrorMessage>}
+              <Input {...register('emails.0.value')} className="w-full" invalid={!!errors.emails?.[0]?.value} />
+              {errors.emails?.[0]?.value && <FormErrorMessage className="text-error">{errors.emails[0].value.message}</FormErrorMessage>}
             </FormControl>
           </div>
           <div className="flex flex-col">
             <FormControl>
               <FormLabel>Telefonnummer</FormLabel>
-              <Input {...register('newPhoneNumber')} className="w-full" invalid={!!errors.newPhoneNumber} />
-              {errors.newPhoneNumber && (
-                <FormErrorMessage className="text-error">{errors.newPhoneNumber.message}</FormErrorMessage>
+              <Input {...register('phoneNumbers.0.value')} className="w-full" invalid={!!errors.phoneNumbers?.[0]?.value} />
+              {errors.phoneNumbers?.[0]?.value && (
+                <FormErrorMessage className="text-error">{errors.phoneNumbers[0].value.message}</FormErrorMessage>
               )}
             </FormControl>
           </div>
@@ -134,33 +134,31 @@ export const StakeholderFormModal: React.FC<{
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <FormControl required>
-            <FormLabel>Roll</FormLabel>
-            <Select
-              data-cy="modal-stakeholder-role-select"
-              className="w-full"
-              invalid={!!errors.roles}
-              value={watch('roles')?.[0] ?? ''}
-              onChange={(e) => {
-                const value = e.target.value as Role;
-                setValue('roles', value ? [value] : [], {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                });
-                setValue('newRole', value);
-              }}
-            >
-              {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
-              {roles.map((role) => (
-                <Select.Option key={role} value={role}>
-                  {RoleDisplayNames[role]}
-                </Select.Option>
-              ))}
-            </Select>
-            {errors.roles && <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>}
-          </FormControl>
-        </div>
+        <FormControl className="w-full" required>
+          <FormLabel>Roll</FormLabel>
+          <Select
+            data-cy="modal-stakeholder-role-select"
+            className="w-full"
+            invalid={!!errors.roles}
+            value={watch('roles')?.[0] ?? ''}
+            onChange={(e) => {
+              const value = e.target.value as Role;
+              setValue('roles', value ? [value] : [], {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+              setValue('newRole', value);
+            }}
+          >
+            {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
+            {roles.map((role) => (
+              <Select.Option key={role} value={role}>
+                {RoleDisplayNames[role]}
+              </Select.Option>
+            ))}
+          </Select>
+          {errors.roles && <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>}
+        </FormControl>
       </Modal.Content>
 
       <Modal.Footer>

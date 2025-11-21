@@ -45,7 +45,7 @@ export const StakeholderList: React.FC<{
     setValue,
     getValues,
     reset,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isSubmitting },
   } = method;
 
   const { personalNumber, firstName, lastName, street, city } = watch();
@@ -115,8 +115,6 @@ export const StakeholderList: React.FC<{
     append({
       ...values,
       stakeholderType: 'PERSON',
-      newEmail: values?.emails?.[0]?.value,
-      newPhoneNumber: values?.phoneNumbers?.[0]?.value,
     });
 
     setSearchResult(false);
@@ -241,6 +239,7 @@ export const StakeholderList: React.FC<{
                           const selected = e.target.value;
                           if (selected) {
                             setValue('roles', [selected as Role], { shouldDirty: true });
+                            setValue('newRole', selected as Role);
                           } else {
                             setValue('roles', [], { shouldDirty: true });
                           }
@@ -268,12 +267,7 @@ export const StakeholderList: React.FC<{
                       variant="primary"
                       onClick={handleSubmit(addStakeholderToErrand)}
                       className="w-full lg:w-auto"
-                      disabled={
-                        municipalityMismatch ||
-                        (isApplicantList && !isValid) ||
-                        (!isApplicantList && !watch('roles')?.[0]) ||
-                        isSubmitting
-                      }
+                      disabled={municipalityMismatch || isSubmitting}
                       loading={isSubmitting}
                     >
                       Lägg till person

@@ -21,8 +21,8 @@ export const useRemoveDeletedStakeholders = () => {
 
     if (deletedStakeholders.length > 0) {
       await Promise.all(
-        deletedStakeholders.map((stakeholder) =>
-          removeStakeholder(municipalityId, currentData.id as number, stakeholder.id)
+        deletedStakeholders.map(
+          (stakeholder) => stakeholder.id && removeStakeholder(municipalityId, currentData.id as number, stakeholder.id)
         )
       );
     }

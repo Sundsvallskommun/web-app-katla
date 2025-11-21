@@ -34,11 +34,8 @@ export const useInitializeErrandForm = (method: UseFormReturn<IErrand>) => {
             personalNumber: adUserInfo.personId ?? '',
             emails: adUserInfo.email ? [{ value: adUserInfo.email }] : [],
             phoneNumbers: adUserInfo.phone ? [{ value: adUserInfo.phone }] : [],
-            newEmail: adUserInfo.email,
-            newPhoneNumber: adUserInfo.phone,
             roles: [Role.REPORTER],
             stakeholderType: 'PERSON',
-            id: '',
             newRole: Role.REPORTER,
           };
 

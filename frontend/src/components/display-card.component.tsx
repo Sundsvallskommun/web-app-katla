@@ -45,11 +45,11 @@ export const DisplayCard: React.FC<{
             </div>
           )}
           <div className="flex flex-col">
-            <div className={!person.newEmail?.trim() ? 'italic text-text-secondary' : ''}>
-              {person.newEmail?.trim() || 'E-post saknas'}
+            <div className={!person.emails?.[0]?.value?.trim() ? 'italic text-text-secondary' : ''}>
+              {person.emails?.[0]?.value?.trim() || 'E-post saknas'}
             </div>
-            <div className={!phoneNumberFormatter(person.newPhoneNumber) ? 'italic text-text-secondary' : ''}>
-              {phoneNumberFormatter(person.newPhoneNumber) || 'Telefonnummer saknas'}
+            <div className={!phoneNumberFormatter(person.phoneNumbers?.[0]?.value) ? 'italic text-text-secondary' : ''}>
+              {phoneNumberFormatter(person.phoneNumbers?.[0]?.value) || 'Telefonnummer saknas'}
             </div>
           </div>
         </div>
