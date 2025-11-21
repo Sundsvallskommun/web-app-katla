@@ -153,7 +153,7 @@ describe('Registrera ärende-sida', () => {
     cy.get('[data-cy="add-stakeholder-button"]').should('exist');
 
     //Unikt för övriga parter är att välja roll
-    cy.get('[data-cy="stakeholder-role-select"]').select(Role.FELLOW_APPLICANT);
+    cy.get('[data-cy="stakeholder-role-select"]').select(Role.CONTACT_PERSON);
     cy.get('[data-cy="add-stakeholder-button"]').click();
     cy.get('[data-cy="add-stakeholder-button"]').should('not.exist');
 
@@ -162,7 +162,7 @@ describe('Registrera ärende-sida', () => {
     cy.contains(address.address).should('exist');
     cy.contains(address.addressNumber).should('exist');
     cy.contains(address.city).should('exist');
-    cy.contains(RoleDisplayNames[Role.FELLOW_APPLICANT]).should('exist');
+    cy.contains(RoleDisplayNames[Role.CONTACT_PERSON]).should('exist');
 
     // Verifiera modal
     cy.get('[data-cy="edit-card-button"]').should('exist').click();

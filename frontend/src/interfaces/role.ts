@@ -2,7 +2,6 @@ export enum Role {
   APPLICANT = 'APPLICANT',
   ADMINISTRATOR = 'ADMINISTRATOR',
   CONTACT_PERSON = 'CONTACT_PERSON',
-  FELLOW_APPLICANT = 'FELLOW_APPLICANT',
   DRIVER = 'DRIVER',
   PASSENGER = 'PASSENGER',
   DOCTOR = 'DOCTOR',
@@ -18,7 +17,6 @@ export const RoleDisplayNames: Record<Role, string> = {
   [Role.APPLICANT]: 'Ärendeägare',
   [Role.ADMINISTRATOR]: 'Handläggare',
   [Role.CONTACT_PERSON]: 'Kontaktperson',
-  [Role.FELLOW_APPLICANT]: 'Medsökande',
   [Role.DRIVER]: 'Förare',
   [Role.PASSENGER]: 'Passagerare',
   [Role.DOCTOR]: 'Läkare',
@@ -32,7 +30,6 @@ export const RoleDisplayNames: Record<Role, string> = {
 
 export const OTHER_PARTY_ROLES: Role[] = [
   Role.CONTACT_PERSON,
-  Role.FELLOW_APPLICANT,
   Role.DOCTOR,
   Role.NEXT_OF_KIN,
   Role.LEGAL_GUARDIAN,
