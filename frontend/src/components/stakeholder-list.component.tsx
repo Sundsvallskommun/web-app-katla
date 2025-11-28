@@ -291,6 +291,7 @@ export const StakeholderList: React.FC<{
               availableRoles={roles}
               onRemove={() => {
                 remove(index);
+                setFetchedSsn(false);
                 reset(emptyCasedataOwnerOrContact);
               }}
               onUpdate={(values) => update(index, { ...person, ...values })}
