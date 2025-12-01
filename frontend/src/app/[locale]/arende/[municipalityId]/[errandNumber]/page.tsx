@@ -142,7 +142,7 @@ const Arende: React.FC = () => {
                       <ErrandReportedTab />
                     </div>
 
-                    {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} update={() => {}} />}
+                    {current === 1 && <CasedataMessagesTab setUnsaved={() => {}} />}
                     {current === 2 && <FileUploadComponent />}
                   </section>
                 </div>
