@@ -150,7 +150,7 @@ export const notification_UppgiftFieldTemplate: UppgiftField[] = [
   {
     field: 'external.mobilityAids.additional',
     value: [],
-    label: 'Hur långt klarar den sökande att gå på plan mark i meter?',
+    label: 'Hur långt klarar den sökande att gå på plan mark? Ange i antalet meter',
     formField: {
       type: 'textarea',
     },

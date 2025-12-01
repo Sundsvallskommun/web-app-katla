@@ -143,7 +143,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'personal.mobilityAids',
     value: [],
-    label: 'Förflyttningshjälpmedel som den sökande är beroende av för att kunna genomföra resan',
+    label: 'Ange en eller flera förflyttningshjälpmedel som den sökande är beroende av för att kunna genomföra resan',
     formField: {
       type: 'combobox',
       options: [
@@ -168,7 +168,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'personal.walkingDistance',
     value: '',
-    label: 'Hur långt klarar du att gå på plan mark? Ange i antalet meter',
+    label: 'Hur långt klarar den sökande att gå på plan mark? Ange i antalet meter',
     formField: {
       type: 'textarea',
     },
@@ -219,7 +219,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'personal.transportTypes',
     value: [],
-    label: 'Vilken/vilka färdmedel gäller anmälan',
+    label: 'Ange ett eller flera färdmedel för resan',
     formField: {
       type: 'combobox',
       options: [
@@ -255,7 +255,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'medical.diagnoses',
     value: [],
-    label: 'Ange funktionsnedsättning / funktionsnedsättningar',
+    label: 'Ange en eller flera funktionsnedsättningar som den sökande har',
     formField: {
       type: 'combobox',
       options: [
