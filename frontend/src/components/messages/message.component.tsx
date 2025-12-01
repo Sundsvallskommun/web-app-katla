@@ -1,28 +1,21 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { MessageResponse } from '@interfaces/message';
 import { Conversation, getConversationMessages, getConversations } from '@services/casedata-conversation-service';
 import { isErrandLocked } from '@services/casedata-errand-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, RadioButton } from '@sk-web-gui/react';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { MessageComposer } from './message-composer.component';
 import MessageTreeComponent from './tree.component';
 
 export const CasedataMessagesTab: React.FC<{
   setUnsaved: (unsaved: boolean) => void;
-  update: () => void;
 }> = (props) => {
   const { municipalityId, errand, conversation, setConversation } = useContext(AppContext);
-  const [selectedMessage, setSelectedMessage] = useState<MessageResponse>();
-  const [showMessageComposer, setShowMessageComposer] = useState<boolean>(false);
-  const [sortMessages, setSortMessages] = useState<number>(0);
+  const [showMessageComposer, setShowMessageComposer] = useState(false);
+  const [sortMessages, setSortMessages] = useState(0);
   const [sortedMessages, setSortedMessages] = useState(conversation);
 
-  const setMessageViewed = (msg: MessageResponse) => {
-    console.warn('Not implemented', msg); //Unsure of how acknowledge for conversation messages will work
-  };
-
-  useEffect(() => {
+  const fetchMessages = useCallback(() => {
     if (errand && errand.errandNumber) {
       getConversations(municipalityId, errand.id)
         .then((res) => {
@@ -49,8 +42,12 @@ export const CasedataMessagesTab: React.FC<{
           console.error('getConversations failed', err);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId, errand]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
 
   useEffect(() => {
     if (conversation) {
@@ -84,10 +81,7 @@ export const CasedataMessagesTab: React.FC<{
             color="vattjom"
             inverted={!isErrandLocked(errand)}
             rightIcon={<LucideIcon name="mail" size={18} />}
-            onClick={() => {
-              setSelectedMessage(undefined);
-              setShowMessageComposer(true);
-            }}
+            onClick={() => setShowMessageComposer(true)}
             data-cy="new-message-button"
           >
             Nytt meddelande
@@ -113,14 +107,7 @@ export const CasedataMessagesTab: React.FC<{
         </RadioButton.Group>
 
         {sortedMessages?.length ?
-          <MessageTreeComponent
-            nodes={sortedMessages}
-            onSelect={(msg: MessageResponse) => {
-              setMessageViewed(msg);
-              setSelectedMessage(msg);
-            }}
-            setShowMessageComposer={setShowMessageComposer}
-          />
+          <MessageTreeComponent nodes={sortedMessages} />
         : <>
             <Divider className="pt-24" />
             <p className="pt-24 text-dark-disabled">Inga meddelanden</p>
@@ -129,16 +116,10 @@ export const CasedataMessagesTab: React.FC<{
       </div>
       <div className="h-xl"></div>
       <MessageComposer
-        message={selectedMessage ?? ({} as MessageResponse)}
         show={showMessageComposer}
-        closeHandler={() => {
-          setTimeout(() => {
-            setShowMessageComposer(false);
-            setSelectedMessage(undefined);
-          }, 0);
-        }}
+        closeHandler={() => setShowMessageComposer(false)}
         setUnsaved={props.setUnsaved}
-        update={props.update}
+        update={fetchMessages}
       />
     </>
   );

@@ -1,7 +1,6 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { MessageNode } from '@interfaces/message';
 import { getConversationAttachment } from '@services/casedata-conversation-service';
-import { isErrandLocked } from '@services/casedata-errand-service';
 import sanitized from '@services/sanitizer-service';
 import { Button, cx, Icon, useSnackbar } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
@@ -12,11 +11,9 @@ import { RenderMessageReciever } from './render-message-reciever.component';
 
 export const RenderedMessage: React.FC<{
   message: MessageNode;
-  onSelect: (msg: MessageNode) => void;
-  setShowMessageComposer: React.Dispatch<React.SetStateAction<boolean>>;
   root?: boolean;
   children: React.ReactNode;
-}> = ({ message, onSelect, setShowMessageComposer, root = false, children }) => {
+}> = ({ message, root = false, children }) => {
   const { errand, municipalityId } = useContext(AppContext);
   const [expanded, setExpanded] = useState<boolean>(!message?.children?.length ? true : false);
 
@@ -126,11 +123,7 @@ export const RenderedMessage: React.FC<{
               variant="ghost"
               iconButton
               size="sm"
-              onClick={() => {
-                setExpanded(!expanded);
-                //eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                !expanded && onSelect(message);
-              }}
+              onClick={() => setExpanded(!expanded)}
             >
               <Icon icon={expanded ? <SquareMinus /> : <SquarePlus />} />
             </Button>
@@ -144,28 +137,6 @@ export const RenderedMessage: React.FC<{
               __html: sanitized(message.subject || ''),
             }}
           ></p>
-          {(
-            expanded &&
-            (message.messageType === 'EMAIL' ||
-              message.messageType === 'WEB_MESSAGE' ||
-              message.messageType === 'DRAKEN' ||
-              message.messageType === 'MINASIDOR')
-          ) ?
-            <Button
-              type="button"
-              className="self-start"
-              color="vattjom"
-              disabled={isErrandLocked(errand)}
-              size="sm"
-              variant="primary"
-              onClick={() => {
-                onSelect(message);
-                setShowMessageComposer(true);
-              }}
-            >
-              {message?.direction === 'INBOUND' ? 'Svara' : 'Följ upp'}
-            </Button>
-          : null}
         </div>
         <div
           className={`message-${message.messageId} px-xl ${

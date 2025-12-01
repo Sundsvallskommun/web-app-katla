@@ -6,22 +6,18 @@ import { countAllMessages, countUnreadMessages } from '@services/casedata-conver
 
 interface MessageTreeProps {
   nodes: MessageNode[];
-  onSelect: (node: MessageNode) => void;
-  setShowMessageComposer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const MessageNodeComponent: React.FC<{
   node: MessageNode;
-  onSelect: (node: MessageNode) => void;
-  setShowMessageComposer: React.Dispatch<React.SetStateAction<boolean>>;
   root?: boolean;
-}> = ({ node, onSelect, setShowMessageComposer, root = false }) => {
+}> = ({ node, root = false }) => {
   const [showChildren, setShowChildren] = useState(true);
 
   return (
     <>
       <div className="m-md mr-0" id={`node-${node?.messageId}`}>
-        <RenderedMessage message={node} onSelect={onSelect} root={root} setShowMessageComposer={setShowMessageComposer}>
+        <RenderedMessage message={node} root={root}>
           {root && node.children?.length ?
             <Button
               size="sm"
@@ -47,8 +43,6 @@ const MessageNodeComponent: React.FC<{
               <MessageNodeComponent
                 key={`${idx}`}
                 node={child}
-                onSelect={onSelect}
-                setShowMessageComposer={setShowMessageComposer}
               />
             ))}
           </div>
@@ -58,13 +52,13 @@ const MessageNodeComponent: React.FC<{
   );
 };
 
-const MessageTreeComponent: React.FC<MessageTreeProps> = ({ nodes, onSelect, setShowMessageComposer }) => {
+const MessageTreeComponent: React.FC<MessageTreeProps> = ({ nodes }) => {
   return (
     <div className="my-lg" data-cy="message-container">
       {nodes.map((node, idx) => (
         <Fragment key={`${idx}`}>
           <Divider />
-          <MessageNodeComponent node={node} onSelect={onSelect} setShowMessageComposer={setShowMessageComposer} root={true} />
+          <MessageNodeComponent node={node} root={true} />
         </Fragment>
       ))}
     </div>

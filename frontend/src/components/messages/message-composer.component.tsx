@@ -1,7 +1,5 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { Attachment } from '@interfaces/attachment';
 import { IErrand } from '@interfaces/errand';
-import { MessageResponse } from '@interfaces/message';
 import { User } from '@interfaces/user';
 import { createConversation, sendInternalMessage } from '@services/casedata-conversation-service';
 import sanitized from '@services/sanitizer-service';
@@ -10,7 +8,7 @@ import {
   Button,
   CustomOnChangeEventUploadFile,
   FileUpload,
-  Input,
+  FormErrorMessage,
   Modal,
   Spinner,
   UploadFile,
@@ -18,55 +16,27 @@ import {
   useSnackbar,
 } from '@sk-web-gui/react';
 import dynamic from 'next/dynamic';
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageWrapper } from './message-wrapper.component';
 const TextEditor = dynamic(() => import('@sk-web-gui/text-editor'), { ssr: false });
 
 interface TextEditorValue {
   markup?: string;
-  text?: string;
+  plainText?: string;
 }
 
 export interface CasedataMessageTabFormModel {
-  contactMeans: 'email' | 'sms' | 'webmessage' | 'digitalmail' | 'paper';
-  messageClassification: string;
-  messageTemplate?: string;
-  emails: { value: string }[];
-  newEmail: string;
-  phoneNumbers: string[];
-  newPhoneNumber: string;
   messageBody: string;
   messageBodyPlaintext: string;
-  attachUtredning: boolean;
-  existingAttachments: Attachment[];
-  addExisting: string;
-  messageAttachments: { file: FileList | undefined }[];
-  newAttachments: { file: FileList | undefined }[];
-  newItem: FileList | undefined;
-  headerReplyTo: string;
-  headerReferences: string;
 }
 
 const defaultMessage = {
-  contactMeans: 'webmessage' as const,
-  emails: [],
-  newEmail: '',
-  phoneNumbers: [],
-  newPhoneNumber: '',
   messageBody: '',
   messageBodyPlaintext: '',
-  attachUtredning: false,
-  existingAttachments: [],
-  addExisting: '',
-  newAttachments: [],
-  newItem: undefined,
-  headerReplyTo: '',
-  headerReferences: '',
 };
 
 export const MessageComposer: React.FC<{
-  message: MessageResponse;
   show: boolean;
   closeHandler: () => void;
   setUnsaved: (unsaved: boolean) => void;
@@ -79,20 +49,23 @@ export const MessageComposer: React.FC<{
   const [files, setFiles] = useState<UploadFile[]>([]);
   const toastMessage = useSnackbar();
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState<boolean>(false);
+  const [messageError, setMessageError] = useState<string>('');
 
-  const { register, handleSubmit, getValues, setValue, trigger, watch, formState, reset } =
-    useForm<CasedataMessageTabFormModel>({
+  const { handleSubmit, getValues, setValue, watch, formState, reset } = useForm<CasedataMessageTabFormModel>(
+    {
       defaultValues: defaultMessage,
       mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
-    });
+    }
+  );
 
-  const messageBodyPlaintext = watch('messageBodyPlaintext');
+  const messageBody = watch('messageBody');
+  const editorValue = useMemo(() => ({ markup: messageBody }), [messageBody]);
 
   const clearAndClose = () => {
     setTimeout(() => {
       setValue('messageBody', '', { shouldDirty: false });
       setValue('messageBodyPlaintext', '', { shouldDirty: false });
-      setValue('emails', [], { shouldDirty: false });
+      setFiles([]);
       props.closeHandler();
       reset();
     }, 0);
@@ -101,12 +74,8 @@ export const MessageComposer: React.FC<{
   const onSubmit = async (data: CasedataMessageTabFormModel) => {
     setIsLoading(true);
 
-    if (data.messageBodyPlaintext === '') {
-      return;
-    }
-
     createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
-      sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, data.messageBody, files)
+      sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, sanitized(data.messageBody), files)
         .then(() => {
           toastMessage({
             position: 'bottom',
@@ -126,11 +95,8 @@ export const MessageComposer: React.FC<{
             status: 'error',
           });
           setIsLoading(false);
-          return;
         });
     });
-
-    setIsLoading(false);
   };
 
   const abortHandler = () => {
@@ -166,21 +132,21 @@ export const MessageComposer: React.FC<{
     <>
       <MessageWrapper label="Nytt meddelande" closeHandler={clearAndClose} show={props.show}>
         <div className="my-md py-8 px-40 flex flex-col gap-12 ">
-          <Input type="hidden" {...register('headerReplyTo')} />
-          <Input type="hidden" {...register('headerReferences')} />
-
-          <div className="h-[30rem] mb-[4rem]">
+          <div className="h-[30rem]">
             <TextEditor
               className="h-[80%]"
               onChange={(e: { target: { value: TextEditorValue } }) => {
                 props.setUnsaved(true);
-                setValue('messageBody', sanitized(e.target.value.markup ?? ''), { shouldDirty: true });
-                setValue('messageBodyPlaintext', e.target.value.text ?? '', { shouldDirty: true });
-                trigger('messageBody');
+                setValue('messageBody', e.target.value.markup ?? '', { shouldDirty: true });
+                setValue('messageBodyPlaintext', e.target.value.plainText ?? '', { shouldDirty: true });
+                if (messageError) {
+                  setMessageError('');
+                }
               }}
-              value={{ markup: watch('messageBody') }}
+              value={editorValue}
             />
           </div>
+          {messageError && <FormErrorMessage className="text-error">{messageError}</FormErrorMessage>}
         </div>
         <div className="flex mb-24 mt-8 px-40">
           <Button
@@ -227,12 +193,17 @@ export const MessageComposer: React.FC<{
             loading={isLoading}
             loadingText="Skickar meddelande"
             onClick={handleSubmit(async () => {
-              await onSubmit(getValues());
+              const values = getValues();
+              if (values.messageBodyPlaintext.trim() === '') {
+                setMessageError('Skriv ett meddelande innan du skickar');
+                return;
+              }
+              await onSubmit(values);
             })}
             variant="primary"
             color="primary"
-            disabled={isLoading || messageBodyPlaintext === ''}
-            leftIcon={isLoading ? <Spinner size={2} className="mr-sm" /> : <></>}
+            disabled={isLoading}
+            leftIcon={isLoading ? <Spinner size={2} className="mr-sm" /> : undefined}
           >
             Skicka meddelande
           </Button>
