@@ -1,5 +1,4 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { Channels } from '@interfaces/channels';
 import { ErrandStatus } from '@interfaces/errand-status';
 import { Priority } from '@interfaces/priority';
 import {
@@ -27,10 +26,6 @@ export const CasedataFilterTags: React.FC<{ mobileOverviewPage?: boolean }> = (m
   const startdate = values.startdate;
   const enddate = values.enddate;
   const priorities = Array.isArray(values.priority) ? values.priority : [];
-  const channels =
-    Array.isArray(values.channel) ? values.channel
-    : values.channel ? [values.channel]
-    : [];
 
   const query = values.query || '';
 
@@ -125,19 +120,6 @@ export const CasedataFilterTags: React.FC<{ mobileOverviewPage?: boolean }> = (m
           {startdate && enddate && `${dayjs(startdate).format('D MMM YYYY')} - ${dayjs(enddate).format('D MMM YYYY')}`}
         </Chip>
       )}
-
-      {channels.map((channel, idx) => (
-        <Chip
-          data-cy={`tag-channel-${channel}`}
-          key={`channel-${idx}`}
-          onClick={() => {
-            const newChannels = channels.filter((c) => c !== channel);
-            setValue('channel', newChannels);
-          }}
-        >
-          {Channels[channel as keyof typeof Channels] || channel}
-        </Chip>
-      ))}
 
       {hasTags && (
         <button data-cy="tag-clearAll" className="sk-chip" onClick={handleReset}>

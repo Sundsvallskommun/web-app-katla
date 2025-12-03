@@ -4,6 +4,7 @@ import { FTCaseType } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import { normalizeStatus } from '@interfaces/errand-status';
 import { getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
+import { getOwnerStakeholder } from '@services/casedata-stakeholder-service';
 import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
 import NextLink from 'next/link';
@@ -59,6 +60,9 @@ export const ErrandsTable: React.FC = () => {
   ));
 
   const rows = (data.errands || []).map((errand: IErrand, index) => {
+
+    const ownerStakeholderName = getOwnerStakeholder(errand)?.firstName && getOwnerStakeholder(errand)?.lastName ? `${getOwnerStakeholder(errand)?.firstName} ${getOwnerStakeholder(errand)?.lastName}` : '(Saknas)'
+
     const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${municipalityId}/${errand.errandNumber}`;
     return (
       <Table.Row
@@ -85,7 +89,7 @@ export const ErrandsTable: React.FC = () => {
           <PriorityComponent priority={errand.priority} />
         </Table.Column>
 
-        <Table.Column>{errand.channel || ''}</Table.Column>
+        <Table.Column className={cx(getOwnerStakeholder(errand) ? '' : 'italic')}>{ownerStakeholderName}</Table.Column>
 
         <Table.Column sticky>
           <div className="w-full flex justify-end">

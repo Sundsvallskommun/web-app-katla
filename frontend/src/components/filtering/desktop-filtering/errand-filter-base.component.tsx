@@ -1,11 +1,10 @@
-import { Checkbox, cx, useThemeQueries } from '@sk-web-gui/react';
-import { CasedataFilterCaseType } from './errand-filter-casetype.component';
-import { CasedataFilterStatus } from './casedata-filter-status.component';
-import { CasedataFilterPriority } from './errand-filter-priority.component';
-import { CasedataFilterDates } from './errand-filter-dates.component';
-import { CasedataFilterChannel } from './errand-filter-channels.component';
-import React, { useContext } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
+import { Checkbox, cx, useThemeQueries } from '@sk-web-gui/react';
+import React, { useContext } from 'react';
+import { CasedataFilterStatus } from './casedata-filter-status.component';
+import { CasedataFilterCaseType } from './errand-filter-casetype.component';
+import { CasedataFilterDates } from './errand-filter-dates.component';
+import { CasedataFilterPriority } from './errand-filter-priority.component';
 
 interface Props {
   ownerFilterHandler: (b: boolean) => void;
@@ -41,9 +40,6 @@ export const CasedataFilterBase: React.FC<Props> = ({ ownerFilterHandler, ownerF
         </div>
         <div className={filterItemClass}>
           <CasedataFilterDates />
-        </div>
-        <div className={filterItemClass}>
-          <CasedataFilterChannel />
         </div>
       </div>
 

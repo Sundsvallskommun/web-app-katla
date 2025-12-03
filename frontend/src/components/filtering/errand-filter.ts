@@ -52,17 +52,12 @@ export interface CaseChannelFilter {
   channel: string[];
 }
 
-export const CaseChannelValues = {
-  channel: [],
-};
-
 export type CaseDataFilter = CaseTypeFilter &
   CaseStatusFilter &
   CasePriorityFilter &
   CaseQueryFilter &
   CaseDatesFilter &
-  CaseAdminsFilter &
-  CaseChannelFilter;
+  CaseAdminsFilter;
 export const CaseDataValues = {
   ...CaseTypeValues,
   ...CaseStatusValues,
@@ -70,5 +65,4 @@ export const CaseDataValues = {
   ...CaseQueryValues,
   ...CaseDatesValues,
   ...CaseAdminsValues,
-  ...CaseChannelValues,
 };
