@@ -53,7 +53,6 @@ export const useOngoingCaseDataErrands = () => {
   const priorityFilter = watchFilter('priority');
   const startdate = watchFilter('startdate');
   const enddate = watchFilter('enddate');
-  const channelFilter = watchFilter('channel');
 
   const sortObject = useMemo(() => {
     if (!sortColumn) return undefined;
@@ -109,7 +108,6 @@ export const useOngoingCaseDataErrands = () => {
           priority: filter?.priority?.split(',') || CaseDataValues.priority,
           startdate: filter?.start || CaseDataValues.startdate,
           enddate: filter?.end || CaseDataValues.enddate,
-          channel: filter?.channel?.split(',') || CaseDataValues.channel,
         };
 
         const filterStatuses = filter?.status?.split(',') || CaseDataValues.status;
@@ -128,7 +126,6 @@ export const useOngoingCaseDataErrands = () => {
           status: CaseDataValues.status,
           startdate: CaseDataValues.startdate,
           enddate: CaseDataValues.enddate,
-          channel: CaseDataValues.channel,
         };
       }
       if (filter?.stakeholders === user.username) {
@@ -170,7 +167,6 @@ export const useOngoingCaseDataErrands = () => {
         caseType: caseTypeFilter,
         status: statusFilter,
         priority: priorityFilter,
-        channel: channelFilter,
       };
 
       Object.entries(multiValueFilters).forEach(([key, value]) => {
@@ -195,7 +191,7 @@ export const useOngoingCaseDataErrands = () => {
       store.set('filter', JSON.stringify(fObj));
     },
     200,
-    [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, channelFilter, queryFilter]
+    [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, queryFilter]
   );
 
   useDebounceEffect(
@@ -213,7 +209,6 @@ export const useOngoingCaseDataErrands = () => {
     (currentValues.priority?.length || 0) +
     (currentValues.startdate ? 1 : 0) +
     (currentValues.enddate ? 1 : 0) +
-    (currentValues.channel?.length || 0) +
     (ownerFilter ? 1 : 0) +
     (JSON.stringify(selectedStatuses) === JSON.stringify(ongoingStatuses) ? currentValues.status?.length : 0);
 
