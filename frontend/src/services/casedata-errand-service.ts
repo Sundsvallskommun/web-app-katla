@@ -329,6 +329,7 @@ export const useErrands = (
   const fetchErrands = useCallback(
     async (page: number = 0) => {
       setIsLoading(true);
+      setErrands({ ...errands, isLoading: true });
       if (!filter) {
         return;
       }
