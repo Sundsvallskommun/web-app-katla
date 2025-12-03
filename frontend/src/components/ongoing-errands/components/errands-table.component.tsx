@@ -4,7 +4,7 @@ import { FTCaseType } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import { normalizeStatus } from '@interfaces/errand-status';
 import { getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
-import { Button, cx, Input, Pagination, Select, SortMode, Table } from '@sk-web-gui/react';
+import { Button, cx, Input, Pagination, Select, SortMode, Spinner, Table } from '@sk-web-gui/react';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
 import NextLink from 'next/link';
 import { useContext, useState } from 'react';
@@ -114,12 +114,13 @@ export const ErrandsTable: React.FC = () => {
 
   return (
     <div className="max-w-full overflow-x-hidden">
-      {/* <div className="z-100 absolute top-0 bottom-0 left-0 right-0 bg-background-content opacity-50 w-full h-full flex items-center justify-center">
-          <div>
-            <Spinner size={4} />
-          </div>
-        </div> */}
 
+      {data.isLoading ?(
+
+      <div className="z-100 absolute top-0 bottom-0 left-[3.2rem] bg-background-content opacity-50 w-full h-full flex items-center justify-center">
+            <Spinner size={4} />
+        </div>
+      ) : (
       <Table data-cy="main-table" dense={rowHeight === 'dense'} aria-describedby="errandTableCaption">
         <>
           <Table.Header>
@@ -191,6 +192,7 @@ export const ErrandsTable: React.FC = () => {
           </div>
         </Table.Footer>
       </Table>
+      )}
     </div>
   );
 };
