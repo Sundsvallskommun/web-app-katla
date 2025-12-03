@@ -78,25 +78,27 @@ export const MessageComposer: React.FC<{
     createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
       sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, sanitized(data.messageBody), files)
         .then(() => {
-          isMaxMediumDevice &&
+          if (!isMaxMediumDevice) {
             toastMessage({
               position: 'bottom',
               closeable: false,
               message: `Meddelandet skickades`,
               status: 'success',
             });
+          }
           setIsLoading(false);
           props.update();
           clearAndClose();
         })
         .catch(() => {
-          isMaxMediumDevice &&
+          if (!isMaxMediumDevice) {
             toastMessage({
               position: 'bottom',
               closeable: false,
               message: `Något gick fel när meddelandet skickades`,
               status: 'error',
             });
+          }
           setIsLoading(false);
         });
     });

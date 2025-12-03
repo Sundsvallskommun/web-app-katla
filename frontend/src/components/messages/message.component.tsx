@@ -21,27 +21,25 @@ export const CasedataMessagesTab: React.FC<{
       getConversations(municipalityId, errand.id)
         .then((res) => {
           Promise.all(
-            res.data.map((conversation: Conversation) =>
-              getConversationMessages(municipalityId, errand.id, conversation.id ?? '')
+            res.data.map((conv: Conversation) =>
+              getConversationMessages(municipalityId, errand.id, conv.id ?? '')
                 .then((messages) => {
-                  const allMessages = messages.data
+                  return messages.data
                     .map((msgRes) =>
                       Array.isArray(msgRes) ? msgRes
                       : msgRes ? [msgRes]
                       : []
                     )
                     .flat();
-                  setConversation(allMessages);
                 })
-                .catch((err) => {
-                  console.error('Something went wrong when fetching message', err);
-                })
+                .catch(() => [])
             )
-          );
+          ).then((allConversationMessages) => {
+            const allMessages = allConversationMessages.flat();
+            setConversation(allMessages);
+          });
         })
-        .catch((err) => {
-          console.error('getConversations failed', err);
-        });
+        .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId, errand]);

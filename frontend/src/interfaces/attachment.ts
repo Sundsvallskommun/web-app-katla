@@ -2,14 +2,22 @@ import { GenericExtraParameters } from './extra-parameters';
 
 export interface Attachment {
   id?: string;
+  name: string;
   version?: number;
   created?: string;
   updated?: string;
   category: string;
-  name: string;
   note: string;
   extension: string;
-  mimeType: string;
   file: string;
   extraParameters?: GenericExtraParameters;
+  mimeType: string;
+}
+
+export interface MessageAttachment {
+  id?: string;
+  name: string;
+  attachmentId?: string;
+  contentType?: string;
+  mimeType?: string;
 }

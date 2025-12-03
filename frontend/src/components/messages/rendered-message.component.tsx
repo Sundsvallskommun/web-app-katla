@@ -1,10 +1,20 @@
 import { AppContext } from '@contexts/app-context-interface';
+import { MessageAttachment } from '@interfaces/attachment';
 import { MessageNode } from '@interfaces/message';
 import { getConversationAttachment } from '@services/casedata-conversation-service';
 import sanitized from '@services/sanitizer-service';
 import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
-import { CornerDownRight, Image, Mail, Monitor, Paperclip, Smartphone, SquareMinus, SquarePlus } from 'lucide-react';
+import {
+  CornerDownRight,
+  Image as ImageIcon,
+  Mail,
+  Monitor,
+  Paperclip,
+  Smartphone,
+  SquareMinus,
+  SquarePlus,
+} from 'lucide-react';
 import React, { useContext, useState } from 'react';
 import { MessageAvatar } from './message-avatar.component';
 import { RenderMessageReciever } from './render-message-reciever.component';
@@ -72,35 +82,56 @@ export const RenderedMessage: React.FC<{
     }
   };
 
-  const handleDownloadAttachment = (a: { id?: string; file: string; name: string }) => {
-    if (message.conversationId && message.messageId && a.id) {
-      getConversationAttachment(municipalityId, errand.id, message.conversationId, message.messageId, a.id)
-        .then((res) => {
-          if (res.data) {
-            const uri = `data:${a.file};base64,${res.data}`;
-            const link = document.createElement('a');
-            link.href = uri;
-            link.setAttribute('download', a.name);
-            document.body.appendChild(link);
-            link.click();
-          } else {
-            toastMessage({
-              position: 'bottom',
-              closeable: false,
-              message: 'Filen kan inte hittas eller är skadad.',
-              status: 'error',
-            });
-          }
-        })
-        .catch(() => {
+  const handleDownloadAttachment = (attachment: MessageAttachment) => {
+    const attachmentId = attachment.attachmentId || attachment.id;
+
+    if (!message.conversationId || !message.messageId || !attachmentId) {
+      toastMessage({
+        position: 'bottom',
+        closeable: false,
+        message: 'Kan inte ladda ned bilagan - information saknas',
+        status: 'error',
+      });
+      return;
+    }
+
+    getConversationAttachment(municipalityId, errand.id, message.conversationId, message.messageId, attachmentId)
+      .then((res) => {
+        if (res.data) {
+          //NOTE: application/octet-stream is a generic binary type
+          const mimeType = attachment.contentType || attachment.mimeType || 'application/octet-stream';
+          const uri = `data:${mimeType};base64,${res.data}`;
+          const link = document.createElement('a');
+          link.href = uri;
+          link.setAttribute('download', attachment.name);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
           toastMessage({
             position: 'bottom',
             closeable: false,
-            message: 'Något gick fel när bilagan skulle hämtas',
+            message: 'Filen kan inte hittas eller är skadad.',
             status: 'error',
           });
+        }
+      })
+      .catch(() => {
+        toastMessage({
+          position: 'bottom',
+          closeable: false,
+          message: 'Något gick fel när bilagan skulle hämtas',
+          status: 'error',
         });
+      });
+  };
+
+  const getAttachmentIcon = (attachment: MessageAttachment) => {
+    const type = attachment.contentType || attachment.mimeType || '';
+    if (type.startsWith('image/')) {
+      return <Icon icon={<ImageIcon />} />;
     }
+    return <Icon icon={<Paperclip />} />;
   };
 
   const ExpandButton = () => (
@@ -203,18 +234,18 @@ export const RenderedMessage: React.FC<{
             <ul className="flex flex-wrap gap-sm items-center my-12">
               {message.attachments.map((a, idx) => (
                 <Button
-                  key={`${a.file}-${idx}`}
+                  key={`${a.attachmentId || a.id}-${idx}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDownloadAttachment(a);
                   }}
                   role="listitem"
-                  leftIcon={a.name.endsWith('pdf') ? <Icon icon={<Paperclip />} /> : <Icon icon={<Image />} />}
+                  leftIcon={getAttachmentIcon(a)}
                   variant="tertiary"
                   size={isMaxMediumDevice ? 'sm' : 'md'}
                   className={isMaxMediumDevice ? 'max-w-full' : undefined}
                 >
-                  <span className={isMaxMediumDevice ? 'truncate' : undefined}>{a.name}</span>
+                  <span className="truncate">{a.name}</span>
                 </Button>
               ))}
             </ul>
