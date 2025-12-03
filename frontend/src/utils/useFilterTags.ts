@@ -12,13 +12,11 @@ export const useFilterTags = () => {
     priority: string[];
     startdate: string;
     enddate: string;
-    channel: string[];
   }>();
 
   const types = getValues('caseType') ?? [];
   const statuses = getValues('status') ?? [];
   const priorities = getValues('priority') ?? [];
-  const channels = getValues('channel') ?? [];
   const startdate = getValues('startdate');
   const enddate = getValues('enddate');
 
@@ -42,11 +40,6 @@ export const useFilterTags = () => {
     }
   };
 
-  const handleRemoveChannel = (channelToRemove: string) => {
-    const updatedChannels = channels.filter((channel) => channel !== channelToRemove);
-    setValue('channel', updatedChannels);
-  };
-
   const handleRemoveDates = () => {
     setValue('startdate', '');
     setValue('enddate', '');
@@ -59,7 +52,6 @@ export const useFilterTags = () => {
       priority: [],
       startdate: '',
       enddate: '',
-      channel: [],
     });
 
     setSelectedErrandStatuses([]);
@@ -73,7 +65,6 @@ export const useFilterTags = () => {
       parsed.priority = [];
       parsed.startdate = '';
       parsed.enddate = '';
-      parsed.channel = [];
       store.set('filter', JSON.stringify(parsed));
     }
   };
@@ -82,10 +73,8 @@ export const useFilterTags = () => {
     types,
     statuses,
     priorities,
-    channels,
     startdate,
     enddate,
-    handleRemoveChannel,
     handleRemoveType,
     handleRemoveStatus,
     handleRemovePriority,

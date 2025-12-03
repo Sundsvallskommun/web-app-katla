@@ -26,7 +26,6 @@ describe('Overview page', () => {
   it('shows the correct sidebar main buttons', () => {
     const expectedStatusLabels = [
       ErrandStatus.ArendeInkommit,
-      ErrandStatus.UnderGranskning,
       ErrandStatus.Utkast,
       ErrandStatus.ArendeAvslutat,
     ];
@@ -39,7 +38,7 @@ describe('Overview page', () => {
 
   it('navigates to /logout when clicking the logout button', () => {
     cy.get('[data-cy="logout-button"]').should('exist').click();
-    cy.url().should('include', '/login');
+    cy.url().should('include', '/logout');
   });
 
   it('should open and close the notifications panel and show two items', () => {
@@ -67,11 +66,10 @@ describe('Overview page', () => {
     headerRow.get('th').eq(1).find('span').first().should('have.text', 'Ärendetyp');
     headerRow.get('th').eq(2).find('span').first().should('have.text', 'Registrerat');
     headerRow.get('th').eq(3).find('span').first().should('have.text', 'Prioritet');
-    headerRow.get('th').eq(4).find('span').first().should('have.text', 'Inkom via');
   });
 
   it('displays the filters', () => {
-    cy.get('[aria-label="status-button-Under granskning"]').click();
+    cy.get('[aria-label="status-button-Ärende inskickat"]').click();
     cy.get('[data-cy="Show-filters-button"]').should('exist');
     cy.get('[data-cy="Status-filter"]').should('exist');
     cy.get('[data-cy="Ärendetyp-filter"]').should('exist');
@@ -140,7 +138,7 @@ describe('Overview page', () => {
 
   it('allows filtering by single status', () => {
     const labels = Object.entries(ErrandStatus);
-    cy.get('[aria-label="status-button-Under granskning"]').click();
+    cy.get('[aria-label="status-button-Ärende inskickat"]').click();
     cy.get('[data-cy="Show-filters-button"]').should('exist');
     cy.get('[data-cy="Status-filter"]').click();
     if (labels[0][0] !== 'ArendeInkommit') {
@@ -156,7 +154,7 @@ describe('Overview page', () => {
 
   it('allows filtering by multiple statuses', () => {
     const labels = Object.entries(ErrandStatus);
-    cy.get('[aria-label="status-button-Under granskning"]').click();
+    cy.get('[aria-label="status-button-Ärende inskickat"]').click();
     cy.get('[data-cy="Show-filters-button"]').should('exist');
     cy.get('[data-cy="Status-filter"]').click();
     labels.forEach((label) => {

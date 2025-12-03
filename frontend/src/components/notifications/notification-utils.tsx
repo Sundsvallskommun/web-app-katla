@@ -14,17 +14,6 @@ export const getNotificationKey = (notification: Notification): string | undefin
   return notification.subType?.toUpperCase();
 };
 
-export const getFilteredNotifications = (notifications: Notification[], currentUsername: string): Notification[] => {
-  const username = currentUsername.toLowerCase();
-
-  return notifications.filter((n) => {
-    const subType = getNotificationKey(n);
-    const createdBy = (n.createdBy || '').toLowerCase();
-
-    return subType !== 'SYSTEM' && createdBy !== username;
-  });
-};
-
 export const sortByCreatedDesc = (notifications: Notification[]): Notification[] => {
   return [...notifications].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
 };

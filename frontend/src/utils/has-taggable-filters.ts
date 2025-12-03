@@ -21,7 +21,7 @@ export const useHasTags = () => {
     .map(findStatusKeyForStatusLabel)
     .filter((key): key is string => typeof key === 'string');
 
-  const { status = [], caseType = [], priority = [], channel = [], startdate, enddate } = filter;
+  const { status = [], caseType = [], priority = [], startdate, enddate } = filter;
 
   const taggableStatuses = status.filter((s) => !nonTaggableStatusKeys.includes(s));
 
@@ -29,7 +29,6 @@ export const useHasTags = () => {
     taggableStatuses.length > 0 ||
     caseType.length > 0 ||
     priority.length > 0 ||
-    channel.length > 0 ||
     !!startdate ||
     !!enddate;
 

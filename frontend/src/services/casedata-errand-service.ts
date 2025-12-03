@@ -53,7 +53,7 @@ export const ongoingCaseDataPTErrandLabels = [
   { label: 'Ärendetyp', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Prioritet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Inkom via', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
+  { label: 'Ärendeägare', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
 ];
 
 export const ongoingStatuses = [

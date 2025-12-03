@@ -116,7 +116,11 @@ export class CasedataNotificationController {
     const url = `${municipalityId}/${this.namespace}/notifications?${queryString}`;
     const baseURL = apiURL(this.SERVICE);
     const res = await this.apiService.get<CasedataNotification[]>({ url, baseURL }, req.user);
-    return response.status(200).send(res.data);
+
+    //NOTE: This application should only display notifications with subType MESSAGE
+    const filtredNotifications = res.data.filter((n) => n.subType === "MESSAGE")
+
+    return response.status(200).send(filtredNotifications);
   }
 
   @Patch('/casedatanotifications/:municipalityId')

@@ -4,7 +4,7 @@ import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Button, Divider, cx, useThemeQueries } from '@sk-web-gui/react';
 import { useContext, useEffect } from 'react';
 import { NotificationItem } from './notification-item';
-import { getFilteredNotifications, sortByCreatedDesc } from './notification-utils';
+import { sortByCreatedDesc } from './notification-utils';
 import { SidebarMode } from '@interfaces/sidebarmode';
 export interface NotificationsWrapperProps {
   show: boolean;
@@ -19,7 +19,6 @@ export const NotificationsWrapper: React.FC<NotificationsWrapperProps> = ({
 }) => {
   const { municipalityId, notifications, setNotifications } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
-  const { user } = useContext(AppContext);
 
   useEffect(() => {
     if (municipalityId) {
@@ -34,10 +33,8 @@ export const NotificationsWrapper: React.FC<NotificationsWrapperProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalityId]);
 
-  const filteredNotifications = getFilteredNotifications(notifications, user?.username || '');
-
-  const acknowledgedNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => n.acknowledged));
-  const newNotifications = sortByCreatedDesc(filteredNotifications.filter((n) => !n.acknowledged));
+  const acknowledgedNotifications = sortByCreatedDesc(notifications.filter((n) => n.acknowledged));
+  const newNotifications = sortByCreatedDesc(notifications.filter((n) => !n.acknowledged));
 
   // Overlay till vänster om panelen (bara desktop)
   const overlayClass =
