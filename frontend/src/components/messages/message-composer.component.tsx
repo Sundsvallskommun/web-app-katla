@@ -14,6 +14,7 @@ import {
   UploadFile,
   useConfirm,
   useSnackbar,
+  useThemeQueries,
 } from '@sk-web-gui/react';
 import dynamic from 'next/dynamic';
 import { useContext, useMemo, useState } from 'react';
@@ -44,6 +45,8 @@ export const MessageComposer: React.FC<{
 }> = (props) => {
   const { municipalityId, errand, user }: { municipalityId: string; errand: IErrand; user: User } =
     useContext(AppContext);
+  const { isMaxMediumDevice } = useThemeQueries();
+  const mobilePadding = isMaxMediumDevice ? 'px-[1.6rem]' : 'px-40';
   const [isLoading, setIsLoading] = useState(false);
   const closeConfirm = useConfirm();
   const [files, setFiles] = useState<UploadFile[]>([]);
@@ -51,12 +54,10 @@ export const MessageComposer: React.FC<{
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState<boolean>(false);
   const [messageError, setMessageError] = useState<string>('');
 
-  const { handleSubmit, getValues, setValue, watch, formState, reset } = useForm<CasedataMessageTabFormModel>(
-    {
-      defaultValues: defaultMessage,
-      mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
-    }
-  );
+  const { handleSubmit, getValues, setValue, watch, formState, reset } = useForm<CasedataMessageTabFormModel>({
+    defaultValues: defaultMessage,
+    mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
+  });
 
   const messageBody = watch('messageBody');
   const editorValue = useMemo(() => ({ markup: messageBody }), [messageBody]);
@@ -77,23 +78,25 @@ export const MessageComposer: React.FC<{
     createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
       sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, sanitized(data.messageBody), files)
         .then(() => {
-          toastMessage({
-            position: 'bottom',
-            closeable: false,
-            message: `Meddelandet skickades`,
-            status: 'success',
-          });
+          isMaxMediumDevice &&
+            toastMessage({
+              position: 'bottom',
+              closeable: false,
+              message: `Meddelandet skickades`,
+              status: 'success',
+            });
           setIsLoading(false);
           props.update();
           clearAndClose();
         })
         .catch(() => {
-          toastMessage({
-            position: 'bottom',
-            closeable: false,
-            message: `Något gick fel när meddelandet skickades`,
-            status: 'error',
-          });
+          isMaxMediumDevice &&
+            toastMessage({
+              position: 'bottom',
+              closeable: false,
+              message: `Något gick fel när meddelandet skickades`,
+              status: 'error',
+            });
           setIsLoading(false);
         });
     });
@@ -131,8 +134,8 @@ export const MessageComposer: React.FC<{
   return (
     <>
       <MessageWrapper label="Nytt meddelande" closeHandler={clearAndClose} show={props.show}>
-        <div className="my-md py-8 px-40 flex flex-col gap-12 ">
-          <div className="h-[30rem]">
+        <div className={`my-md py-8 ${mobilePadding} flex flex-col gap-12`}>
+          <div className={isMaxMediumDevice ? 'h-[20rem]' : 'h-[30rem]'}>
             <TextEditor
               className="h-[80%]"
               onChange={(e: { target: { value: TextEditorValue } }) => {
@@ -148,7 +151,7 @@ export const MessageComposer: React.FC<{
           </div>
           {messageError && <FormErrorMessage className="text-error">{messageError}</FormErrorMessage>}
         </div>
-        <div className="flex mb-24 mt-8 px-40">
+        <div className={`flex mb-24 mt-8 ${mobilePadding}`}>
           <Button
             variant="tertiary"
             color="primary"
@@ -159,7 +162,7 @@ export const MessageComposer: React.FC<{
             Bifoga fil
           </Button>
         </div>
-        <div className="px-40 mb-15">
+        <div className={`${mobilePadding} mb-15`}>
           <FileUpload.List>
             {files.map((file, index) => (
               <FileUpload.ListItem
@@ -176,7 +179,7 @@ export const MessageComposer: React.FC<{
             ))}
           </FileUpload.List>
         </div>
-        <div className="flex justify-start gap-lg px-40">
+        <div className={`flex justify-start gap-lg ${mobilePadding}`}>
           <Button
             key="cancelButton"
             type="button"
