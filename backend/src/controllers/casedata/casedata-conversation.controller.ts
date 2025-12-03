@@ -32,7 +32,10 @@ export class CaseDataConversationController {
     const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations`;
     const baseURL = apiURL(this.SERVICE);
     const res = await this.apiService.get<Conversation[]>({ url, baseURL }, req.user);
-    return { data: res.data, message: 'success' } as ResponseData;
+
+    const katlaConversations = res.data.filter((c) => c.type === 'INTERNAL' && c.relationIds.length === 0)
+
+    return { data: katlaConversations, message: 'success' } as ResponseData;
   }
 
   @Get('/casedata/:municipalityId/namespace/errands/:errandId/communication/conversations/:conversationId/messages')
