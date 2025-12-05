@@ -16,7 +16,7 @@ export const CasedataFilterQuery: React.FC = () => {
       onChange={(e) => {
         setQuery(e.target.value);
       }}
-      showSearchButton={value !== query}
+      showSearchButton
       className="flex-grow max-w-full"
       onSearch={() => setValue('query', query)}
       onReset={() => {
