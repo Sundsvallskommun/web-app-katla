@@ -197,7 +197,7 @@ export const useOngoingCaseDataErrands = () => {
       store.set('filter', JSON.stringify(fObj));
     },
     200,
-    [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, queryFilter]
+    [ownerFilter, caseTypeFilter, statusFilter, priorityFilter, startdate, enddate, queryFilter, user.username]
   );
 
   useDebounceEffect(
