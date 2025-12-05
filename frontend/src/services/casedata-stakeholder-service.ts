@@ -234,6 +234,7 @@ export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (
     primaryContact: (s.extraParameters?.primaryContact ?? '') === 'true',
     messageAllowed: (s.extraParameters?.messageAllowed ?? '') === 'true',
     extraInformation: s.extraParameters?.extraInformation ?? '',
+    adAccount: s.adAccount ?? ''
   };
 };
 
