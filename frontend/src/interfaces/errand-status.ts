@@ -63,3 +63,14 @@ export interface ApiErrandStatus {
   description?: string;
   created?: string;
 }
+
+const statusValueToKey = Object.entries(ErrandStatus).reduce(
+  (acc, [key, value]) => {
+    acc[value] = key;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+export const getStatusKey = (status: ErrandStatus): string => statusValueToKey[status];
+export const getStatusKeys = (statuses: ErrandStatus[]): string[] => statuses.map(getStatusKey);

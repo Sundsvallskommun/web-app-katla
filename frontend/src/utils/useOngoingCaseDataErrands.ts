@@ -104,13 +104,19 @@ export const useOngoingCaseDataErrands = () => {
         filter = JSON.parse(filterdata);
         storedFilters = {
           caseType: filter?.caseType?.split(',') || CaseDataValues.caseType,
-          status: filter?.status !== '' ? filter?.status?.split(',') || CaseDataValues.status : CaseDataValues.status,
+          status:
+            filter?.status && filter.status.trim()
+              ? filter.status.split(',').filter((s: string) => s.trim())
+              : CaseDataValues.status,
           priority: filter?.priority?.split(',') || CaseDataValues.priority,
           startdate: filter?.start || CaseDataValues.startdate,
           enddate: filter?.end || CaseDataValues.enddate,
         };
 
-        const filterStatuses = filter?.status?.split(',') || CaseDataValues.status;
+        const filterStatuses =
+          filter?.status && filter.status.trim()
+            ? filter.status.split(',').filter((s: string) => s.trim())
+            : CaseDataValues.status;
 
         setSelectedErrandStatuses(filterStatuses);
 

@@ -1,3 +1,4 @@
+import { ongoingStatusKeys } from '@components/filtering/errand-filter';
 import { Asset } from '@interfaces/asset';
 import { ErrandsData, IErrand } from '@interfaces/errand';
 import { UiPhase } from '@interfaces/errand-phase';
@@ -87,7 +88,7 @@ export const AppContext = createContext<AppContextInterface>({
   municipalityId: '',
   setMunicipalityId: () => {},
 
-  selectedErrandStatuses: [ErrandStatus.ArendeInkommit],
+  selectedErrandStatuses: ongoingStatusKeys as ErrandStatus[],
   setSelectedErrandStatuses: () => {},
 
   notifications: [],
