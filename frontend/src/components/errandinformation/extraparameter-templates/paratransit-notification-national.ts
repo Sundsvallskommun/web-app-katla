@@ -143,7 +143,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'personal.mobilityAids',
     value: [],
-    label: 'Ange en eller flera förflyttningshjälpmedel som den sökande är beroende av för att kunna genomföra resan',
+    label: 'Ange ett eller flera förflyttningshjälpmedel som den sökande är beroende av för att kunna genomföra resan',
     formField: {
       type: 'combobox',
       options: [
@@ -190,7 +190,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'personal.needForEscort',
     value: '',
-    label: 'Ange om du behöver aktiv hjälp av en ledsagare under själva resan',
+    label: 'Behöver den sökande aktiv hjälp av en ledsagare under själva resan',
     formField: {
       type: 'radio',
       options: [
@@ -255,7 +255,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'medical.diagnoses',
     value: [],
-    label: 'Ange en eller flera funktionsnedsättningar som den sökande har',
+    label: 'Ange ett eller flera funktionsnedsättningar som den sökande har',
     formField: {
       type: 'combobox',
       options: [
