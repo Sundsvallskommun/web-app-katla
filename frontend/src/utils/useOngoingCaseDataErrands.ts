@@ -2,8 +2,8 @@
 
 import { CaseDataFilter, CaseDataValues } from '@components/filtering/errand-filter';
 import { AppContext } from '@contexts/app-context-interface';
-import { ErrandStatus } from '@interfaces/errand-status';
-import { getStatusLabel, ongoingStatuses, useErrands } from '@services/casedata-errand-service';
+import { ErrandStatus, ongoingStatuses } from '@interfaces/errand-status';
+import { getStatusLabel, useErrands } from '@services/casedata-errand-service';
 import store from '@services/storage-service';
 import { useThemeQueries } from '@sk-web-gui/react';
 import { useDebounceEffect } from '@utils/useDebounceEffect';

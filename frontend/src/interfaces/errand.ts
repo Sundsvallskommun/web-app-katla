@@ -127,6 +127,15 @@ export interface ErrandsData extends Data {
   };
 }
 
+export const emptyErrandList: ErrandsData = {
+  errands: [],
+  labels: [],
+  page: 0,
+  size: 0,
+  totalPages: 0,
+  totalElements: 0,
+};
+
 export interface RelatedErrand {
   errandId?: number;
   errandNumber?: string;

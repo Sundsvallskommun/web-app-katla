@@ -1,14 +1,7 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { assignedStatuses, closedStatuses, draftStatuses, ErrandStatus, ongoingStatuses } from '@interfaces/errand-status';
 import { Priority } from '@interfaces/priority';
-import {
-  assignedStatuses,
-  closedStatuses,
-  draftStatuses,
-  findCaseLabelForCaseType,
-  findStatusKeyForStatusLabel,
-  ongoingStatuses
-} from '@services/casedata-errand-service';
+import { findCaseLabelForCaseType, findStatusKeyForStatusLabel } from '@services/casedata-errand-service';
 import { Chip, useThemeQueries } from '@sk-web-gui/react';
 import { useHasTags } from '@utils/has-taggable-filters';
 import dayjs from 'dayjs';
