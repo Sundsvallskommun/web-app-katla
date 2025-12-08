@@ -4,8 +4,8 @@ import { FTCaseType } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
 import { normalizeStatus } from '@interfaces/errand-status';
 import { getCaseLabels, isErrandClosed } from '@services/casedata-errand-service';
-import { Button, cx, Input, Pagination, Select, SortMode, Spinner, Table } from '@sk-web-gui/react';
 import { getOwnerStakeholder } from '@services/casedata-stakeholder-service';
+import { Button, cx, Input, Pagination, Select, SortMode, Spinner, Table } from '@sk-web-gui/react';
 import { TableForm } from '@utils/useOngoingCaseDataErrands';
 import NextLink from 'next/link';
 import { useContext, useState } from 'react';
@@ -21,25 +21,16 @@ export const ErrandsTable: React.FC = () => {
   const totalPages = watch('totalPages');
   const page = watch('page');
 
-  const serverSideSortableColsPT: { [key: number]: string } = {
-    0: 'status.statusType',
-    1: 'caseType',
-    2: 'errandNumber',
-    3: 'priority',
-    4: 'created',
-    5: 'channel',
-  };
-
   const sortOrders: { [key: string]: 'ascending' | 'descending' } = {
     asc: 'ascending',
     desc: 'descending',
   };
 
-  const handleSort = (index: number) => {
-    if (sortColumn === serverSideSortableColsPT[index]) {
+  const handleSort = (sortField: string) => {
+    if (sortColumn === sortField) {
       setValue('sortOrder', sortOrder === 'desc' ? 'asc' : 'desc');
     } else {
-      setValue('sortColumn', serverSideSortableColsPT[index]);
+      setValue('sortColumn', sortField);
     }
   };
 
@@ -47,11 +38,11 @@ export const ErrandsTable: React.FC = () => {
     <Table.HeaderColumn key={`header-${index}`} sticky={header.sticky}>
       {header.screenReaderOnly ?
         <span className="sr-only">{header.label}</span>
-      : header.sortable ?
+      : header.sortField ?
         <Table.SortButton
-          isActive={sortColumn === serverSideSortableColsPT[index]}
+          isActive={sortColumn === header.sortField}
           sortOrder={sortOrders[sortOrder] as SortMode}
-          onClick={() => handleSort(index)}
+          onClick={() => handleSort(header.sortField!)}
         >
           {header.label}
         </Table.SortButton>
@@ -60,8 +51,10 @@ export const ErrandsTable: React.FC = () => {
   ));
 
   const rows = (data.errands || []).map((errand: IErrand, index) => {
-
-    const ownerStakeholderName = getOwnerStakeholder(errand)?.firstName && getOwnerStakeholder(errand)?.lastName ? `${getOwnerStakeholder(errand)?.firstName} ${getOwnerStakeholder(errand)?.lastName}` : '(Saknas)'
+    const ownerStakeholderName =
+      getOwnerStakeholder(errand)?.firstName && getOwnerStakeholder(errand)?.lastName ?
+        `${getOwnerStakeholder(errand)?.firstName} ${getOwnerStakeholder(errand)?.lastName}`
+      : '(Saknas)';
 
     const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${municipalityId}/${errand.errandNumber}`;
     return (
@@ -80,6 +73,8 @@ export const ErrandsTable: React.FC = () => {
         <Table.Column scope="row" className="font-bold w-full whitespace-nowrap overflow-x-hidden">
           {getCaseLabels()[errand.caseType as FTCaseType] ?? errand.caseType}
         </Table.Column>
+
+        <Table.Column>{errand.errandNumber}</Table.Column>
 
         <Table.Column>
           <time dateTime={errand.created}>{errand.created}</time>
@@ -118,85 +113,82 @@ export const ErrandsTable: React.FC = () => {
 
   return (
     <div className="max-w-full overflow-x-hidden">
-
-      {data.isLoading ?(
-
-      <div className="z-100 absolute top-0 bottom-0 left-[3.2rem] bg-background-content opacity-50 w-full h-full flex items-center justify-center">
-            <Spinner size={4} />
+      {data.isLoading ?
+        <div className="z-100 absolute top-0 bottom-0 left-[3.2rem] bg-background-content opacity-50 w-full h-full flex items-center justify-center">
+          <Spinner size={4} />
         </div>
-      ) : (
-      <Table data-cy="main-table" dense={rowHeight === 'dense'} aria-describedby="errandTableCaption">
-        <>
-          <Table.Header>
-            {headers}
-            <Table.HeaderColumn sticky>
-              <span className="sr-only">Hantera</span>
-            </Table.HeaderColumn>
-          </Table.Header>
-          <Table.Body>{rows}</Table.Body>
-        </>
+      : <Table data-cy="main-table" dense={rowHeight === 'dense'} aria-describedby="errandTableCaption">
+          <>
+            <Table.Header>
+              {headers}
+              <Table.HeaderColumn sticky>
+                <span className="sr-only">Hantera</span>
+              </Table.HeaderColumn>
+            </Table.Header>
+            <Table.Body>{rows}</Table.Body>
+          </>
 
-        <Table.Footer>
-          <div className="sk-table-bottom-section sk-table-pagination-mobile">
-            <label className="sk-table-bottom-section-label" htmlFor="paginationSelect">
-              Sida:
-            </label>
-            <Select id="paginationSelect" size="sm" variant="tertiary" value={undefined} onSelectValue={undefined}>
-              {totalPages &&
-                Array.from(Array(totalPages).keys()).map((page) => (
-                  <Select.Option key={`pagipage-${page}`} value={page}>
-                    {page + 1}
-                  </Select.Option>
-                ))}
-            </Select>
-          </div>
-          <div className="sk-table-bottom-section">
-            <label className="sk-table-bottom-section-label" htmlFor="pageSize">
-              Rader per sida:
-            </label>
-            <Input
-              {...register('pageSize')}
-              size="sm"
-              id="pageSize"
-              type="number"
-              min={1}
-              max={1000}
-              className="max-w-[6rem]"
-            />
-          </div>
-          <div className="sk-table-paginationwrapper">
-            <Pagination
-              showFirst
-              showLast
-              pagesBefore={1}
-              pagesAfter={1}
-              showConstantPages={true}
-              fitContainer
-              pages={totalPages}
-              activePage={page + 1}
-              changePage={(page) => {
-                setValue('page', page - 1);
-              }}
-            />
-          </div>
-          <div className="sk-table-bottom-section">
-            <label className="sk-table-bottom-section-label" htmlFor="rowHeight">
-              Radhöjd:
-            </label>
-            <Select
-              size="sm"
-              id="rowHeight"
-              variant="tertiary"
-              onChange={(e) => setRowHeight(e.target.value)}
-              value={rowHeight}
-            >
-              <Select.Option value="normal">Normal</Select.Option>
-              <Select.Option value="dense">Tät</Select.Option>
-            </Select>
-          </div>
-        </Table.Footer>
-      </Table>
-      )}
+          <Table.Footer>
+            <div className="sk-table-bottom-section sk-table-pagination-mobile">
+              <label className="sk-table-bottom-section-label" htmlFor="paginationSelect">
+                Sida:
+              </label>
+              <Select id="paginationSelect" size="sm" variant="tertiary" value={undefined} onSelectValue={undefined}>
+                {totalPages &&
+                  Array.from(Array(totalPages).keys()).map((page) => (
+                    <Select.Option key={`pagipage-${page}`} value={page}>
+                      {page + 1}
+                    </Select.Option>
+                  ))}
+              </Select>
+            </div>
+            <div className="sk-table-bottom-section">
+              <label className="sk-table-bottom-section-label" htmlFor="pageSize">
+                Rader per sida:
+              </label>
+              <Input
+                {...register('pageSize')}
+                size="sm"
+                id="pageSize"
+                type="number"
+                min={1}
+                max={1000}
+                className="max-w-[6rem]"
+              />
+            </div>
+            <div className="sk-table-paginationwrapper">
+              <Pagination
+                showFirst
+                showLast
+                pagesBefore={1}
+                pagesAfter={1}
+                showConstantPages={true}
+                fitContainer
+                pages={totalPages}
+                activePage={page + 1}
+                changePage={(page) => {
+                  setValue('page', page - 1);
+                }}
+              />
+            </div>
+            <div className="sk-table-bottom-section">
+              <label className="sk-table-bottom-section-label" htmlFor="rowHeight">
+                Radhöjd:
+              </label>
+              <Select
+                size="sm"
+                id="rowHeight"
+                variant="tertiary"
+                onChange={(e) => setRowHeight(e.target.value)}
+                value={rowHeight}
+              >
+                <Select.Option value="normal">Normal</Select.Option>
+                <Select.Option value="dense">Tät</Select.Option>
+              </Select>
+            </div>
+          </Table.Footer>
+        </Table>
+      }
     </div>
   );
 };
