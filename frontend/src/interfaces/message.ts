@@ -1,4 +1,4 @@
-import { Attachment } from './attachment';
+import { MessageAttachment } from './attachment';
 
 export interface MessageNode extends MessageResponse {
   children?: MessageNode[];
@@ -14,6 +14,6 @@ export interface MessageResponse {
   lastName?: string;
   messageType?: string;
   viewed?: string;
-  attachments?: Attachment[];
+  attachments?: MessageAttachment[];
   conversationId?: string;
 }

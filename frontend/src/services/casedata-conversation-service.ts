@@ -1,4 +1,4 @@
-import { Attachment } from '@interfaces/attachment';
+import { Attachment, MessageAttachment } from '@interfaces/attachment';
 import { User } from '@interfaces/user';
 import { UploadFile } from '@sk-web-gui/react';
 import { ApiResponse, apiService } from './api-service';
@@ -40,7 +40,7 @@ export interface Message {
   createdBy?: Identifier;
   content: string;
   readBy?: ReadBy[];
-  attachments?: Attachment[];
+  attachments?: MessageAttachment[];
 }
 
 //Count functions can be removed if it wont be used for FT

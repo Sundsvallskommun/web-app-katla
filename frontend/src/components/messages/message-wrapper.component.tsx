@@ -1,21 +1,24 @@
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, Header, cx } from '@sk-web-gui/react';
+import { Button, Header, cx, useThemeQueries } from '@sk-web-gui/react';
 
 export const MessageWrapper: React.FC<{
   show: boolean;
   label: string;
   closeHandler: () => void;
   children: React.ReactNode;
-}> = ({ show, label = '', closeHandler, children }) => (
-  <>
-    <div className={cx(show ? 'sk-modal-wrapper' : 'fixed')}></div>
-    <section
-      className={cx(
-        `border-1 border-t-0 absolute right-0 bottom-0 top-0 bg-background-content transition-all ease-in-out duration-150 overflow-auto z-[20] shadow-100`,
-        show ? 'w-full md:min-w-[50rem] md:w-[50vw] lg:w-[38vw]' : 'w-0 px-0'
-      )}
-    >
-      <Header className="h-[64px] flex justify-between" wrapperClasses="py-4 px-40">
+}> = ({ show, label = '', closeHandler, children }) => {
+  const { isMaxMediumDevice } = useThemeQueries();
+
+  return (
+    <>
+      <div className={cx(show ? 'sk-modal-wrapper' : 'fixed')}></div>
+      <section
+        className={cx(
+          `border-1 border-t-0 absolute right-0 bottom-0 top-0 bg-background-content transition-all ease-in-out duration-150 overflow-auto z-[20] shadow-100`,
+          show ? 'w-full md:min-w-[50rem] md:w-[50vw] lg:w-[38vw]' : 'w-0 px-0'
+        )}
+      >
+        <Header className="h-[64px] flex justify-between" wrapperClasses={`py-4 ${isMaxMediumDevice ? 'px-[1.6rem]' : 'px-40'}`}>
         <div className="text-h4-sm flex items-center gap-12">
           <LucideIcon name="mail" /> {label}
         </div>
@@ -34,5 +37,6 @@ export const MessageWrapper: React.FC<{
       </Header>
       {children}
     </section>
-  </>
-);
+    </>
+  );
+};

@@ -1,6 +1,5 @@
-
 import { MessageNode } from '@interfaces/message';
-import { Avatar } from '@sk-web-gui/react';
+import { Avatar, useThemeQueries } from '@sk-web-gui/react';
 
 const getSenderInitials = (msg: MessageNode): string => {
   if ('firstName' in msg && 'lastName' in msg) {
@@ -12,11 +11,12 @@ const getSenderInitials = (msg: MessageNode): string => {
 export const MessageAvatar: React.FC<{
   message: MessageNode;
 }> = ({ message }) => {
+  const { isMaxMediumDevice } = useThemeQueries();
   return (
     <Avatar
       rounded
       color={message.direction === 'OUTBOUND' ? 'juniskar' : 'bjornstigen'}
-      size={'md'}
+      size={isMaxMediumDevice ? 'sm' : 'md'}
       initials={getSenderInitials(message)}
     />
   );

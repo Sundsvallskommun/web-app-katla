@@ -274,7 +274,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
         <div className={formFieldClassName}>
           <Checkbox.Group
             data-cy={`uppgift-field-${field.field}`}
-            direction="row"
+            direction={!isMaxMediumDevice && field.formField.options.length <= 3 ? 'row' : 'column'}
             defaultValue={field.value as string[]}
           >
             {options.map((option, index) => (

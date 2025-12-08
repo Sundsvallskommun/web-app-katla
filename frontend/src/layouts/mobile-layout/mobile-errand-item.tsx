@@ -28,7 +28,7 @@ const MobileErrandItem: React.FC<ErrandItemProps> = ({ errand }) => {
 
           <div className="flex flex-col items-start gap-1.5 pt-[2.4rem] flex-1">
             <div className=" font-arial text-base lining-nums proportional-nums leading-[2.4rem]">
-              <span className="font-[700]">Ärendetyp:</span> {errand.label}
+              <span className="font-[700]">Uppdaterat:</span> {errand.updated}
             </div>
             <div className="font-arial text-base lining-nums proportional-nums leading-[2.4rem]">
               <span className="font-[700]">Registrerat</span> {errand.created}

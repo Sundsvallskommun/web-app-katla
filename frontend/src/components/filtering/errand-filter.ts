@@ -1,3 +1,6 @@
+import { getStatusKeys } from '@interfaces/errand-status';
+import { ongoingStatuses } from '@services/casedata-errand-service';
+
 export interface CaseTypeFilter {
   caseType: string[];
 }
@@ -10,8 +13,10 @@ export interface CaseStatusFilter {
   status: string[];
 }
 
+export const ongoingStatusKeys = getStatusKeys(ongoingStatuses);
+
 export const CaseStatusValues = {
-  status: ['ArendeInkommit'],
+  status: ongoingStatusKeys,
 };
 
 export interface CasePriorityFilter {
