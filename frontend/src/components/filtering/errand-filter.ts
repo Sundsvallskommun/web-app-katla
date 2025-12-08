@@ -1,5 +1,4 @@
-import { getStatusKeys } from '@interfaces/errand-status';
-import { ongoingStatuses } from '@services/casedata-errand-service';
+import { getStatusKeys, ongoingStatuses } from '@interfaces/errand-status';
 
 export interface CaseTypeFilter {
   caseType: string[];

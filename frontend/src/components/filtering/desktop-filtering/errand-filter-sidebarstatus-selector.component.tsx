@@ -1,6 +1,6 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { ErrandStatus } from '@interfaces/errand-status';
-import { closedStatuses, draftStatuses, getStatusLabel, ongoingStatuses } from '@services/casedata-errand-service';
+import { closedStatuses, draftStatuses, ErrandStatus, ongoingStatuses } from '@interfaces/errand-status';
+import { getStatusLabel } from '@services/casedata-errand-service';
 import store from '@services/storage-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Badge, Button } from '@sk-web-gui/react';

@@ -74,3 +74,25 @@ const statusValueToKey = Object.entries(ErrandStatus).reduce(
 
 export const getStatusKey = (status: ErrandStatus): string => statusValueToKey[status];
 export const getStatusKeys = (statuses: ErrandStatus[]): string[] => statuses.map(getStatusKey);
+
+export const ongoingStatuses = [
+  ErrandStatus.ArendeInkommit,
+  ErrandStatus.UnderGranskning,
+  ErrandStatus.VantarPaKomplettering,
+  ErrandStatus.InterntAterkoppling,
+  ErrandStatus.UnderUtredning,
+  ErrandStatus.UnderBeslut,
+  ErrandStatus.Beslutad,
+  ErrandStatus.BeslutVerkstallt,
+  ErrandStatus.BeslutOverklagat,
+];
+
+export const suspendedStatuses = [ErrandStatus.Parkerad];
+export const assignedStatuses = [ErrandStatus.Tilldelat];
+export const draftStatuses = [ErrandStatus.Utkast];
+
+export const closedStatuses = [
+  ErrandStatus.ArendeAvslutat,
+  ErrandStatus.ArendetAvvisas,
+  ErrandStatus.HanterasIAnnatSystem,
+];

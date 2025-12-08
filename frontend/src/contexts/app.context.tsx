@@ -1,12 +1,10 @@
-import { ongoingStatusKeys } from '@components/filtering/errand-filter';
 import { Asset } from '@interfaces/asset';
-import { ErrandsData, IErrand } from '@interfaces/errand';
+import { emptyErrandList, ErrandsData, IErrand } from '@interfaces/errand';
 import { UiPhase } from '@interfaces/errand-phase';
-import { ErrandStatus } from '@interfaces/errand-status';
+import { ErrandStatus, getStatusKeys, ongoingStatuses } from '@interfaces/errand-status';
 import { MessageNode } from '@interfaces/message';
 import { Notification as CaseDataNotification } from '@interfaces/notification';
 import { User } from '@interfaces/user';
-import { emptyErrandList } from '@services/casedata-errand-service';
 import { Admin, emptyUser } from '@services/user-service';
 import { ReactNode, useState } from 'react';
 import { AppContext } from './app-context-interface';
@@ -25,7 +23,7 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   const [conversation, setConversation] = useState<MessageNode[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedErrandStatuses, setSelectedErrandStatuses] = useState<ErrandStatus[]>(
-    ongoingStatusKeys as ErrandStatus[]
+    getStatusKeys(ongoingStatuses) as ErrandStatus[]
   );
   const [municipalityId, setMunicipalityId] = useState<string>('');
   const [sidebarLabel, setSidebarLabel] = useState<string>('');

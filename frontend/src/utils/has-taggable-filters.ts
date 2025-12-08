@@ -1,12 +1,7 @@
 import { CaseDataFilter } from '../components/filtering/errand-filter';
+import { assignedStatuses, closedStatuses, draftStatuses, ongoingStatuses } from '../interfaces/errand-status';
 import { useFormContext } from 'react-hook-form';
-import {
-  ongoingStatuses,
-  assignedStatuses,
-  draftStatuses,
-  closedStatuses,
-  findStatusKeyForStatusLabel,
-} from '../services/casedata-errand-service';
+import { findStatusKeyForStatusLabel } from '../services/casedata-errand-service';
 
 export const useHasTags = () => {
   const { getValues } = useFormContext<CaseDataFilter>();

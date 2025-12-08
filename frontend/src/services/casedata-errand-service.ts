@@ -2,9 +2,21 @@ import { AppContext } from '@contexts/app-context-interface';
 import { Attachment } from '@interfaces/attachment';
 import { FTCaseLabel, FTCaseType } from '@interfaces/case-type';
 import { ApiChannels, Channels } from '@interfaces/channels';
-import { ApiErrand, ErrandsData, IErrand, PagedApiErrandsResponse, RegisterErrandData } from '@interfaces/errand';
+import {
+  ApiErrand,
+  emptyErrandList,
+  ErrandsData,
+  IErrand,
+  PagedApiErrandsResponse,
+  RegisterErrandData,
+} from '@interfaces/errand';
 import { ErrandPhase, UiPhase } from '@interfaces/errand-phase';
-import { ErrandStatus } from '@interfaces/errand-status';
+import {
+  ErrandStatus,
+  ongoingStatuses,
+  draftStatuses,
+  closedStatuses,
+} from '@interfaces/errand-status';
 import { ExtraParameter } from '@interfaces/extra-parameters';
 import { All, ApiPriority, Priority } from '@interfaces/priority';
 import { Role } from '@interfaces/role';
@@ -39,44 +51,12 @@ interface CasedataFormModel {
   supplementDueDate: string;
 }
 
-export const emptyErrandList: ErrandsData = {
-  errands: [],
-  labels: [],
-  page: 0,
-  size: 0,
-  totalPages: 0,
-  totalElements: 0,
-};
-
 export const ongoingCaseDataPTErrandLabels = [
   { label: 'Status', screenReaderOnly: false, sortable: false, shownForStatus: All.ALL },
   { label: 'Ärendetyp', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Prioritet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
   { label: 'Ärendeägare', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-];
-
-export const ongoingStatuses = [
-  ErrandStatus.ArendeInkommit,
-  ErrandStatus.UnderGranskning,
-  ErrandStatus.VantarPaKomplettering,
-  ErrandStatus.InterntAterkoppling,
-  ErrandStatus.UnderUtredning,
-  ErrandStatus.UnderBeslut,
-  ErrandStatus.Beslutad,
-  ErrandStatus.BeslutVerkstallt,
-  ErrandStatus.BeslutOverklagat,
-];
-
-export const suspendedStatuses = [ErrandStatus.Parkerad];
-export const assignedStatuses = [ErrandStatus.Tilldelat];
-
-export const draftStatuses = [ErrandStatus.Utkast];
-
-export const closedStatuses = [
-  ErrandStatus.ArendeAvslutat,
-  ErrandStatus.ArendetAvvisas,
-  ErrandStatus.HanterasIAnnatSystem,
 ];
 
 export const getStatusLabel = (statuses: ErrandStatus[]) => {
