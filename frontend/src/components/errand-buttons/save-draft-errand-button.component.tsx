@@ -13,7 +13,7 @@ import { useFormContext, UseFormReturn } from 'react-hook-form';
 export const DraftErrandButton: React.FC = () => {
   const toastMessage = useSnackbar();
   const router = useRouter();
-  const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
+  const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
   const handleRemoveDeletedStakeholders = useRemoveDeletedStakeholders();
 
@@ -94,7 +94,7 @@ export const DraftErrandButton: React.FC = () => {
   return (
     <Button
       data-cy="save-draft-errand-button"
-      variant="primary"
+      variant={errand.created === undefined ? "primary" : "secondary"}
       onClick={onSubmit}
       disabled={isLoading}
       rightIcon={isLoading ? <Spinner size={2} /> : undefined}

@@ -6,7 +6,6 @@ import { DraftErrandButton } from '@components/errand-buttons/save-draft-errand-
 import { AppContext } from '@contexts/app-context-interface';
 import { ErrandStatus } from '@interfaces/errand-status';
 import { useContext } from 'react';
-import { SaveErrandButton } from './errand-buttons/save-errand-button.component';
 
 interface Props {
   className?: string;
@@ -20,7 +19,7 @@ export const ErrandActionButtons: React.FC<Props> = ({ className = '' }) => {
     <div className={className}>
       {draftErrand ?
         <>
-          <SaveErrandButton />
+          <DraftErrandButton />
           <RegisterErrandButton />
         </>
       : errandRegistredState ?
