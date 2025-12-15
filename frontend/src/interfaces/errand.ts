@@ -117,7 +117,7 @@ export interface ErrandsData extends Data {
   labels: {
     label: string;
     screenReaderOnly: boolean;
-    sortable: boolean;
+    sortField?: string;
     sticky?: boolean;
     shownForStatus: ErrandPhase | All;
   }[];

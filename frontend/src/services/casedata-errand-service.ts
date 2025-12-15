@@ -11,12 +11,7 @@ import {
   RegisterErrandData,
 } from '@interfaces/errand';
 import { ErrandPhase, UiPhase } from '@interfaces/errand-phase';
-import {
-  ErrandStatus,
-  ongoingStatuses,
-  draftStatuses,
-  closedStatuses,
-} from '@interfaces/errand-status';
+import { closedStatuses, draftStatuses, ErrandStatus, ongoingStatuses } from '@interfaces/errand-status';
 import { ExtraParameter } from '@interfaces/extra-parameters';
 import { All, ApiPriority, Priority } from '@interfaces/priority';
 import { Role } from '@interfaces/role';
@@ -51,12 +46,13 @@ interface CasedataFormModel {
   supplementDueDate: string;
 }
 
-export const ongoingCaseDataPTErrandLabels = [
-  { label: 'Status', screenReaderOnly: false, sortable: false, shownForStatus: All.ALL },
-  { label: 'Ärendetyp', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Registrerat', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Prioritet', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
-  { label: 'Ärendeägare', screenReaderOnly: false, sortable: true, shownForStatus: All.ALL },
+export const errandTableLabels = [
+  { label: 'Status', screenReaderOnly: false, shownForStatus: All.ALL },
+  { label: 'Ärendetyp', screenReaderOnly: false, sortField: 'caseType', shownForStatus: All.ALL },
+  { label: 'Ärendenummer', screenReaderOnly: false, sortField: 'errandNumber', shownForStatus: All.ALL },
+  { label: 'Registrerat', screenReaderOnly: false, sortField: 'created', shownForStatus: All.ALL },
+  { label: 'Prioritet', screenReaderOnly: false, sortField: 'priority', shownForStatus: All.ALL },
+  { label: 'Ärendeägare', screenReaderOnly: false, shownForStatus: All.ALL },
 ];
 
 export const getStatusLabel = (statuses: ErrandStatus[]) => {
@@ -272,7 +268,7 @@ export const getErrands: (
         size: res.data.data.pageable.pageSize,
         totalPages: res.data.data.totalPages,
         totalElements: res.data.data.totalElements,
-        labels: ongoingCaseDataPTErrandLabels,
+        labels: errandTableLabels,
       } as ErrandsData;
       return response;
     })
