@@ -37,7 +37,7 @@ const Arende: React.FC = () => {
         const user = await getMe();
         setUser(user);
 
-        const res = await getErrandByErrandNumber(municipality, errandNumber);
+        const res = await getErrandByErrandNumber(errandNumber);
 
         if (res.error) {
           setForbidden(true);

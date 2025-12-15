@@ -24,7 +24,7 @@ export const RenderedMessage: React.FC<{
   root?: boolean;
   children: React.ReactNode;
 }> = ({ message, root = false, children }) => {
-  const { errand, municipalityId } = useContext(AppContext);
+  const { errand } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
   const [expanded, setExpanded] = useState<boolean>(!message?.children?.length ? true : false);
   const toastMessage = useSnackbar();
@@ -95,7 +95,7 @@ export const RenderedMessage: React.FC<{
       return;
     }
 
-    getConversationAttachment(municipalityId, errand.id, message.conversationId, message.messageId, attachmentId)
+    getConversationAttachment(errand.id, message.conversationId, message.messageId, attachmentId)
       .then((res) => {
         if (res.data) {
           //NOTE: application/octet-stream is a generic binary type

@@ -94,12 +94,11 @@ export const NotificationItem: React.FC<{ notification: Notification }> = ({ not
             target="_blank"
             onClick={async () => {
               try {
-                await acknowledgeCasedataNotification(municipalityId, notification as Notification).catch(() => {
+                await acknowledgeCasedataNotification(notification as Notification).catch(() => {
                   throw new Error('Failed to acknowledge notification');
                 });
 
-                const getNotifications = getCasedataNotifications;
-                const notifications = await getNotifications(municipalityId);
+                const notifications = await getCasedataNotifications();
                 setNotifications(notifications);
               } catch (error) {
                 toastMessage({

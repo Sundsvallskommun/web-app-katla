@@ -1,4 +1,3 @@
-import { MUNICIPALITY_ID } from '@/config';
 import {
   Errand as ErrandDTO,
   PageErrand as PageErrandDTO,
@@ -23,6 +22,7 @@ import { Body, Controller, Get, HttpCode, Param, Patch, Post, QueryParam, Req, R
 import { OpenAPI } from 'routing-controllers-openapi';
 import { apiURL, luhnCheck, withRetries } from '../../utils/util';
 import { apiServiceName } from '@/config/api-config';
+import { MUNICIPALITY_ID } from '@/config';
 
 interface SingleErrandResponseData {
   data: ErrandDTO;
@@ -40,11 +40,12 @@ export class CaseDataErrandController {
   private apiService = new ApiService();
   SERVICE = apiServiceName('case-data');
   CITIZEN_SERVICE = apiServiceName('citizen');
+  private readonly municipalityId = MUNICIPALITY_ID;
 
   preparedErrandResponse = async (errandData: ErrandDTO, req: any) => {
     const applicant: StakeholderDTO & { personalNumber?: string } = errandData.stakeholders.find(s => s.roles.includes(Role.APPLICANT));
     if (applicant && applicant.personId) {
-      const personNumberUrl = `${this.CITIZEN_SERVICE}/${MUNICIPALITY_ID}/${applicant.personId}/personnumber`;
+      const personNumberUrl = `${this.CITIZEN_SERVICE}/${this.municipalityId}/${applicant.personId}/personnumber`;
       const personNumberRes = await this.apiService
         .get<string>({ url: personNumberUrl }, req.user)
         .then(res => ({ data: `${res.data}` }))
@@ -55,7 +56,7 @@ export class CaseDataErrandController {
       errandData.stakeholders?.filter(s => s.roles.includes(Role.CONTACT_PERSON)) || [];
     const contactPersonsPromises = contactPersons.map(fa => {
       if (fa && fa.personId) {
-        const personNumberUrl = `${this.CITIZEN_SERVICE}/${MUNICIPALITY_ID}/${fa.personId}/personnumber`;
+        const personNumberUrl = `${this.CITIZEN_SERVICE}/${this.municipalityId}/${fa.personId}/personnumber`;
         const getPersonalNumber = () =>
           this.apiService
             .get<string>({ url: personNumberUrl }, req.user)
@@ -74,32 +75,26 @@ export class CaseDataErrandController {
     return resToSend;
   };
 
-  @Get('/casedata/:municipalityId/errand/:id')
+  @Get('/casedata/errand/:id')
   @OpenAPI({ summary: 'Return an errand by id' })
   @UseBefore(authMiddleware)
-  async errand(
-    @Req() req: RequestWithUser,
-    @Param('id') id: string,
-    @Param('municipalityId') municipalityId: string,
-    @Res() response: any,
-  ): Promise<SingleErrandResponseData> {
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${id}`;
+  async errand(@Req() req: RequestWithUser, @Param('id') id: string, @Res() response: any): Promise<SingleErrandResponseData> {
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${id}`;
     const baseURL = apiURL(this.SERVICE);
     const errandResponse = await this.apiService.get<ErrandDTO>({ url, baseURL }, req.user);
     const errandData = errandResponse.data;
     return response.send(await this.preparedErrandResponse(errandData, req));
   }
 
-  @Get('/casedata/:municipalityId/errand/errandnumber/:errandNumber')
+  @Get('/casedata/errand/errandnumber/:errandNumber')
   @OpenAPI({ summary: 'Return an errand by errand number' })
   @UseBefore(authMiddleware)
   async errandByErrandNumber(
     @Req() req: RequestWithUser,
     @Param('errandNumber') errandNumber: string,
-    @Param('municipalityId') municipalityId: string,
     @Res() response: any,
   ): Promise<SingleErrandResponseData> {
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands?filter=errandNumber:'${errandNumber}'`;
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands?filter=errandNumber:'${errandNumber}'`;
     const baseURL = apiURL(this.SERVICE);
     const errandResponse = await this.apiService.get<PageErrandDTO>({ url, baseURL }, req.user);
     validateCaseTypes(errandResponse.data.content);
@@ -107,12 +102,11 @@ export class CaseDataErrandController {
     return response.send(await this.preparedErrandResponse(errandData, req));
   }
 
-  @Get('/casedata/:municipalityId/errands')
+  @Get('/casedata/errands')
   @OpenAPI({ summary: 'Return a list of errands for current logged in user' })
   @UseBefore(authMiddleware, hasPermissions(['canEditCasedata'])) //hasRoles(['sg_mea_prh_utvecklare']))
   async getErrands(
     @Req() req: RequestWithUser,
-    @Param('municipalityId') municipalityId: string,
     @QueryParam('page') page: number,
     @QueryParam('size') size: number,
     @QueryParam('priority') priority: string,
@@ -130,14 +124,14 @@ export class CaseDataErrandController {
     @QueryParam('channel') channel: string,
     @Res() response: any,
   ): Promise<ResponseData> {
-    let url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands?page=${page || 0}&size=${size || 8}`;
+    let url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands?page=${page || 0}&size=${size || 8}`;
     const baseURL = apiURL(this.SERVICE);
     const filterList = [];
     if (query) {
       let guidRes = null;
       const isPersonNumber = luhnCheck(query);
       if (isPersonNumber) {
-        const guidUrl = `${this.CITIZEN_SERVICE}/${MUNICIPALITY_ID}/${query}/guid`;
+        const guidUrl = `${this.CITIZEN_SERVICE}/${this.municipalityId}/${query}/guid`;
         guidRes = await this.apiService.get<string>({ url: guidUrl }, req.user).catch(e => null);
       }
       let queryFilter = `(`;
@@ -241,19 +235,15 @@ export class CaseDataErrandController {
     return response.send(resToSend);
   }
 
-  @Post('/casedata/:municipalityId/errands')
+  @Post('/casedata/errands')
   @HttpCode(201)
   @OpenAPI({ summary: 'Create a new errand' })
   @UseBefore(authMiddleware, validationMiddleware(CreateErrandDto, 'body'))
-  async newErrand(
-    @Req() req: RequestWithUser,
-    @Param('municipalityId') municipalityId: string,
-    @Body() errandData: CreateErrandDto,
-  ): Promise<{ data: ErrandDTO; message: string }> {
+  async newErrand(@Req() req: RequestWithUser, @Body() errandData: CreateErrandDto): Promise<{ data: ErrandDTO; message: string }> {
     const { user } = req;
     const data = makeErrandApiData(errandData, undefined);
 
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands`;
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands`;
     const baseURL = apiURL(this.SERVICE);
     const response = await this.apiService
       .post<ErrandDTO, Partial<ErrandDTO>>({ url, baseURL, data: data }, req.user)
@@ -268,14 +258,13 @@ export class CaseDataErrandController {
     return { data: response, message: 'Errand created' };
   }
 
-  @Patch('/casedata/:municipalityId/errands/:id')
+  @Patch('/casedata/errands/:id')
   @HttpCode(201)
   @OpenAPI({ summary: 'Modify an existing errand' })
   @UseBefore(authMiddleware, hasPermissions(['canEditCasedata']), validationMiddleware(CPatchErrandDto, 'body'))
   async editErrand(
     @Req() req: RequestWithUser,
     @Param('id') errandId: number,
-    @Param('municipalityId') municipalityId: string,
     @Body() errandData: PatchErrandDTO,
   ): Promise<{ data: ErrandDTO; message: string }> {
     const { user } = req;
@@ -286,7 +275,7 @@ export class CaseDataErrandController {
     const administratorCheckedData = errandData;
 
     const errandApiData = makeErrandApiData(administratorCheckedData, errandId.toString());
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandApiData.id}`;
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandApiData.id}`;
     const baseURL = apiURL(this.SERVICE);
     const strippedStakeholders = { ...errandApiData, stakeholders: [] };
     const patchResponse = await this.apiService
@@ -296,7 +285,7 @@ export class CaseDataErrandController {
           errandApiData.stakeholders
             ?.filter(s => !s.id)
             .map(async (stakeholder, idx) => {
-              const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandApiData.id}/stakeholders`;
+              const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandApiData.id}/stakeholders`;
               const baseURL = apiURL(this.SERVICE);
               const patchStakeholder = () =>
                 this.apiService.patch<any, StakeholderDTO>({ url, baseURL, data: stakeholder }, req.user).catch(e => {
@@ -311,7 +300,7 @@ export class CaseDataErrandController {
           errandApiData.stakeholders
             ?.filter(s => s.id)
             .map(async (stakeholder, idx) => {
-              const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandApiData.id}/stakeholders/${stakeholder.id}`;
+              const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandApiData.id}/stakeholders/${stakeholder.id}`;
               const baseURL = apiURL(this.SERVICE);
               const putStakeholder = () =>
                 this.apiService.put<any, StakeholderDTO>({ url, baseURL, data: stakeholder }, req.user).catch(e => {

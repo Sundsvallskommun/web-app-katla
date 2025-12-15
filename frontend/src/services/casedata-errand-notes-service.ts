@@ -3,16 +3,15 @@ import { ApiResponse, apiService } from './api-service';
 import { CreateErrandNoteDto, ErrandNote, NoteType } from '@interfaces/errandNote';
 
 export const saveErrandNote: (
-  municipalityId: string,
   errandId: string,
   note: CreateErrandNoteDto
-) => Promise<AxiosResponse<boolean>> = (municipalityId, errandId, note) => {
+) => Promise<AxiosResponse<boolean>> = (errandId, note) => {
   let apiCall;
   if (note.id) {
-    const url = `casedata/${municipalityId}/errands/${errandId}/notes/${note.id}`;
+    const url = `casedata/errands/${errandId}/notes/${note.id}`;
     apiCall = apiService.patch<boolean, CreateErrandNoteDto>(url, note);
   } else {
-    const url = `casedata/${municipalityId}/errands/${errandId}/notes`;
+    const url = `casedata/errands/${errandId}/notes`;
     apiCall = apiService.patch<boolean, CreateErrandNoteDto>(url, note);
   }
   return apiCall.catch((e) => {
@@ -22,14 +21,13 @@ export const saveErrandNote: (
 };
 
 export const deleteErrandNote: (
-  municipalityId: string,
   errandId: string,
   noteId: string
-) => Promise<AxiosResponse<boolean>> = (municipalityId, errandId, noteId) => {
+) => Promise<AxiosResponse<boolean>> = (errandId, noteId) => {
   if (!noteId) {
     console.error('No note id found, cannot delete. Returning.');
   }
-  const url = `casedata/${municipalityId}/errands/${errandId}/notes/${noteId}`;
+  const url = `casedata/errands/${errandId}/notes/${noteId}`;
   return apiService.deleteRequest<boolean>(url).catch((e) => {
     console.error('Something went wrong when deleting note: ', noteId);
     throw e;
@@ -37,16 +35,15 @@ export const deleteErrandNote: (
 };
 
 export const signErrandNote: (
-  municipalityId: string,
   errandId: string,
   note: CreateErrandNoteDto
-) => Promise<AxiosResponse<boolean>> = (municipalityId, errandId, note) => {
+) => Promise<AxiosResponse<boolean>> = (errandId, note) => {
   if (!note || !note.id) {
     console.error('No note id found, cannot sign. Returning.');
   }
   note.extraParameters = note.extraParameters || {};
   note.extraParameters['signed'] = 'true';
-  const url = `casedata/${municipalityId}/errands/${errandId}/notes/${note.id}`;
+  const url = `casedata/errands/${errandId}/notes/${note.id}`;
   return apiService.patch<boolean, CreateErrandNoteDto>(url, note).catch((e) => {
     console.error('Something went wrong when signing note: ', note.id);
     throw e;
@@ -54,14 +51,13 @@ export const signErrandNote: (
 };
 
 export const fetchNote: (
-  municipalityId: string,
   errandId: number,
   noteId: string
-) => Promise<ApiResponse<ErrandNote>> = (municipalityId, errandId, noteId) => {
+) => Promise<ApiResponse<ErrandNote>> = (errandId, noteId) => {
   if (!noteId) {
     console.error('No note id found, cannot fetch. Returning.');
   }
-  const url = `casedata/${municipalityId}/errands/${errandId}/notes/${noteId}`;
+  const url = `casedata/errands/${errandId}/notes/${noteId}`;
   return apiService
     .get<ApiResponse<ErrandNote>>(url)
     .then((res) => res.data)

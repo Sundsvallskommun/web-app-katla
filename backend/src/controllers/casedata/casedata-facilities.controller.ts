@@ -1,4 +1,5 @@
 import { apiServiceName } from '@/config/api-config';
+import { MUNICIPALITY_ID } from '@/config';
 import { Facility as FacilityDTO } from '@/data-contracts/case-data/data-contracts';
 import { HttpException } from '@/exceptions/HttpException';
 import { logger } from '@/utils/logger';
@@ -18,21 +19,16 @@ interface ResponseData {
 export class caseDataFacilitiesController {
   private apiService = new ApiService();
   SERVICE = apiServiceName('case-data');
+  private readonly municipalityId = MUNICIPALITY_ID;
 
-  @Post('/casedata/:municipalityId/errands/:errandId/facilities')
+  @Post('/casedata/errands/:errandId/facilities')
   @OpenAPI({ summary: 'Save facilities by errand' })
   @UseBefore(authMiddleware)
-  async saveFacility(
-    @Req() req: RequestWithUser,
-    @Param('errandId') errandId: number,
-    @Param('municipalityId') municipalityId: string,
-    @Body() facilities: FacilityDTO[],
-  ) {
+  async saveFacility(@Req() req: RequestWithUser, @Param('errandId') errandId: number, @Body() facilities: FacilityDTO[]) {
     if (errandId === undefined) {
       throw new HttpException(400, 'Bad Request');
     }
-
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/facilities`;
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/facilities`;
     const baseURL = apiURL(this.SERVICE);
     const data = JSON.stringify(facilities);
 

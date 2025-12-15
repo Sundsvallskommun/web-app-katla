@@ -69,15 +69,14 @@ export const countUnreadMessages = (tree: MessageNode[]): number => {
 };
 
 
-export const getConversations: (municipalityId: string, errandId: number) => Promise<ApiResponse<Conversation[]>> = (
-  municipalityId,
+export const getConversations: (errandId: number) => Promise<ApiResponse<Conversation[]>> = (
   errandId
 ) => {
   if (!errandId) {
     console.error('No errand id found, cannot fetch. Returning.');
   }
 
-  const url = `casedata/${municipalityId}/namespace/errands/${errandId}/communication/conversations`;
+  const url = `casedata/namespace/errands/${errandId}/communication/conversations`;
   return apiService
     .get<ApiResponse<Conversation[]>>(url)
     .then((res) => {
@@ -90,15 +89,14 @@ export const getConversations: (municipalityId: string, errandId: number) => Pro
 };
 
 export const getConversationMessages: (
-  municipalityId: string,
   errandId: number,
   conversationId: string
-) => Promise<ApiResponse<MessageNode[]>> = (municipalityId, errandId, conversationId) => {
+) => Promise<ApiResponse<MessageNode[]>> = (errandId, conversationId) => {
   if (!errandId) {
     console.error('No errand id found, cannot fetch. Returning.');
   }
 
-  const url = `casedata/${municipalityId}/namespace/errands/${errandId}/communication/conversations/${conversationId}/messages`;
+  const url = `casedata/namespace/errands/${errandId}/communication/conversations/${conversationId}/messages`;
   return apiService
     .get<ApiResponse<MessageNode[]>>(url)
     .then((res) => {
@@ -110,8 +108,8 @@ export const getConversationMessages: (
     });
 };
 
-export const createConversation = async (municipalityId: string, errandId: number, user: User, topic: string) => {
-  const res = await getConversations(municipalityId, errandId);
+export const createConversation = async (errandId: number, user: User, topic: string) => {
+  const res = await getConversations(errandId);
 if (res && res.data && res.data.length > 0) {
   const conversation = res.data.find(
     (item) => item.type === "INTERNAL" && Array.isArray(item.relationIds) && item.relationIds.length === 0
@@ -125,7 +123,7 @@ if (res && res.data && res.data.length > 0) {
   }
 }
 
-  const url = `${municipalityId}/namespace/errand/${errandId}/communication/conversations`;
+  const url = `casedata/namespace/errand/${errandId}/communication/conversations`;
 
   const body: Partial<Conversation> = {
     topic: topic,
@@ -150,14 +148,13 @@ if (res && res.data && res.data.length > 0) {
 };
 
 export const sendInternalMessage = (
-  municipalityId: string,
   errandId: number,
   conversationId: string,
   user: User,
   message: string,
   files?: UploadFile[]
 ) => {
-  const url = `${municipalityId}/namespace/errand/${errandId}/communication/conversations/${conversationId}/messages`;
+  const url = `casedata/namespace/errand/${errandId}/communication/conversations/${conversationId}/messages`;
 
   const formData = new FormData();
   formData.append(
@@ -184,13 +181,11 @@ export const sendInternalMessage = (
 };
 
 export const getConversationAttachment: (
-  municipalityId: string,
   errandId: number,
   conversationId: string,
   messageId: string,
   attachmentId: string
 ) => Promise<ApiResponse<Attachment>> = (
-  municipalityId,
   errandId,
   conversationId,
   messageId,
@@ -200,7 +195,7 @@ export const getConversationAttachment: (
     console.error('No errand id found, cannot fetch. Returning.');
   }
 
-  const url = `casedata/${municipalityId}/namespace/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
+  const url = `casedata/namespace/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
   return apiService
     .get<ApiResponse<Attachment>>(url)
     .then((res) => {

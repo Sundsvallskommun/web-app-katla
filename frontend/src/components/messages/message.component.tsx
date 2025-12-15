@@ -10,7 +10,7 @@ import MessageTreeComponent from './tree.component';
 export const CasedataMessagesTab: React.FC<{
   setUnsaved: (unsaved: boolean) => void;
 }> = (props) => {
-  const { municipalityId, errand, conversation, setConversation } = useContext(AppContext);
+  const { errand, conversation, setConversation } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
   const [showMessageComposer, setShowMessageComposer] = useState(false);
   const [sortMessages, setSortMessages] = useState(0);
@@ -18,11 +18,11 @@ export const CasedataMessagesTab: React.FC<{
 
   const fetchMessages = useCallback(() => {
     if (errand && errand.errandNumber) {
-      getConversations(municipalityId, errand.id)
+      getConversations(errand.id)
         .then((res) => {
           Promise.all(
             res.data.map((conv: Conversation) =>
-              getConversationMessages(municipalityId, errand.id, conv.id ?? '')
+              getConversationMessages(errand.id, conv.id ?? '')
                 .then((messages) => {
                   return messages.data
                     .map((msgRes) =>
@@ -42,7 +42,7 @@ export const CasedataMessagesTab: React.FC<{
         .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [municipalityId, errand]);
+  }, [errand]);
 
   useEffect(() => {
     fetchMessages();

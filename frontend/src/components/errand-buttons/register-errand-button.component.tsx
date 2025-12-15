@@ -61,17 +61,16 @@ export const RegisterErrandButton: React.FC = () => {
     };
 
     try {
-      const res = await saveErrand(data, municipalityId);
+      const res = await saveErrand(data);
       if (!res.errandSuccessful) {
         throw new Error('Errand could not be registered');
       }
 
       if (res.errandId) {
-        const e = await getErrand(municipalityId, res.errandId);
+        const e = await getErrand(res.errandId);
         if (e.errand && e.errand.errandNumber) {
           if (newAttachments.length > 0) {
             await sendAttachments(
-              municipalityId,
               e.errand.id,
               e.errand.errandNumber,
               newAttachments
@@ -89,13 +88,7 @@ export const RegisterErrandButton: React.FC = () => {
             await Promise.all(
               existingAttachments.map(async (attachment) => {
                 if (e.errand && attachment.id && attachment.meta.name && attachment.meta.category) {
-                  await editAttachment(
-                    municipalityId,
-                    e.errand.id,
-                    attachment.id,
-                    attachment.meta.name,
-                    attachment.meta.category
-                  );
+                  await editAttachment(e.errand.id, attachment.id, attachment.meta.name, attachment.meta.category);
                 }
               })
             );

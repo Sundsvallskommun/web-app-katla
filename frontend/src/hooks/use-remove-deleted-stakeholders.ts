@@ -1,13 +1,10 @@
-import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { removeStakeholder } from '@services/casedata-stakeholder-service';
-import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 export const useRemoveDeletedStakeholders = () => {
   const { formState } = useFormContext<IErrand>();
-  const { municipalityId } = useContext(AppContext);
 
   return async (currentData: Partial<IErrand>) => {
     if (!currentData.id) return;
@@ -22,7 +19,7 @@ export const useRemoveDeletedStakeholders = () => {
     if (deletedStakeholders.length > 0) {
       await Promise.all(
         deletedStakeholders.map(
-          (stakeholder) => stakeholder.id && removeStakeholder(municipalityId, currentData.id as number, stakeholder.id)
+          (stakeholder) => stakeholder.id && removeStakeholder(currentData.id as number, stakeholder.id)
         )
       );
     }

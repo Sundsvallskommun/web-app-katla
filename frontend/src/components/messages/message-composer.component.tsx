@@ -43,8 +43,7 @@ export const MessageComposer: React.FC<{
   setUnsaved: (unsaved: boolean) => void;
   update: () => void;
 }> = (props) => {
-  const { municipalityId, errand, user }: { municipalityId: string; errand: IErrand; user: User } =
-    useContext(AppContext);
+  const { errand, user }: { errand: IErrand; user: User } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
   const mobilePadding = isMaxMediumDevice ? 'px-[1.6rem]' : 'px-40';
   const [isLoading, setIsLoading] = useState(false);
@@ -75,8 +74,8 @@ export const MessageComposer: React.FC<{
   const onSubmit = async (data: CasedataMessageTabFormModel) => {
     setIsLoading(true);
 
-    createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
-      sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, sanitized(data.messageBody), files)
+    createConversation(errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
+      sendInternalMessage(errand.id, res.data.id || '', user, sanitized(data.messageBody), files)
         .then(() => {
           if (!isMaxMediumDevice) {
             toastMessage({

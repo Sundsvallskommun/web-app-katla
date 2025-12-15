@@ -17,21 +17,19 @@ export const NotificationsWrapper: React.FC<NotificationsWrapperProps> = ({
   setShow,
   sidebarMode = SidebarMode.EXPANDED,
 }) => {
-  const { municipalityId, notifications, setNotifications } = useContext(AppContext);
+  const { notifications, setNotifications } = useContext(AppContext);
   const { isMaxMediumDevice } = useThemeQueries();
 
   useEffect(() => {
-    if (municipalityId) {
-      getCasedataNotifications(municipalityId)
-        .then((res) => {
-          setNotifications(res);
-        })
-        .catch((e) => {
-          console.error('Something went wrong when fetching notifications', e);
-        });
-    }
+    getCasedataNotifications()
+      .then((res) => {
+        setNotifications(res);
+      })
+      .catch((e) => {
+        console.error('Something went wrong when fetching notifications', e);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [municipalityId]);
+  }, []);
 
   const acknowledgedNotifications = sortByCreatedDesc(notifications.filter((n) => n.acknowledged));
   const newNotifications = sortByCreatedDesc(notifications.filter((n) => !n.acknowledged));
