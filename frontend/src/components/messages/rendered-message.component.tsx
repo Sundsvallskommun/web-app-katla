@@ -211,13 +211,6 @@ export const RenderedMessage: React.FC<{
           {!isMaxMediumDevice && <ExpandButton />}
         </div>
 
-        <div className={cx('flex justify-between items-start', !isMaxMediumDevice && 'pl-xl')}>
-          <p
-            className={cx('my-0 text-primary break-words', message.viewed ? 'font-normal' : 'font-bold')}
-            dangerouslySetInnerHTML={{ __html: sanitized(message.subject || '') }}
-          ></p>
-        </div>
-
         <div
           className={cx(
             `message-${message.messageId}`,
