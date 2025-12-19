@@ -1,25 +1,24 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { IErrand } from '@interfaces/errand';
 import { User } from '@interfaces/user';
+import { ACCEPTED_UPLOAD_FILETYPES } from '@services/casedata-attachment-service';
 import { createConversation, sendInternalMessage } from '@services/casedata-conversation-service';
+import { isErrandLocked } from '@services/casedata-errand-service';
 import sanitized from '@services/sanitizer-service';
-import LucideIcon from '@sk-web-gui/lucide-icon';
 import {
   Button,
-  CustomOnChangeEventUploadFile,
   FileUpload,
+  FormControl,
   FormErrorMessage,
   Modal,
-  Spinner,
   UploadFile,
-  useConfirm,
   useSnackbar,
   useThemeQueries,
 } from '@sk-web-gui/react';
 import dynamic from 'next/dynamic';
 import { useContext, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { MessageWrapper } from './message-wrapper.component';
+import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+
 const TextEditor = dynamic(() => import('@sk-web-gui/text-editor'), { ssr: false });
 
 interface TextEditorValue {
@@ -27,201 +26,179 @@ interface TextEditorValue {
   plainText?: string;
 }
 
-export interface CasedataMessageTabFormModel {
+interface MessageFormModel {
+  files: UploadFile[];
   messageBody: string;
   messageBodyPlaintext: string;
 }
 
-const defaultMessage = {
-  messageBody: '',
-  messageBodyPlaintext: '',
-};
+const MESSAGE_CHARACTER_LIMIT = 10000;
 
-export const MessageComposer: React.FC<{
-  show: boolean;
-  closeHandler: () => void;
-  setUnsaved: (unsaved: boolean) => void;
-  update: () => void;
-}> = (props) => {
+export const MessageComposer: React.FC<{ update: () => void }> = ({ update }) => {
   const { municipalityId, errand, user }: { municipalityId: string; errand: IErrand; user: User } =
     useContext(AppContext);
-  const { isMaxMediumDevice } = useThemeQueries();
-  const mobilePadding = isMaxMediumDevice ? 'px-[1.6rem]' : 'px-40';
-  const [isLoading, setIsLoading] = useState(false);
-  const closeConfirm = useConfirm();
-  const [files, setFiles] = useState<UploadFile[]>([]);
+  const { isMaxMediumDevice, isMinDesktop } = useThemeQueries();
   const toastMessage = useSnackbar();
-  const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState<boolean>(false);
-  const [messageError, setMessageError] = useState<string>('');
+  const [showFiletypesModal, setShowFiletypesModal] = useState(false);
 
-  const { handleSubmit, getValues, setValue, watch, formState, reset } = useForm<CasedataMessageTabFormModel>({
-    defaultValues: defaultMessage,
-    mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
+  const context = useForm<MessageFormModel>({
+    defaultValues: { files: [], messageBody: '', messageBodyPlaintext: '' },
+    mode: 'onChange',
   });
 
-  const messageBody = watch('messageBody');
+  const files = context.watch('files');
+  const messageBody = context.watch('messageBody');
+  const messageBodyPlaintext = context.watch('messageBodyPlaintext');
   const editorValue = useMemo(() => ({ markup: messageBody }), [messageBody]);
 
-  const clearAndClose = () => {
-    setTimeout(() => {
-      setValue('messageBody', '', { shouldDirty: false });
-      setValue('messageBodyPlaintext', '', { shouldDirty: false });
-      setFiles([]);
-      props.closeHandler();
-      reset();
-    }, 0);
-  };
+  context.register('messageBodyPlaintext', {
+    required: 'Skriv ett meddelande',
+    validate: (value) =>
+      value.length <= MESSAGE_CHARACTER_LIMIT || `Du får skriva max ${MESSAGE_CHARACTER_LIMIT} tecken.`,
+  });
 
-  const onSubmit = async (data: CasedataMessageTabFormModel) => {
-    setIsLoading(true);
+  const messageLength = messageBodyPlaintext?.length ?? 0;
+  const isMessageOverLimit = messageLength > MESSAGE_CHARACTER_LIMIT;
 
-    createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
-      sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, sanitized(data.messageBody), files)
-        .then(() => {
-          if (!isMaxMediumDevice) {
-            toastMessage({
-              position: 'bottom',
-              closeable: false,
-              message: `Meddelandet skickades`,
-              status: 'success',
-            });
-          }
-          setIsLoading(false);
-          props.update();
-          clearAndClose();
-        })
-        .catch(() => {
-          if (!isMaxMediumDevice) {
-            toastMessage({
-              position: 'bottom',
-              closeable: false,
-              message: `Något gick fel när meddelandet skickades`,
-              status: 'error',
-            });
-          }
-          setIsLoading(false);
-        });
-    });
-  };
+  if (isErrandLocked(errand)) {
+    return null;
+  }
 
-  const abortHandler = () => {
-    if (formState.dirtyFields.messageBodyPlaintext) {
-      closeConfirm
-        .showConfirmation('Vill du avbryta?', 'Du har osparade ändringar.', 'Ja', 'Nej', 'info', 'info')
-        .then((confirmed) => {
-          if (confirmed) {
-            clearAndClose();
-          }
-        });
-    } else {
-      clearAndClose();
+  const handleOnSubmit: SubmitHandler<MessageFormModel> = async (data) => {
+    if (!data.messageBodyPlaintext?.trim()) {
+      context.setError('messageBodyPlaintext', { message: 'Skriv ett meddelande' });
+      return;
     }
-  };
 
-  const closeAttachmentModal = () => {
-    setIsAttachmentModalOpen(false);
-  };
+    try {
+      const res = await createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`);
 
-  const onChange = (e: CustomOnChangeEventUploadFile) => {
-    if (e.target.value !== null) {
-      setFiles((prevFiles) => [...prevFiles, ...e.target.value]);
-      setIsAttachmentModalOpen(false);
+      await sendInternalMessage(
+        municipalityId,
+        errand.id,
+        res.data.id || '',
+        user,
+        sanitized(data.messageBody),
+        data.files
+      );
+
+      toastMessage({
+        position: 'bottom',
+        closeable: false,
+        message: 'Meddelandet skickades',
+        status: 'success',
+      });
+
+      context.reset();
+      update();
+    } catch {
+      toastMessage({
+        position: 'bottom',
+        closeable: false,
+        message: 'Något gick fel när meddelandet skickades',
+        status: 'error',
+      });
     }
   };
 
   const handleRemoveFile = (file: UploadFile) => {
-    setFiles((prevFiles) => prevFiles.filter((f) => f.id !== file.id));
+    context.setValue(
+      'files',
+      files.filter((x) => x !== file)
+    );
   };
 
   return (
     <>
-      <MessageWrapper label="Nytt meddelande" closeHandler={clearAndClose} show={props.show}>
-        <div className={`my-md py-8 ${mobilePadding} flex flex-col gap-12`}>
-          <div className={isMaxMediumDevice ? 'h-[20rem]' : 'h-[30rem]'}>
-            <TextEditor
-              className="h-[80%]"
-              onChange={(e: { target: { value: TextEditorValue } }) => {
-                props.setUnsaved(true);
-                setValue('messageBody', e.target.value.markup ?? '', { shouldDirty: true });
-                setValue('messageBodyPlaintext', e.target.value.plainText ?? '', { shouldDirty: true });
-                if (messageError) {
-                  setMessageError('');
-                }
-              }}
-              value={editorValue}
-            />
-          </div>
-          {messageError && <FormErrorMessage className="text-error">{messageError}</FormErrorMessage>}
-        </div>
-        <div className={`flex mb-24 mt-8 ${mobilePadding}`}>
-          <Button
-            variant="tertiary"
-            color="primary"
-            leftIcon={<LucideIcon name="paperclip" />}
-            onClick={() => setIsAttachmentModalOpen(true)}
-            data-cy="add-attachment-button"
-          >
-            Bifoga fil
-          </Button>
-        </div>
-        <div className={`${mobilePadding} mb-15`}>
-          <FileUpload.List>
-            {files.map((file, index) => (
-              <FileUpload.ListItem
-                key={file.id || index}
-                index={index}
-                actionsProps={{
-                  showRemove: true,
-                  onRemove: () => handleRemoveFile(file),
-                }}
-                nameProps={{
-                  heading: file.meta.name,
-                }}
-              />
-            ))}
-          </FileUpload.List>
-        </div>
-        <div className={`flex justify-start gap-lg ${mobilePadding}`}>
-          <Button
-            key="cancelButton"
-            type="button"
-            variant="tertiary"
-            onClick={abortHandler}
-            tabIndex={props.show ? 0 : -1}
-          >
-            Avbryt
-          </Button>
-          <Button
-            tabIndex={props.show ? 0 : -1}
-            data-cy="send-message-button"
-            type="button"
-            loading={isLoading}
-            loadingText="Skickar meddelande"
-            onClick={handleSubmit(async () => {
-              const values = getValues();
-              if (values.messageBodyPlaintext.trim() === '') {
-                setMessageError('Skriv ett meddelande innan du skickar');
-                return;
-              }
-              await onSubmit(values);
-            })}
-            variant="primary"
-            color="primary"
-            disabled={isLoading}
-            leftIcon={isLoading ? <Spinner size={2} className="mr-sm" /> : undefined}
-          >
-            Skicka meddelande
-          </Button>
-        </div>
-      </MessageWrapper>
+      <div className="flex flex-col gap-y-24 py-24">
+        <FormProvider {...context}>
+          <form className="flex flex-col gap-lg" onSubmit={context.handleSubmit(handleOnSubmit)}>
+            <p className="font-bold">Skicka ett meddelande för att kontakta handläggaren för ditt ärende</p>
 
-      <Modal show={isAttachmentModalOpen} onClose={closeAttachmentModal} label="Ladda upp bilaga" className="w-[40rem]">
+            <FormControl className="w-full">
+              <TextEditor
+                className={isMaxMediumDevice ? 'h-[10rem]' : 'h-[20rem]'}
+                onChange={(e: { target: { value: TextEditorValue } }) => {
+                  context.setValue('messageBody', e.target.value.markup ?? '', { shouldDirty: true });
+                  context.setValue('messageBodyPlaintext', e.target.value.plainText ?? '', {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                value={editorValue}
+                disableToolbar
+              />
+              <div className="flex justify-between text-small mt-8">
+                <span className="text-dark-secondary">Max {MESSAGE_CHARACTER_LIMIT} tecken.</span>
+                <span className={isMessageOverLimit ? 'text-error' : 'text-dark-secondary'}>
+                  {messageLength}/{MESSAGE_CHARACTER_LIMIT}
+                </span>
+              </div>
+              {context.formState.errors.messageBodyPlaintext && (
+                <FormErrorMessage className="text-small text-error" role="alert">
+                  {context.formState.errors.messageBodyPlaintext.message}
+                </FormErrorMessage>
+              )}
+            </FormControl>
+
+            <FileUpload.Button
+              appendFiles={files}
+              className="mt-16"
+              maxFileSizeMB={25}
+              {...context.register('files')}
+            />
+            <div className="flex items-row text-small gap-5">
+              <span className="text-dark-secondary">Maximal filstorlek: 25 MB.</span>
+              <Button variant="link" onClick={() => setShowFiletypesModal(true)}>
+                Visa tillåtna filtyper
+              </Button>
+            </div>
+
+            {files.length > 0 && (
+              <div className="flex flex-col py-16 gap-y-16">
+                <h3 className="text-large font-normal">Valda filer</h3>
+                <FileUpload.List name="files" showBorder>
+                  {files.map((file, i) => (
+                    <FileUpload.ListItem
+                      key={`${file?.meta.name}-${i}`}
+                      index={i}
+                      actionsProps={{ showRemove: true, onRemove: () => handleRemoveFile(file) }}
+                      file={file}
+                    />
+                  ))}
+                </FileUpload.List>
+              </div>
+            )}
+
+            <div className="flex desktop:justify-start">
+              <Button
+                className="w-full desktop:w-fit"
+                size={isMinDesktop ? 'md' : 'lg'}
+                type="submit"
+                color="vattjom"
+                loading={context.formState.isSubmitting}
+                disabled={isMessageOverLimit || context.formState.isSubmitting}
+                data-cy="send-message-button"
+              >
+                Skicka meddelande
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </div>
+
+      <Modal
+        className="w-full max-w-[43.3rem]"
+        show={showFiletypesModal}
+        onClose={() => setShowFiletypesModal(false)}
+        label="Tillåtna filtyper"
+      >
         <Modal.Content>
-          <div className="flex flex-col gap-lg">
-            <FileUpload.Field onChange={onChange} variant="horizontal" invalid={false}>
-              FileUpload
-            </FileUpload.Field>
-          </div>
+          <ul className="text-dark-secondary space-y-3">
+            {ACCEPTED_UPLOAD_FILETYPES.filter((type) => !type.includes('/')).map((type) => (
+              <li key={type}>.{type}</li>
+            ))}
+          </ul>
         </Modal.Content>
       </Modal>
     </>

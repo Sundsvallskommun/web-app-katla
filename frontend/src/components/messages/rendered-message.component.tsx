@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import React, { useContext, useState } from 'react';
 import { MessageAvatar } from './message-avatar.component';
-import { RenderMessageReciever } from './render-message-reciever.component';
 
 export const RenderedMessage: React.FC<{
   message: MessageNode;
@@ -172,9 +171,6 @@ export const RenderedMessage: React.FC<{
                     className={cx('mr-md text-small font-bold', isMaxMediumDevice ? 'break-words' : 'break-all')}
                     dangerouslySetInnerHTML={{ __html: `Från: ${sanitized(getSender(message))}` }}
                   ></p>
-                  <p className={cx('mr-md font-bold', isMaxMediumDevice ? 'break-words' : 'break-all')}>
-                    Till : <RenderMessageReciever selectedMessage={message} errand={errand} />
-                  </p>
                 </div>
               </div>
             </div>
