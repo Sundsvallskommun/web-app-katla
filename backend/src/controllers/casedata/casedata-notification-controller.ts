@@ -1,4 +1,5 @@
 import { CASEDATA_NAMESPACE } from '@/config';
+import { apiServiceName } from '@/config/api-config';
 import { Notification as CasedataNotification, PatchNotification } from '@/data-contracts/case-data/data-contracts';
 import { HttpException } from '@/exceptions/HttpException';
 import { RequestWithUser } from '@/interfaces/auth.interface';
@@ -59,6 +60,9 @@ export class CasedataNotificationDto implements CasedataNotification {
   @IsOptional()
   @IsString()
   errandNumber?: string;
+  @IsOptional()
+  @IsString()
+  subType?: string;
 }
 
 export class PatchNotificationDto implements PatchNotification {
@@ -95,7 +99,7 @@ export class PatchNotificationDto implements PatchNotification {
 export class CasedataNotificationController {
   private apiService = new ApiService();
   private namespace = CASEDATA_NAMESPACE;
-  SERVICE = `case-data/11.0`;
+  SERVICE = apiServiceName('case-data');
 
   @Get('/casedatanotifications/:municipalityId')
   @OpenAPI({ summary: 'Get notifications' })
@@ -112,7 +116,11 @@ export class CasedataNotificationController {
     const url = `${municipalityId}/${this.namespace}/notifications?${queryString}`;
     const baseURL = apiURL(this.SERVICE);
     const res = await this.apiService.get<CasedataNotification[]>({ url, baseURL }, req.user);
-    return response.status(200).send(res.data);
+
+    //NOTE: This application should only display notifications with subType MESSAGE
+    const filtredNotifications = res.data.filter((n) => n.subType === "MESSAGE")
+
+    return response.status(200).send(filtredNotifications);
   }
 
   @Patch('/casedatanotifications/:municipalityId')

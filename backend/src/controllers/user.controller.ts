@@ -1,49 +1,27 @@
 import { MUNICIPALITY_ID } from '@/config';
+import { apiServiceName } from '@/config/api-config';
 import { PortalPersonData } from '@/data-contracts/employee/data-contracts';
 import { HttpException } from '@/exceptions/HttpException';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Permissions } from '@/interfaces/users.interface';
 import ApiService from '@/services/api.service';
 import authMiddleware from '@middlewares/auth.middleware';
-import { PrismaClient } from '@prisma/client';
 import { Controller, Get, Header, Param, QueryParam, Req, Res, UseBefore } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
-
-const prisma = new PrismaClient();
 
 interface UserData {
   name: string;
   firstName: string;
   lastName: string;
   username: string;
-  userSettings: any;
+  userSettings: {username: string};
   permissions: Permissions;
-}
-
-interface EmployeeAddress {
-  personid: string;
-  givenname: string;
-  lastname: string;
-  fullname: string;
-  address: string;
-  postalCode: string;
-  city: string;
-  workPhone: string;
-  mobilePhone: string;
-  aboutMe: string;
-  email: string;
-  mailNickname: string;
-  company: string;
-  companyId: number;
-  orgTree: string;
-  referenceNumber: string;
-  isManager: boolean;
-  loginName: string;
 }
 
 @Controller()
 export class UserController {
   private apiService = new ApiService();
+  SERVICE = apiServiceName('employee');
 
   @Get('/me')
   @OpenAPI({ summary: 'Return current user' })
@@ -55,31 +33,12 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    let userSettings = await prisma.userSettings.findFirst({
-      where: {
-        username: req.user.username,
-      },
-    });
-
-    if (!userSettings) {
-      userSettings = await prisma.userSettings.create({
-        data: {
-          username: req.user.username,
-
-          readNotificationsClearedDate: new Date().toISOString(),
-        },
-      });
-    }
-
-    userSettings && delete userSettings.id;
-    userSettings && delete userSettings.username;
-
     const userData: UserData = {
       name,
       firstName,
       lastName,
       username,
-      userSettings,
+      userSettings: { username },
       permissions,
     };
 
@@ -99,7 +58,7 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    const url = `employee/2.0/${MUNICIPALITY_ID}/${personId}/personimage`;
+    const url = `${this.SERVICE}/${MUNICIPALITY_ID}/${personId}/personimage`;
     const res = await this.apiService.get<any>(
       {
         url,
@@ -124,7 +83,7 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    const url = `employee/2.0/${MUNICIPALITY_ID}/${personId}/personimage`;
+    const url = `${this.SERVICE}/${MUNICIPALITY_ID}/${personId}/personimage`;
     const res = await this.apiService.get<any>(
       {
         url,
@@ -149,7 +108,7 @@ export class UserController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    const url = `employee/2.0/${MUNICIPALITY_ID}/portalpersondata/PERSONAL/${adaccount}`;
+    const url = `${this.SERVICE}/${MUNICIPALITY_ID}/portalpersondata/PERSONAL/${adaccount}`;
     const res = await this.apiService.get<PortalPersonData>(
       {
         url,

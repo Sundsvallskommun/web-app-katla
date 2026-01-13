@@ -4,19 +4,30 @@ import { AppContext } from '@contexts/app-context-interface';
 import store from '@services/storage-service';
 
 export const useFilterTags = () => {
-  const { selectedErrandStatuses, setSelectedErrandStatuses, setSidebarLabel } = useContext(AppContext);
+  const { setSelectedErrandStatuses, setSidebarLabel } = useContext(AppContext);
 
   const { getValues, setValue, reset } = useFormContext<{
     status: string[];
     caseType: string[];
+    priority: string[];
+    startdate: string;
+    enddate: string;
   }>();
 
   const types = getValues('caseType') ?? [];
   const statuses = getValues('status') ?? [];
+  const priorities = getValues('priority') ?? [];
+  const startdate = getValues('startdate');
+  const enddate = getValues('enddate');
 
   const handleRemoveType = (typeToRemove: string) => {
     const updatedTypes = types.filter((type) => type !== typeToRemove);
     setValue('caseType', updatedTypes);
+  };
+
+  const handleRemovePriority = (priorityToRemove: string) => {
+    const updatedPriorities = priorities.filter((priority) => priority !== priorityToRemove);
+    setValue('priority', updatedPriorities);
   };
 
   const handleRemoveStatus = (statusToRemove: string) => {
@@ -29,10 +40,18 @@ export const useFilterTags = () => {
     }
   };
 
+  const handleRemoveDates = () => {
+    setValue('startdate', '');
+    setValue('enddate', '');
+  };
+
   const handleReset = () => {
     reset({
       status: [],
       caseType: [],
+      priority: [],
+      startdate: '',
+      enddate: '',
     });
 
     setSelectedErrandStatuses([]);
@@ -41,8 +60,11 @@ export const useFilterTags = () => {
     const stored = store.get('filter');
     if (stored) {
       const parsed = JSON.parse(stored);
-      parsed.status = '';
-      parsed.caseType = '';
+      parsed.status = [];
+      parsed.caseType = [];
+      parsed.priority = [];
+      parsed.startdate = '';
+      parsed.enddate = '';
       store.set('filter', JSON.stringify(parsed));
     }
   };
@@ -50,8 +72,13 @@ export const useFilterTags = () => {
   return {
     types,
     statuses,
+    priorities,
+    startdate,
+    enddate,
     handleRemoveType,
     handleRemoveStatus,
+    handleRemovePriority,
+    handleRemoveDates,
     handleReset,
   };
 };

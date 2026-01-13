@@ -1,258 +1,332 @@
+import { AppContext } from '@contexts/app-context-interface';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { IErrand } from '@interfaces/errand';
+import { Role, RoleDisplayNames } from '@interfaces/role';
+import { CasedataOwnerOrContact, emptyCasedataOwnerOrContact, StakeholderType } from '@interfaces/stakeholder';
 import { searchPerson } from '@services/adress-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Button, FormLabel, Input, Select } from '@sk-web-gui/react';
+import { Button, FormControl, FormErrorMessage, FormLabel, Input, SearchField, Select } from '@sk-web-gui/react';
+import { isErrandReadOnly } from '@utils/errand-utils';
+import { ssnSchema, stakeholderSchema } from '@utils/validation-schema';
 import React, { useContext, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { FormProvider, Resolver, useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import { DisplayCard } from './display-card.component';
-import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
-import { Role } from '@interfaces/role';
-import { editStakeholder, removeStakeholder, addStakeholder } from '@services/casedata-stakeholder-service';
-import { AppContext } from '@contexts/app-context-interface';
-
-export interface CardProps {
-  role: string;
-  firstName: string;
-  lastName: string;
-  ssn: string;
-  emails: string;
-  street: string;
-  city: string;
-  zip: string;
-  phoneNumber: string;
-  isEditable: boolean;
-  careof: string;
-  personalNumber: string;
-}
+import { StakeholderFormModal } from './stakeholder-form.component';
 
 export const StakeholderList: React.FC<{
-  owners: CasedataOwnerOrContact[];
-  setOwners: React.Dispatch<React.SetStateAction<CasedataOwnerOrContact[]>>;
-  roles: string[];
-}> = ({ owners, setOwners, roles }) => {
-  const [searching, setSearching] = useState(false);
-  const [error, setError] = useState(false);
+  roles: Role[];
+}> = ({ roles }) => {
+  const [fetchedSsn, setFetchedSsn] = useState(false);
   const [searchResult, setSearchResult] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [outsideMunicipalityWarning, setOutsideMunicipalityWarning] = useState<boolean>(false);
+  const [manualEntryOpen, setManualEntryOpen] = useState(false);
 
-  const { municipalityId, errand } = useContext(AppContext);
+  const { errand } = useContext(AppContext);
 
-  const { register, watch, setValue, getValues, clearErrors, reset } = useForm<CasedataOwnerOrContact>({
-    mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
+  const context = useFormContext<IErrand>();
+
+  const { fields, append, update, remove } = useFieldArray({
+    control: context.control,
+    name: 'stakeholders',
   });
 
-  const personId = watch(`personId`);
-  const firstName = watch(`firstName`);
-  const lastName = watch(`lastName`);
-  const street = watch(`street`);
-  const careof = watch(`careof`);
-  const zip = watch(`zip`);
-  const city = watch(`city`);
-  const emails = watch(`emails`);
-  const phoneNumbers = watch(`phoneNumbers`);
-  const personalNumber = watch(`personalNumber`);
+  const method = useForm<CasedataOwnerOrContact>({
+    defaultValues: { ...emptyCasedataOwnerOrContact },
+    mode: 'onSubmit',
+    resolver: yupResolver(stakeholderSchema) as unknown as Resolver<CasedataOwnerOrContact>,
+  });
 
-  const updateOwner = (index: number, updatedData: { newEmail?: string; newPhoneNumber?: string }) => {
-    setOwners((prevOwners) =>
-      prevOwners.map((owner, i) => {
-        if (i === index) {
-          const updatedOwner = { ...owner, ...updatedData };
+  const {
+    handleSubmit,
+    register,
+    watch,
+    setValue,
+    getValues,
+    reset,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = method;
 
-          if (updatedData.newEmail) {
-            updatedOwner.emails = [{ value: updatedData.newEmail }];
-          }
+  const { personalNumber, firstName, lastName, street, city } = watch();
 
-          if (updatedData.newPhoneNumber) {
-            updatedOwner.phoneNumbers = [{ value: updatedData.newPhoneNumber }];
-          }
+  const isApplicantList = roles.includes(Role.APPLICANT);
+  const municipalityMismatch = isApplicantList && !!outsideMunicipalityWarning;
+  const manualEntryAllowed = !isApplicantList;
 
-          if (errand?.id) {
-            editStakeholder(municipalityId, errand.id, updatedOwner);
-          }
-          return updatedOwner;
-        }
-
-        return owner;
-      })
-    );
-  };
+  const existingApplicants = fields.filter((f: CasedataOwnerOrContact) => f.roles?.includes(Role.APPLICANT));
+  const hasExistingApplicant = isApplicantList && existingApplicants.length > 0;
 
   const doSearch = () => {
-    const search = () => searchPerson(personalNumber as string);
-    setSearching(true);
-    setSearchResult(false);
-    setNotFound(false);
-    search()
-      .then((res) => {
-        setValue(`personId`, res.personId, { shouldDirty: true });
-        setValue(`firstName`, res.firstName, { shouldDirty: true });
-        setValue(`lastName`, res.lastName, { shouldDirty: true });
-        setValue(`street`, res.street.charAt(0).toUpperCase() + res.street.slice(1).toLowerCase(), {
-          shouldDirty: true,
-        });
-        setValue(`city`, res.city.charAt(0).toUpperCase() + res.city.slice(1).toLowerCase(), { shouldDirty: true });
-        setValue(`careof`, res.careof, { shouldDirty: true });
-        setValue(`zip`, res.zip, { shouldDirty: true });
-        clearErrors([`firstName`, `lastName`]);
-        setSearching(false);
-        setSearchResult(true);
-      })
-      .catch(() => {
-        setSearching(false);
-        setNotFound(true);
+    ssnSchema
+      .validate(personalNumber)
+      .then(() => {
+        clearErrors('personalNumber');
+        setFetchedSsn(true);
         setSearchResult(false);
+        setNotFound(false);
+
+        searchPerson(personalNumber ?? '')
+          .then((res) => {
+            const normalizedData = {
+              personalNumber,
+              ...res,
+              roles: roles.length === 1 ? [roles[0]] : [],
+              stakeholderType: 'PERSON' as StakeholderType,
+            };
+            reset(normalizedData);
+
+            if (res.municipality !== process.env.NEXT_PUBLIC_MUNICIPALITY_ID && isApplicantList) {
+              setOutsideMunicipalityWarning(true);
+              setSearchResult(true);
+              return;
+            }
+
+            setSearchResult(true);
+          })
+          .catch(() => {
+            setFetchedSsn(false);
+            setSearchResult(false);
+          });
+      })
+      .catch((e) => {
+        setError('personalNumber', {
+          type: 'manual',
+          message: e.message,
+        });
       });
   };
 
-  const addStakeholderToErrand: () => void = () => {
-    const email = [{ value: getValues(`emails.0.value`) }];
-    const phone = [{ value: getValues(`phoneNumbers.0.value`) }];
-    const role = getValues(`roles`).toString() === 'Sökande' ? Role.APPLICANT : ''; //TODO: Better mapping of roles
+  const addStakeholderToErrand = () => {
+    const values = getValues();
 
-    if (email && phone && role) {
-      setError(false);
-      const updatedOwner: CasedataOwnerOrContact = {
-        personId,
-        firstName,
-        lastName,
-        street,
-        careof,
-        zip,
-        city,
-        emails: email,
-        personalNumber,
-        phoneNumbers: phone,
-        newPhoneNumber: phone[0].value,
-        roles: [role],
-        id: '',
-        stakeholderType: 'PERSON',
-        newRole: role,
-        newEmail: email[0].value,
-      };
-      if (errand?.id) {
-        addStakeholder(municipalityId, errand.id, updatedOwner);
-      }
-      setOwners((prevOwners) => [...prevOwners, updatedOwner]);
-      reset();
+    const existingStakeholders = context.getValues('stakeholders') || [];
+    const isDuplicate = existingStakeholders.some(
+      (stakeholder: CasedataOwnerOrContact) =>
+        stakeholder.personId && values.personId && stakeholder.personId === values.personId
+    );
+
+    if (isDuplicate) {
+      console.warn('Stakeholder with personId already exists:', values.personId);
       setSearchResult(false);
-    } else {
-      setError(true);
+      return;
     }
+
+    append({
+      ...values,
+      stakeholderType: 'PERSON',
+    });
+
+    setSearchResult(false);
   };
 
   return (
-    <div>
-      <FormLabel>Sök på personnummer</FormLabel>
-      <Input.Group size="md" className="rounded-12 w-[52.5rem] mt-5" disabled={false}>
-        <Input.LeftAddin icon>
-          <LucideIcon name="search" />
-        </Input.LeftAddin>
-        <Input
-          disabled={false}
-          aria-disabled={false}
-          readOnly={false}
-          className="read-only:cursor-not-allowed"
-          data-cy={`contact-personalNumber-${1}`}
-          {...register(`personalNumber`)}
-        />
-        <Input.RightAddin icon>
-          <Button
-            iconButton
-            variant="primary"
-            disabled={false}
-            inverted
-            onClick={() => {
-              reset();
-              setValue('personalNumber', '');
-              setSearchResult(false);
-            }}
-          >
-            <LucideIcon name="x" />
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={false}
-            data-cy={`search-button-${1}`}
-            onClick={doSearch}
-            loading={searching}
-            loadingText="Söker"
-          >
-            Sök
-          </Button>
-        </Input.RightAddin>
-      </Input.Group>
-      {searchResult && !notFound ?
-        <div className="border-1 rounded-12 bg-background-content w-[52.5rem] my-15">
-          <div className="px-[1rem]">
-            <p className="text-[1.6rem] font-semibold py-10">{firstName + ' ' + lastName}</p>
-            <div className="flex text-md mb-10">
-              <div className="flex flex-col mr-10">
-                <div>{personalNumber}</div>
-                <div>{street + ', ' + city}</div>
-              </div>
-            </div>
+    <FormProvider {...method}>
+      <FormControl className="w-full">
+        {!isErrandReadOnly(errand) && !hasExistingApplicant && (
+          <div className="w-full max-w-[52.5rem]">
+            <FormLabel>Sök på personnummer</FormLabel>
+            <SearchField
+              data-cy="personal-number-input"
+              size="md"
+              value={watch('personalNumber') || ''}
+              onChange={(e) => {
+                setValue('personalNumber', e.target.value);
+                clearErrors('personalNumber');
+              }}
+              onSearch={doSearch}
+              onReset={() => {
+                setSearchResult(false);
+                setFetchedSsn(false);
+                setNotFound(false);
+                setOutsideMunicipalityWarning(false);
+                reset(emptyCasedataOwnerOrContact);
+              }}
+              showSearchButton={true}
+              placeholder="Personnummer"
+              readOnly={fetchedSsn}
+            />
+            {errors.personalNumber && (
+              <FormErrorMessage className="text-error">{errors.personalNumber.message}</FormErrorMessage>
+            )}
+          </div>
+        )}
 
-            <div className="mt-4">
-              <div className="flex py-10">
-                <div className="flex-col  mx-5">
-                  <FormLabel>E-postadress*</FormLabel>
-                  <Input
-                    className="w-full"
-                    placeholder="Ange e-postadress"
-                    invalid={error}
-                    {...register(`emails.0.value`, { required: true })}
-                  />
-                </div>
-                <div className="flex-col mx-5">
-                  <FormLabel>Telefonnummer*</FormLabel>
-                  <Input
-                    className="w-full"
-                    placeholder="Ange telefonnummer"
-                    invalid={error}
-                    {...register(`phoneNumbers.0.value`, { required: true })}
-                  />
+        {searchResult && !notFound && !hasExistingApplicant && (
+          <div className="border-1 rounded-12 bg-background-content w-max-[52.5rem] my-15">
+            <div className="px-16 py-8">
+              <p className="text-[1.6rem] font-semibold py-10">
+                {firstName?.trim() || lastName?.trim() ?
+                  `${firstName} ${lastName}`
+                : <span className="italic text-text-secondary">Namn saknas</span>}
+              </p>
+
+              <div className="flex text-md mb-10">
+                <div className="flex flex-col mr-10">
+                  <div className={!personalNumber ? 'italic text-text-secondary' : ''}>
+                    {personalNumber || 'Personnummer saknas'}
+                  </div>
+                  <div className={!(street?.trim() && city?.trim()) ? 'italic text-text-secondary' : ''}>
+                    {street?.trim() && city?.trim() ? `${street}, ${city}` : 'Adress saknas'}
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col py-10">
-                <FormLabel>Personens roll*</FormLabel>
-                <Select className="w-full" {...register('roles', { required: true })}>
-                  {roles.map((role, index) => (
-                    <Select.Option key={index} value={role}>
-                      {role}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-              <div className="py-10">
-                <Button
-                  leftIcon={<LucideIcon name="plus" size={16} />}
-                  variant="primary"
-                  onClick={addStakeholderToErrand}
-                >
-                  Lägg till person
-                </Button>
-              </div>
+
+              {!municipalityMismatch && (
+                <>
+                  <div className="flex flex-col lg:flex-row py-10 gap-10">
+                    <div className="flex-col w-full">
+                      <FormLabel>E-postadress</FormLabel>
+                      <Input
+                        className="w-full"
+                        data-cy="stakeholder-email-input"
+                        placeholder="Ange e-postadress"
+                        {...register('emails.0.value')}
+                      />
+                      {errors.emails?.[0]?.value && (
+                        <FormErrorMessage className="text-error">{errors.emails[0].value.message}</FormErrorMessage>
+                      )}
+                    </div>
+                    <div className="flex-col w-full">
+                      <FormLabel>Telefonnummer</FormLabel>
+                      <Input
+                        data-cy="stakeholder-mobilephone-input"
+                        className="w-full"
+                        placeholder="Ange telefonnummer"
+                        {...register('phoneNumbers.0.value')}
+                      />
+                      {errors.phoneNumbers?.[0]?.value && (
+                        <FormErrorMessage className="text-error">
+                          {errors.phoneNumbers[0].value.message}
+                        </FormErrorMessage>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-8">
+                    <div className="flex flex-col">
+                      <FormLabel>Personens roll*</FormLabel>
+                      <Select
+                        data-cy="stakeholder-role-select"
+                        className="w-full"
+                        value={watch('roles')?.[0] ?? ''}
+                        onChange={(e) => {
+                          const selected = e.target.value;
+                          if (selected) {
+                            setValue('roles', [selected as Role], { shouldDirty: true });
+                            setValue('newRole', selected as Role);
+                          } else {
+                            setValue('roles', [], { shouldDirty: true });
+                          }
+                        }}
+                      >
+                        {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
+                        {roles
+                          .sort((a, b) => RoleDisplayNames[a].localeCompare(RoleDisplayNames[b]))
+                          .map((role) => (
+                            <Select.Option key={role} value={role}>
+                              {RoleDisplayNames[role]}
+                            </Select.Option>
+                          ))}
+                      </Select>
+
+                      {errors.roles && (
+                        <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>
+                      )}
+                    </div>
+                  </div>
+                  <div className="py-10">
+                    <Button
+                      data-cy="add-stakeholder-button"
+                      leftIcon={<LucideIcon name="plus" size={16} />}
+                      variant="primary"
+                      onClick={handleSubmit(addStakeholderToErrand)}
+                      className="w-full lg:w-auto"
+                      disabled={municipalityMismatch || isSubmitting}
+                      loading={isSubmitting}
+                    >
+                      Lägg till person
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {outsideMunicipalityWarning && (
+                <div className="flex flex-col gap-10 rounded-2xl bg-warning-background-200 p-12 mt-12 mb-16 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-12">
+                    <LucideIcon color="warning" name="info" className="w-24 h-24 mt-0.5 shrink-0" />
+                    <span className="text-warning text-md leading-[1.8rem] font-normal font-sans break-words flex-1 min-w-0">
+                      Den sökande som du försöker lägga till är inte folkbokförd i kommunen.
+                    </span>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                    onClick={() => {
+                      setSearchResult(false);
+                      setFetchedSsn(false);
+                      setNotFound(false);
+                      setOutsideMunicipalityWarning(false);
+                      reset(emptyCasedataOwnerOrContact);
+                    }}
+                  >
+                    Ny sökning
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      : null}
+        )}
 
-      {owners?.map((owner, index) => (
-        <DisplayCard
-          isEditable={true}
-          key={index}
-          {...owner}
-          onRemove={() => {
-            if (errand?.id) {
-              removeStakeholder(municipalityId, errand.id, owner.id);
-            }
-            setOwners((prevOwners) => prevOwners.filter((_, i) => i !== index));
-          }}
-          onUpdate={(updatedData) => {
-            updateOwner(index, updatedData);
+        {fields.map((person, index) => {
+          if (!person.roles?.some((r) => roles.includes(r))) return null;
+
+          return (
+            <DisplayCard
+              key={person.id || index}
+              person={person}
+              isEditable
+              availableRoles={roles}
+              onRemove={() => {
+                remove(index);
+                setFetchedSsn(false);
+                reset(emptyCasedataOwnerOrContact);
+              }}
+              onUpdate={(values) => update(index, { ...person, ...values })}
+            />
+          );
+        })}
+
+        {manualEntryAllowed && !isErrandReadOnly(errand) && (
+          <Button
+            data-cy="add-manual-person-button"
+            variant="primary"
+            size="sm"
+            color="vattjom"
+            inverted={true}
+            className="mt-6 w-fit"
+            leftIcon={<LucideIcon name="pen" />}
+            onClick={() => {
+              setManualEntryOpen(true);
+            }}
+          >
+            Lägg till manuellt
+          </Button>
+        )}
+
+        <StakeholderFormModal
+          show={manualEntryOpen}
+          onClose={() => setManualEntryOpen(false)}
+          roles={roles}
+          onSubmit={(values) => {
+            reset(values);
+            addStakeholderToErrand();
+            setManualEntryOpen(false);
           }}
         />
-      ))}
-    </div>
+      </FormControl>
+    </FormProvider>
   );
 };

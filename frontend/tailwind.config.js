@@ -9,10 +9,8 @@ module.exports = {
   ],
   theme: {
     // extend: {
-    // if you want to override max content width
-    // maxWidth: {
-    //   content: screens['desktop-max'], // default in core is based on screens
-    // },
+
+    // }
   },
   darkMode: 'class', // or 'media' or 'class'
   presets: [require('@sk-web-gui/core').preset()],

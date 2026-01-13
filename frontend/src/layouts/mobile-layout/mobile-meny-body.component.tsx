@@ -1,5 +1,6 @@
+import { getMenuGroups } from '@components/errand-header/menu-groups';
 import { AppContext } from '@contexts/app-context-interface';
-import { Avatar, Button, Divider } from '@sk-web-gui/react';
+import { Button, Divider, Link, UserMenu } from '@sk-web-gui/react';
 import React, { useContext } from 'react';
 
 interface MobileMenuBodyProps {
@@ -12,13 +13,14 @@ export const MobileMenuBody: React.FC<MobileMenuBodyProps> = ({ children, onNewC
 
   return (
     <div className="flex flex-col w-full bg-vattjom-background-200 p-[1.2rem]">
-      <div className="flex items-center p-4 gap-[1.2rem]">
-        <Avatar
-          data-cy="avatar-aside"
-          className="flex-none"
-          size="md"
+      <div className="flex items-center gap-[1.2rem]">
+        <UserMenu
           initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
-          color="vattjom"
+          menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
+          menuGroups={getMenuGroups(false)}
+          buttonSize="md"
+          className="flex-shrink-0"
+          buttonRounded={false}
         />
         <span className="leading-tight h-fit font-bold mb-0" data-cy="userinfo">
           {user.firstName} {user.lastName}
@@ -26,21 +28,27 @@ export const MobileMenuBody: React.FC<MobileMenuBodyProps> = ({ children, onNewC
       </div>
 
       <div className="flex justify-center w-full px-4 mt-[2.4rem]">
-        <Button
-          size="md"
-          color="vattjom"
-          className="flex items-center justify-center w-full gap-2 px-4 py-2 text-white"
-          onClick={onNewCaseClick}
+        <Link
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH}/registrera`}
+          data-cy="register-new-errand-button"
+          className="w-full"
         >
-          <span>Nytt ärende</span>
-        </Button>
+          <Button
+            size="md"
+            color="vattjom"
+            className="flex items-center w-full justify-center gap-2 px-4 py-2 text-white"
+            onClick={onNewCaseClick}
+          >
+            <span>Nytt ärende</span>
+          </Button>
+        </Link>
       </div>
 
       <div className="py-[2.4rem]">
         <Divider />
       </div>
 
-      <div className="flex flex-col gap-4 p-4">{children}</div>
+      <div className="flex flex-col gap-4">{children}</div>
     </div>
   );
 };

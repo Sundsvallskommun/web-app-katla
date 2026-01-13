@@ -5,13 +5,11 @@ import { Decision } from './decision';
 import { ErrandPhase } from './errand-phase';
 import { ApiErrandStatus } from './errand-status';
 import { ErrandNote } from './errandNote';
+import { ExtraParameter } from './extra-parameters';
 import { FacilityDTO } from './facilities';
+import { Notification } from './notification';
 import { All, Priority } from './priority';
 import { CasedataOwnerOrContact, CreateStakeholderDto, Stakeholder } from './stakeholder';
-import { ExtraParameter } from './extra-parameters';
-import { Notification } from './notification';
-import { Admin } from '@services/user-service';
-
 export interface ApiErrand {
   id: number;
   errandNumber: string;
@@ -80,17 +78,17 @@ export interface PagedApiErrandsResponse extends ApiPagingData {
 export interface IErrand {
   id: number;
   externalCaseId: string;
-  errandNumber: string;
+  errandNumber?: string;
   caseType: string;
   label: string;
   description: string;
-  administrator?: Admin;
+  administrator?: Stakeholder;
   administratorName: string;
   priority: string;
   status: ApiErrandStatus;
   statuses: ApiErrandStatus[];
   phase: ErrandPhase;
-  channel: Channels;
+  channel?: Channels;
   municipalityId: string;
   stakeholders: CasedataOwnerOrContact[];
   facilities: FacilityDTO[];
@@ -119,7 +117,7 @@ export interface ErrandsData extends Data {
   labels: {
     label: string;
     screenReaderOnly: boolean;
-    sortable: boolean;
+    sortField?: string;
     sticky?: boolean;
     shownForStatus: ErrandPhase | All;
   }[];
@@ -128,6 +126,15 @@ export interface ErrandsData extends Data {
     suspendedTo?: string;
   };
 }
+
+export const emptyErrandList: ErrandsData = {
+  errands: [],
+  labels: [],
+  page: 0,
+  size: 0,
+  totalPages: 0,
+  totalElements: 0,
+};
 
 export interface RelatedErrand {
   errandId?: number;

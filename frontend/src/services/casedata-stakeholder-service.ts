@@ -1,14 +1,15 @@
 import { IErrand } from '@interfaces/errand';
-import { MEXRelation, PTRelation, Role } from '@interfaces/role';
+import { getRoleDisplayName, Role } from '@interfaces/role';
 import {
   CasedataOwnerOrContact,
+  ContactInfo,
   ContactInfoType,
   CreateStakeholderDto,
   Stakeholder,
   StakeholderType,
 } from '@interfaces/stakeholder';
 import { ApiResponse, apiService } from '@services/api-service';
-import { OrgNumberFormat, formatOrgNr, latestBy } from '@services/helper-service';
+import { formatOrgNr, latestBy, OrgNumberFormat } from '@services/helper-service';
 import { Admin } from '@services/user-service';
 import { getErrand } from './casedata-errand-service';
 
@@ -63,21 +64,25 @@ export const makeAdministratorStakeholder: (data: Partial<IErrand>) => CreateSta
 };
 
 export const makeStakeholder: (data: CasedataOwnerOrContact, role: Role) => CreateStakeholderDto = (data, role) => {
-  const phones =
-    data.phoneNumbers?.map((p) => ({
+  const phones: ContactInfo[] = (data.phoneNumbers ?? [])
+    .filter((p) => p.value && p.value.trim() !== '')
+    .map((p) => ({
       contactType: 'PHONE' as ContactInfoType,
       value: p.value,
-    })) || [];
-  const mails =
-    data.emails?.map((p) => ({
+    }));
+
+  const mails: ContactInfo[] = (data.emails ?? [])
+    .filter((m) => m.value && m.value.trim() !== '')
+    .map((m) => ({
       contactType: 'EMAIL' as ContactInfoType,
-      value: p.value,
-    })) || [];
+      value: m.value,
+    }));
+
   return {
-    ...(data.id && { id: data.id }),
+    ...(data.id && data.id !== '' && { id: Number(data.id) }),
     ...(data.personId && { personId: data.personId.toString() }),
     type: data.stakeholderType,
-    roles: [role, ...(data.relation ? [data.relation as Role] : [])],
+    roles: [role ?? data.roles[0]],
     contactInformation: [...phones, ...mails],
     firstName: data.firstName || '',
     lastName: data.lastName || '',
@@ -102,11 +107,6 @@ export const makeStakeholder: (data: CasedataOwnerOrContact, role: Role) => Crea
   };
 };
 
-// const validateAddressInfo: (a: Address) => boolean = (a) =>
-//   a.addressCategory &&
-//   a.addressCategory === 'POSTAL_ADDRESS' &&
-//   (!!a.street || !!a.city || !!a.postalCode || !!a.careOf);
-
 const isValidStakeholder: (c: CasedataOwnerOrContact) => boolean = (c) => {
   return (
     (c.stakeholderType === 'PERSON' && c.firstName !== '') ||
@@ -116,15 +116,7 @@ const isValidStakeholder: (c: CasedataOwnerOrContact) => boolean = (c) => {
 
 export const makeStakeholdersList: (data: Partial<IErrand>) => Partial<CreateStakeholderDto>[] = (data) => {
   let stakeholders: Partial<CreateStakeholderDto>[] = [];
-  // if (data.owner?.length === 1 && isValidStakeholder(data.owner[0])) {
-  //   stakeholders.push(makeStakeholder(data.owner[0], Role.APPLICANT));
-  // }
-  // if (data.contacts?.length > 0) {
-  //   const contacts = data.contacts.map((c) => {
-  //     return makeStakeholder(c, Role.CONTACT_PERSON);
-  //   });
-  //   stakeholders = stakeholders.concat(contacts);
-  // }
+
   if ((data.stakeholders ?? []).length > 0) {
     const items = (data.stakeholders ?? []).filter(isValidStakeholder).map((s) => {
       return makeStakeholder(s, s.newRole);
@@ -199,10 +191,6 @@ export const setAdministrator = async (municipalityId: string, errand: IErrand, 
 };
 
 export const removeStakeholder = (municipalityId: string, errandId: number, stakeholderId: string) => {
-  if (!stakeholderId) {
-    console.error('No id found, cannot continue.');
-    return;
-  }
   return apiService
     .deleteRequest<boolean>(`casedata/${municipalityId}/errands/${errandId}/stakeholders/${stakeholderId}`)
     .then((res) => {
@@ -216,7 +204,7 @@ export const removeStakeholder = (municipalityId: string, errandId: number, stak
 
 export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (s) => {
   return {
-    id: s.id,
+    id: s.id.toString(),
     stakeholderType: s.type,
     roles: s.roles,
     newRole: s.roles?.[0] || Role.CONTACT_PERSON,
@@ -224,33 +212,31 @@ export const stakeholder2Contact: (s: Stakeholder) => CasedataOwnerOrContact = (
     personId: s.personId || '',
     organizationName: s.organizationName || '',
     organizationNumber: s.organizationNumber || '',
-    relation: getStakeholderRelation(s),
+    relation: getStakeholderRelationDisplayNames(s),
     firstName: s.firstName || '',
     lastName: s.lastName || '',
     street: s.addresses?.[0]?.street || '',
     careof: s.addresses?.[0]?.careOf || '',
     zip: s.addresses?.[0]?.postalCode || '',
     city: s.addresses?.[0]?.city || '',
-    newPhoneNumber: '+46',
     phoneNumbers: (s.contactInformation ?? [])
       .filter((c) => c.contactType === 'PHONE')
+      .filter((c) => c.value && c.value.trim() !== '')
       .map((c) => ({
         value: c.value,
       })),
-    newEmail: '',
     emails: (s.contactInformation ?? [])
       .filter((c) => c.contactType === 'EMAIL')
+      .filter((c) => c.value && c.value.trim() !== '')
       .map((c) => ({
         value: c.value,
       })),
     primaryContact: (s.extraParameters?.primaryContact ?? '') === 'true',
     messageAllowed: (s.extraParameters?.messageAllowed ?? '') === 'true',
     extraInformation: s.extraParameters?.extraInformation ?? '',
+    adAccount: s.adAccount ?? ''
   };
 };
-
-export const getFellowApplicants: (e: IErrand) => CasedataOwnerOrContact[] = (e) =>
-  e.stakeholders?.filter((s) => s.roles.includes(Role.FELLOW_APPLICANT)) || [];
 
 export const getOwnerStakeholder: (e: IErrand) => CasedataOwnerOrContact = (e) =>
   e.stakeholders?.filter((s) => s.roles.includes(Role.APPLICANT))?.[0];
@@ -258,11 +244,13 @@ export const getOwnerStakeholder: (e: IErrand) => CasedataOwnerOrContact = (e) =
 export const getStakeholdersByRelation: (e: IErrand, relation: Role) => CasedataOwnerOrContact[] = (e, relation) =>
   e.stakeholders?.filter((s) => s.roles.includes(relation));
 
-export const getStakeholderRelation: (s: Stakeholder | CasedataOwnerOrContact) => Role | undefined = (s) => {
-  const relations = [...Object.entries(MEXRelation), ...Object.entries(PTRelation)].map(([key]) => key);
-  return s.roles.find((r) => relations.includes(r)) || undefined;
+export const getStakeholderRelationDisplayNames = (s: Stakeholder | CasedataOwnerOrContact): string => {
+  const validRoles = Object.values(Role) as string[];
+  return s.roles
+    .filter((r): r is Role => validRoles.includes(r))
+    .map(getRoleDisplayName)
+    .join(', ');
 };
-
 export const validateOwnerForSendingDecision: (e: IErrand) => boolean = (e) =>
   validateOwnerForSendingDecisionByEmail(e) || validateOwnerForSendingDecisionByLetter(e);
 

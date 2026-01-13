@@ -1,0 +1,229 @@
+import { AppContext } from '@contexts/app-context-interface';
+import { IErrand } from '@interfaces/errand';
+import { User } from '@interfaces/user';
+import { createConversation, sendInternalMessage } from '@services/casedata-conversation-service';
+import sanitized from '@services/sanitizer-service';
+import LucideIcon from '@sk-web-gui/lucide-icon';
+import {
+  Button,
+  CustomOnChangeEventUploadFile,
+  FileUpload,
+  FormErrorMessage,
+  Modal,
+  Spinner,
+  UploadFile,
+  useConfirm,
+  useSnackbar,
+  useThemeQueries,
+} from '@sk-web-gui/react';
+import dynamic from 'next/dynamic';
+import { useContext, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { MessageWrapper } from './message-wrapper.component';
+const TextEditor = dynamic(() => import('@sk-web-gui/text-editor'), { ssr: false });
+
+interface TextEditorValue {
+  markup?: string;
+  plainText?: string;
+}
+
+export interface CasedataMessageTabFormModel {
+  messageBody: string;
+  messageBodyPlaintext: string;
+}
+
+const defaultMessage = {
+  messageBody: '',
+  messageBodyPlaintext: '',
+};
+
+export const MessageComposer: React.FC<{
+  show: boolean;
+  closeHandler: () => void;
+  setUnsaved: (unsaved: boolean) => void;
+  update: () => void;
+}> = (props) => {
+  const { municipalityId, errand, user }: { municipalityId: string; errand: IErrand; user: User } =
+    useContext(AppContext);
+  const { isMaxMediumDevice } = useThemeQueries();
+  const mobilePadding = isMaxMediumDevice ? 'px-[1.6rem]' : 'px-40';
+  const [isLoading, setIsLoading] = useState(false);
+  const closeConfirm = useConfirm();
+  const [files, setFiles] = useState<UploadFile[]>([]);
+  const toastMessage = useSnackbar();
+  const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState<boolean>(false);
+  const [messageError, setMessageError] = useState<string>('');
+
+  const { handleSubmit, getValues, setValue, watch, formState, reset } = useForm<CasedataMessageTabFormModel>({
+    defaultValues: defaultMessage,
+    mode: 'onChange', // NOTE: Needed if we want to disable submit until valid
+  });
+
+  const messageBody = watch('messageBody');
+  const editorValue = useMemo(() => ({ markup: messageBody }), [messageBody]);
+
+  const clearAndClose = () => {
+    setTimeout(() => {
+      setValue('messageBody', '', { shouldDirty: false });
+      setValue('messageBodyPlaintext', '', { shouldDirty: false });
+      setFiles([]);
+      props.closeHandler();
+      reset();
+    }, 0);
+  };
+
+  const onSubmit = async (data: CasedataMessageTabFormModel) => {
+    setIsLoading(true);
+
+    createConversation(municipalityId, errand.id, user, `Ärende: #${errand.errandNumber}`).then((res) => {
+      sendInternalMessage(municipalityId, errand.id, res.data.id || '', user, sanitized(data.messageBody), files)
+        .then(() => {
+          if (!isMaxMediumDevice) {
+            toastMessage({
+              position: 'bottom',
+              closeable: false,
+              message: `Meddelandet skickades`,
+              status: 'success',
+            });
+          }
+          setIsLoading(false);
+          props.update();
+          clearAndClose();
+        })
+        .catch(() => {
+          if (!isMaxMediumDevice) {
+            toastMessage({
+              position: 'bottom',
+              closeable: false,
+              message: `Något gick fel när meddelandet skickades`,
+              status: 'error',
+            });
+          }
+          setIsLoading(false);
+        });
+    });
+  };
+
+  const abortHandler = () => {
+    if (formState.dirtyFields.messageBodyPlaintext) {
+      closeConfirm
+        .showConfirmation('Vill du avbryta?', 'Du har osparade ändringar.', 'Ja', 'Nej', 'info', 'info')
+        .then((confirmed) => {
+          if (confirmed) {
+            clearAndClose();
+          }
+        });
+    } else {
+      clearAndClose();
+    }
+  };
+
+  const closeAttachmentModal = () => {
+    setIsAttachmentModalOpen(false);
+  };
+
+  const onChange = (e: CustomOnChangeEventUploadFile) => {
+    if (e.target.value !== null) {
+      setFiles((prevFiles) => [...prevFiles, ...e.target.value]);
+      setIsAttachmentModalOpen(false);
+    }
+  };
+
+  const handleRemoveFile = (file: UploadFile) => {
+    setFiles((prevFiles) => prevFiles.filter((f) => f.id !== file.id));
+  };
+
+  return (
+    <>
+      <MessageWrapper label="Nytt meddelande" closeHandler={clearAndClose} show={props.show}>
+        <div className={`my-md py-8 ${mobilePadding} flex flex-col gap-12`}>
+          <div className={isMaxMediumDevice ? 'h-[20rem]' : 'h-[30rem]'}>
+            <TextEditor
+              className="h-[80%]"
+              onChange={(e: { target: { value: TextEditorValue } }) => {
+                props.setUnsaved(true);
+                setValue('messageBody', e.target.value.markup ?? '', { shouldDirty: true });
+                setValue('messageBodyPlaintext', e.target.value.plainText ?? '', { shouldDirty: true });
+                if (messageError) {
+                  setMessageError('');
+                }
+              }}
+              value={editorValue}
+            />
+          </div>
+          {messageError && <FormErrorMessage className="text-error">{messageError}</FormErrorMessage>}
+        </div>
+        <div className={`flex mb-24 mt-8 ${mobilePadding}`}>
+          <Button
+            variant="tertiary"
+            color="primary"
+            leftIcon={<LucideIcon name="paperclip" />}
+            onClick={() => setIsAttachmentModalOpen(true)}
+            data-cy="add-attachment-button"
+          >
+            Bifoga fil
+          </Button>
+        </div>
+        <div className={`${mobilePadding} mb-15`}>
+          <FileUpload.List>
+            {files.map((file, index) => (
+              <FileUpload.ListItem
+                key={file.id || index}
+                index={index}
+                actionsProps={{
+                  showRemove: true,
+                  onRemove: () => handleRemoveFile(file),
+                }}
+                nameProps={{
+                  heading: file.meta.name,
+                }}
+              />
+            ))}
+          </FileUpload.List>
+        </div>
+        <div className={`flex justify-start gap-lg ${mobilePadding}`}>
+          <Button
+            key="cancelButton"
+            type="button"
+            variant="tertiary"
+            onClick={abortHandler}
+            tabIndex={props.show ? 0 : -1}
+          >
+            Avbryt
+          </Button>
+          <Button
+            tabIndex={props.show ? 0 : -1}
+            data-cy="send-message-button"
+            type="button"
+            loading={isLoading}
+            loadingText="Skickar meddelande"
+            onClick={handleSubmit(async () => {
+              const values = getValues();
+              if (values.messageBodyPlaintext.trim() === '') {
+                setMessageError('Skriv ett meddelande innan du skickar');
+                return;
+              }
+              await onSubmit(values);
+            })}
+            variant="primary"
+            color="primary"
+            disabled={isLoading}
+            leftIcon={isLoading ? <Spinner size={2} className="mr-sm" /> : undefined}
+          >
+            Skicka meddelande
+          </Button>
+        </div>
+      </MessageWrapper>
+
+      <Modal show={isAttachmentModalOpen} onClose={closeAttachmentModal} label="Ladda upp bilaga" className="w-[40rem]">
+        <Modal.Content>
+          <div className="flex flex-col gap-lg">
+            <FileUpload.Field onChange={onChange} variant="horizontal" invalid={false}>
+              FileUpload
+            </FileUpload.Field>
+          </div>
+        </Modal.Content>
+      </Modal>
+    </>
+  );
+};

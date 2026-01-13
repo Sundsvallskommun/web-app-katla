@@ -20,7 +20,6 @@ import {
 } from '@config';
 import errorMiddleware from '@middlewares/error.middleware';
 import { Strategy, VerifiedCallback } from '@node-saml/passport-saml';
-import { PrismaClient } from '@prisma/client';
 import { logger, stream } from '@utils/logger';
 import bodyParser from 'body-parser';
 import { defaultMetadataStorage } from 'class-transformer/cjs/storage';
@@ -48,15 +47,15 @@ import ApiService from './services/api.service';
 import { authorizeGroups, getPermissions, getRole } from './services/authorization.service';
 import { additionalConverters } from './utils/custom-validation-classes';
 import { isValidUrl } from './utils/util';
+import type { SchemaObject, ReferenceObject } from 'openapi3-ts';
 
 const corsWhitelist = ORIGIN.split(',');
 
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
 // NOTE: memory uses ms while file uses seconds
-const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { sessionTTL, path: './data/sessions' });
+const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { ttl: sessionTTL, path: './data/sessions' });
 
-const prisma = new PrismaClient();
 const apiService = new ApiService();
 
 passport.serializeUser(function (user, done) {
@@ -69,17 +68,18 @@ passport.deserializeUser(function (user, done) {
 const samlStrategy = new Strategy(
   {
     disableRequestedAuthnContext: true,
-    identifierFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
+    identifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
     callbackUrl: SAML_CALLBACK_URL,
     entryPoint: SAML_ENTRY_SSO,
-    // decryptionPvk: SAML_PRIVATE_KEY,
     privateKey: SAML_PRIVATE_KEY,
     // Identity Provider's public key
     idpCert: SAML_IDP_PUBLIC_CERT,
     issuer: SAML_ISSUER,
     wantAssertionsSigned: false,
+    signatureAlgorithm: 'sha256',
+    digestAlgorithm: 'sha256',
     wantAuthnResponseSigned: false,
-    acceptedClockSkewMs: 1000,
+    acceptedClockSkewMs: -1,
     audience: false,
     logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
   },
@@ -90,7 +90,11 @@ const samlStrategy = new Strategy(
         message: 'Missing SAML profile',
       });
     }
-    const { givenName, surname, username, email, groups } = profile;
+    const givenName = profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'] ?? profile['givenName'];
+    const surname = profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'] ?? profile['sn'];
+    const email = profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ?? profile['email'];
+    const groups = profile['http://schemas.xmlsoap.org/claims/Group']?.join(',') ?? profile['groups'];
+    const username = profile['urn:oid:0.9.2342.19200300.100.1.1'];
 
     if (!givenName || !surname || !email || !groups || !username) {
       logger.error(
@@ -127,18 +131,6 @@ const samlStrategy = new Strategy(
       };
 
       logger.info('Found user:', findUser);
-
-      const userSettings = await prisma.userSettings.findFirst({ where: { username: findUser.username } });
-      // Create user settings for new users
-      const data = {
-        username: findUser.username,
-        readNotificationsClearedDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
-      };
-      if (!userSettings) {
-        await prisma.userSettings.create({
-          data,
-        });
-      }
 
       done(null, findUser);
     } catch (err) {
@@ -204,6 +196,9 @@ class App {
         resave: false,
         saveUninitialized: false,
         store: sessionStore,
+        cookie: {
+          path: BASE_URL_PREFIX,
+        },
       }),
     );
 
@@ -378,7 +373,7 @@ class App {
     const storage = getMetadataArgsStorage();
     const spec = routingControllersToSpec(storage, routingControllersOptions, {
       components: {
-        schemas: schemas as { [schema: string]: unknown },
+        schemas: schemas as { [schema: string]: SchemaObject | ReferenceObject },
         securitySchemes: {
           basicAuth: {
             scheme: 'basic',

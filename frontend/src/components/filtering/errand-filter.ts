@@ -1,3 +1,5 @@
+import { getStatusKeys, ongoingStatuses } from '@interfaces/errand-status';
+
 export interface CaseTypeFilter {
   caseType: string[];
 }
@@ -10,8 +12,10 @@ export interface CaseStatusFilter {
   status: string[];
 }
 
+export const ongoingStatusKeys = getStatusKeys(ongoingStatuses);
+
 export const CaseStatusValues = {
-  status: [],
+  status: ongoingStatusKeys,
 };
 
 export interface CasePriorityFilter {
@@ -30,10 +34,39 @@ export const CaseQueryValues = {
   query: '',
 };
 
-export type CaseDataFilter = CaseTypeFilter & CaseStatusFilter & CasePriorityFilter & CaseQueryFilter;
+export interface CaseDatesFilter {
+  startdate: string;
+  enddate: string;
+}
+
+export const CaseDatesValues = {
+  startdate: '',
+  enddate: '',
+};
+
+export interface CaseAdminsFilter {
+  admins: string[];
+}
+
+export const CaseAdminsValues = {
+  admins: [],
+};
+
+export interface CaseChannelFilter {
+  channel: string[];
+}
+
+export type CaseDataFilter = CaseTypeFilter &
+  CaseStatusFilter &
+  CasePriorityFilter &
+  CaseQueryFilter &
+  CaseDatesFilter &
+  CaseAdminsFilter;
 export const CaseDataValues = {
   ...CaseTypeValues,
   ...CaseStatusValues,
   ...CasePriorityValues,
   ...CaseQueryValues,
+  ...CaseDatesValues,
+  ...CaseAdminsValues,
 };

@@ -9,19 +9,20 @@ export const APIS = [
     version: '3.0',
   },
   {
-    name: 'businessengagements',
-    version: '3.0',
-  },
-  {
-    name: 'legalentity',
-    version: '2.0',
-  },
-  {
     name: 'case-data',
-    version: '11.0',
+    version: '11.5',
   },
   {
     name: 'employee',
     version: '2.0',
   },
+  {
+    name: 'messaging',
+    version: '7.0',
+  },
 ] as const;
+
+export function apiServiceName(name: string): string {
+  const api = APIS.find(a => a.name === name);
+  return api ? `${api.name}/${api.version}` : name;
+}

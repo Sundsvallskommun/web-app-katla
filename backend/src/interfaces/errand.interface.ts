@@ -4,7 +4,6 @@ import {
   Errand as ErrandDTO,
   ExtraParameter,
   PatchErrand as IPatchErrandDTO,
-  PatchErrandCaseTypeEnum,
   PatchErrandPriorityEnum,
   RelatedErrand,
   Stakeholder as StakeholderDTO,
@@ -27,7 +26,7 @@ export class CreateErrandDto implements ErrandDTO {
   externalCaseId?: string;
   @IsString()
   @IsOptional()
-  caseType?: PatchErrandCaseTypeEnum;
+  caseType?: string;
   @IsString()
   @IsOptional()
   channel?: ErrandChannelEnum;
@@ -107,7 +106,7 @@ export class CPatchErrandDto implements IPatchErrandDTO {
   statusDescription?: string;
   @IsString()
   @IsOptional()
-  caseType?: PatchErrandCaseTypeEnum;
+  caseType?: string;
   @IsString()
   @IsOptional()
   priority?: PatchErrandPriorityEnum;
@@ -152,4 +151,7 @@ export class CPatchErrandDto implements IPatchErrandDTO {
   @IsString()
   @IsOptional()
   applicationReceived?: string;
+  @IsString()
+  @IsOptional()
+  channel?: ErrandChannelEnum;
 }

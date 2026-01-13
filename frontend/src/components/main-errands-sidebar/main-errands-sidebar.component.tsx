@@ -1,49 +1,37 @@
-import { CaseDataFilter } from '@components/filtering/errand-filter';
+import { getMenuGroups } from '@components/errand-header/menu-groups';
+import { LogoutButton } from '@components/logout-button.component';
 import { NotificationsBell } from '@components/notifications/notifications-bell';
 import { NotificationsWrapper } from '@components/notifications/notifications-wrapper';
+import { AppContext } from '@contexts/app-context-interface';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Avatar, Button, cx, Divider, Logo } from '@sk-web-gui/react';
+import { Button, cx, Divider, Logo, UserMenu } from '@sk-web-gui/react';
 import NextLink from 'next/link';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { getApplicationEnvironment } from '@services/application-service';
+import { appConfig } from 'src/config/app-config';
+import { SidebarMode } from '@interfaces/sidebarmode';
 
 interface SidebarProps {
   open: boolean;
   setOpen: (state: boolean) => void;
-  user: {
-    firstName: string;
-    lastName: string;
-  };
-  isLoading: boolean;
-  applicationName: string;
-  applicationEnvironment: string;
-  isNotificationEnabled: boolean;
-  casedataFilterForm?: CaseDataFilter;
-  onFilterChange: () => void;
-
   children: React.ReactNode;
 }
 
-export const MainErrandsSidebar: React.FC<SidebarProps> = ({
-  open,
-  setOpen,
-  children,
-  user,
-  applicationName,
-  applicationEnvironment,
-}) => {
+export const MainErrandsSidebar: React.FC<SidebarProps> = ({ open, setOpen, children }) => {
+  const { user } = useContext(AppContext);
+  const applicationEnvironment = getApplicationEnvironment();
   const MainTitle = (open: boolean) => (
     <NextLink href="/" className="no-underline" aria-label={`Go to homepage`}>
       <Logo
         className={cx(open ? '' : 'w-[2.8rem]')}
         variant={open ? 'service' : 'symbol'}
         title={'Draken'}
-        subtitle={applicationName + (applicationEnvironment ? ` ${applicationEnvironment}` : '')}
+        subtitle={`${appConfig.applicationName} ` + ` ${applicationEnvironment ? ` ${applicationEnvironment}` : ''}`}
       />
     </NextLink>
   );
 
   const [showNotifications, setShowNotifications] = useState(false);
-
   return (
     <aside
       data-cy="overview-aside"
@@ -64,12 +52,13 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         >
           {open && (
             <div className="flex gap-12 justify-between items-center">
-              <Avatar
-                data-cy="avatar-aside"
-                className="flex-none"
-                size="md"
+              <UserMenu
                 initials={`${user.firstName.charAt(0).toUpperCase()}${user.lastName.charAt(0).toUpperCase()}`}
-                color="vattjom"
+                menuTitle={`${user.firstName} ${user.lastName} (${user.username})`}
+                menuGroups={getMenuGroups(false)}
+                buttonSize="md"
+                className="flex-shrink-0"
+                buttonRounded={false}
               />
               <span className="leading-tight h-fit font-bold mb-0" data-cy="userinfo">
                 {user.firstName} {user.lastName}
@@ -83,11 +72,17 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         <div className={cx('flex flex-col gap-8', open ? 'py-24' : 'items-center justify-center py-15')}>
           {children}
         </div>
+        <Divider className={cx(open ? '' : 'w-[4rem] mx-auto')} />
+        <div className="py-10 w-full ">
+          <LogoutButton collapsed={!open} data-cy="logout-button" />
+        </div>
+
         <div
           className={cx('absolute bottom-[2.4rem]', open ? 'right-[2.4rem]' : 'left-1/2 transform -translate-x-1/2')}
         >
           <Button
             color="primary"
+            data-cy="toggle-sidebar"
             size={'md'}
             variant="tertiary"
             aria-label={open ? 'Stäng sidomeny' : 'Öppna sidomeny'}
@@ -98,7 +93,11 @@ export const MainErrandsSidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <NotificationsWrapper show={showNotifications} setShow={setShowNotifications} />
+      <NotificationsWrapper
+        show={showNotifications}
+        setShow={setShowNotifications}
+        sidebarMode={open ? SidebarMode.EXPANDED : SidebarMode.COLLAPSED}
+      />
     </aside>
   );
 };

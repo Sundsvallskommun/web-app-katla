@@ -1,34 +1,20 @@
-import { PTCaseLabel } from '@interfaces/case-label';
+import { ErrandDisclosure } from '@components/errand-disclosures/errand-disclosure.component';
+import { FTCaseLabel } from '@interfaces/case-type';
 import { IErrand } from '@interfaces/errand';
-import LucideIcon from '@sk-web-gui/lucide-icon';
-import { Checkbox, cx, Disclosure, Select } from '@sk-web-gui/react';
-import { useState } from 'react';
+import { cx, Select } from '@sk-web-gui/react';
 import { useFormContext, UseFormReturn } from 'react-hook-form';
 
 export const AboutErrand: React.FC = () => {
-  const [doneMark, setDoneMark] = useState(false);
+  const { register }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
-  const {
-    register,
-    formState: { errors },
-  }: UseFormReturn<IErrand, any, undefined> = useFormContext();
   return (
-    <Disclosure
-      icon={<LucideIcon name="info" />}
-      header="Om ärendet"
-      variant="alt"
-      className="w-full px-32"
-      open={true}
-      label={doneMark ? 'Komplett' : ''}
-      labelColor={'gronsta'}
-    >
+    <ErrandDisclosure header="Om ärendet" lucideIconName="info">
       <div className="flex flex-col">
         <strong className="mb-10">Ärendetyp*</strong>
-        <Select className="w-full" {...register('caseType')}>
-          {Object.entries(PTCaseLabel)
-            .filter(([key, label]) => label !== 'Överklagan')
+        <Select data-cy="errand-casetype-select" className="w-full" {...register('caseType')}>
+          {Object.entries(FTCaseLabel)
             .sort((a, b) => a[1].localeCompare(b[1]))
-            .map(([key, label]: [string, string], index) => {
+            .map(([key, label]: [string, string]) => {
               return (
                 <Select.Option
                   className={cx(`cursor-pointer select-none relative py-4 pl-10 pr-4`)}
@@ -41,16 +27,6 @@ export const AboutErrand: React.FC = () => {
             })}
         </Select>
       </div>
-      <div className="mt-24">
-        <Checkbox
-          onClick={() => {
-            setDoneMark(!doneMark);
-          }}
-          checked={doneMark}
-        >
-          Markera avsnittet som komplett
-        </Checkbox>
-      </div>
-    </Disclosure>
+    </ErrandDisclosure>
   );
 };

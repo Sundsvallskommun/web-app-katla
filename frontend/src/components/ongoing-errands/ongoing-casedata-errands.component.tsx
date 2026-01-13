@@ -1,8 +1,8 @@
 import { FormProvider } from 'react-hook-form';
-import { Disclosure } from '@headlessui/react';
+import { Disclosure, DisclosurePanel } from '@headlessui/react';
 import { ErrandsTable } from './components/errands-table.component';
 import { useOngoingCaseDataErrands } from '@utils/useOngoingCaseDataErrands';
-import CaseDataFiltering from '@components/filtering/errand-filtering.component';
+import CaseDataFiltering from '@components/filtering/desktop-filtering/errand-desktop-filtering.component';
 
 export const OngoingCaseDataErrands: React.FC = () => {
   const {
@@ -43,11 +43,11 @@ export const OngoingCaseDataErrands: React.FC = () => {
               </h1>
             </div>
 
-            <Disclosure.Panel static>
+            <DisclosurePanel static>
               <FormProvider {...tableForm}>
                 <ErrandsTable />
               </FormProvider>
-            </Disclosure.Panel>
+            </DisclosurePanel>
           </Disclosure>
         </div>
       </main>

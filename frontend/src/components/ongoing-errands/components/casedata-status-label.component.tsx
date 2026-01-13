@@ -1,12 +1,17 @@
 import { ErrandStatus } from '@interfaces/errand-status';
 import LucideIcon from '@sk-web-gui/lucide-icon';
 import { Label } from '@sk-web-gui/react';
-import { IconName } from 'lucide-react/dynamic';
 
-export const CasedataStatusLabelComponent: React.FC<{ status: string }> = ({ status }) => {
+type LucideIconName = React.ComponentProps<typeof LucideIcon>['name'];
+
+export const StatusLabelComponent: React.FC<{ status: string | undefined; className?: string }> = ({
+  status,
+  className = '',
+}) => {
+  let icon: LucideIconName | null = null;
   let color,
-    inverted = false,
-    icon = null;
+    inverted = false;
+
   switch (status) {
     case ErrandStatus.ArendeAvslutat:
       color = 'primary';
@@ -25,21 +30,11 @@ export const CasedataStatusLabelComponent: React.FC<{ status: string }> = ({ sta
       color = 'vattjom';
       break;
     case ErrandStatus.VantarPaKomplettering:
-      color = 'gronsta';
-      inverted = true;
-      icon = 'clock-10';
-      break;
     case ErrandStatus.InterntAterkoppling:
       color = 'gronsta';
       inverted = true;
       icon = 'clock-10';
       break;
-    //  Lines below to be used for suspended errands shortly
-    // case ErrandStatus.Parkerat:
-    //   color = 'warning';
-    //   inverted = true;
-    //   icon = 'circle-pause';
-    //   break;
     case ErrandStatus.Tilldelat:
       color = 'warning';
       inverted = false;
@@ -51,11 +46,13 @@ export const CasedataStatusLabelComponent: React.FC<{ status: string }> = ({ sta
   }
 
   return (
-    <Label rounded inverted={inverted} color={color} className={`max-h-full h-auto text-center whitespace-nowrap`}>
-      {icon ?
-        <LucideIcon name={icon as IconName} size={16} />
-      : null}{' '}
-      {status}
+    <Label
+      rounded
+      inverted={inverted}
+      color={color}
+      className={`max-h-full h-auto text-center whitespace-nowrap ${className}`}
+    >
+      {icon && <LucideIcon name={icon} size={16} />} {status}
     </Label>
   );
 };

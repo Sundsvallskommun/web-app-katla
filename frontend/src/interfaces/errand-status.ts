@@ -1,5 +1,5 @@
 export enum ErrandStatus {
-  ArendeInkommit = 'Ärende inkommit',
+  ArendeInkommit = 'Ärende inskickat',
   UnderGranskning = 'Under granskning',
   VantarPaKomplettering = 'Väntar på komplettering',
   InterntAterkoppling = 'Internt återkoppling',
@@ -16,8 +16,83 @@ export enum ErrandStatus {
   Parkerad = 'Parkerad',
 }
 
+export const STATUS_LABEL_SV: Record<ErrandStatus, string> = {
+  [ErrandStatus.ArendeInkommit]: 'Ärende inskickat',
+  [ErrandStatus.UnderGranskning]: 'Under granskning',
+  [ErrandStatus.VantarPaKomplettering]: 'Väntar på komplettering',
+  [ErrandStatus.InterntAterkoppling]: 'Internt återkoppling',
+  [ErrandStatus.UnderUtredning]: 'Under utredning',
+  [ErrandStatus.UnderBeslut]: 'Under beslut',
+  [ErrandStatus.Beslutad]: 'Beslutad',
+  [ErrandStatus.BeslutVerkstallt]: 'Beslut verkställt',
+  [ErrandStatus.BeslutOverklagat]: 'Beslut överklagat',
+  [ErrandStatus.ArendeAvslutat]: 'Ärende avslutat',
+  [ErrandStatus.Tilldelat]: 'Tilldelat',
+  [ErrandStatus.Utkast]: 'Utkast',
+  [ErrandStatus.HanterasIAnnatSystem]: 'Hanteras i annat system',
+  [ErrandStatus.ArendetAvvisas]: 'Ärendet avvisas',
+  [ErrandStatus.Parkerad]: 'Parkerad',
+};
+
+export const STATUS_ALIASES: Record<string, ErrandStatus> = {
+  'Ärende inkommit': ErrandStatus.ArendeInkommit,
+  'Under granskning': ErrandStatus.UnderGranskning,
+  'Väntar på komplettering': ErrandStatus.VantarPaKomplettering,
+  'Internt återkoppling': ErrandStatus.InterntAterkoppling,
+  'Under utredning': ErrandStatus.UnderUtredning,
+  'Under beslut': ErrandStatus.UnderBeslut,
+  Beslutad: ErrandStatus.Beslutad,
+  'Beslut verkställt': ErrandStatus.BeslutVerkstallt,
+  'Beslut överklagat': ErrandStatus.BeslutOverklagat,
+  'Ärende avslutat': ErrandStatus.ArendeAvslutat,
+  Tilldelat: ErrandStatus.Tilldelat,
+  Utkast: ErrandStatus.Utkast,
+  'Hanteras i annat system': ErrandStatus.HanterasIAnnatSystem,
+  'Ärendet avvisas': ErrandStatus.ArendetAvvisas,
+  Parkerad: ErrandStatus.Parkerad,
+};
+
+export function normalizeStatus(s?: string): ErrandStatus | undefined {
+  if (!s) return;
+  const t = s.normalize('NFC').trim();
+  return STATUS_ALIASES[t] as ErrandStatus | undefined;
+}
+
 export interface ApiErrandStatus {
   statusType?: string;
   description?: string;
   created?: string;
 }
+
+const statusValueToKey = Object.entries(ErrandStatus).reduce(
+  (acc, [key, value]) => {
+    acc[value] = key;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+export const getStatusKey = (status: ErrandStatus): string => statusValueToKey[status];
+export const getStatusKeys = (statuses: ErrandStatus[]): string[] => statuses.map(getStatusKey);
+
+export const ongoingStatuses = [
+  ErrandStatus.ArendeInkommit,
+  ErrandStatus.UnderGranskning,
+  ErrandStatus.VantarPaKomplettering,
+  ErrandStatus.InterntAterkoppling,
+  ErrandStatus.UnderUtredning,
+  ErrandStatus.UnderBeslut,
+  ErrandStatus.Beslutad,
+  ErrandStatus.BeslutVerkstallt,
+  ErrandStatus.BeslutOverklagat,
+];
+
+export const suspendedStatuses = [ErrandStatus.Parkerad];
+export const assignedStatuses = [ErrandStatus.Tilldelat];
+export const draftStatuses = [ErrandStatus.Utkast];
+
+export const closedStatuses = [
+  ErrandStatus.ArendeAvslutat,
+  ErrandStatus.ArendetAvvisas,
+  ErrandStatus.HanterasIAnnatSystem,
+];

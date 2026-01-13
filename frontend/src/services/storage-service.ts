@@ -10,15 +10,15 @@ const storage: {
     };
 
 const get: (key: string) => string = (key) => {
-  const storedValue = storage.getItem(`${process.env.NEXT_PUBLIC_APPLICATION}${key}`);
+  const storedValue = storage.getItem(`FT${key}`);
   return storedValue ? JSON.parse(storedValue) : null;
 };
 
 const set: (key: string, value: number | string | undefined | null) => void = (key, value) => {
   if (value !== undefined && value !== null) {
-    storage.setItem(`${process.env.NEXT_PUBLIC_APPLICATION}${key}`, JSON.stringify(value));
+    storage.setItem(`FT${key}`, JSON.stringify(value));
   } else {
-    storage.setItem(`${process.env.NEXT_PUBLIC_APPLICATION}${key}`, 'null');
+    storage.setItem(`FT${key}`, 'null');
   }
 };
 

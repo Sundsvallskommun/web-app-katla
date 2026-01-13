@@ -1,4 +1,5 @@
 import { CASEDATA_NAMESPACE } from '@/config';
+import { apiServiceName } from '@/config/api-config';
 import { Errand as ErrandDTO } from '@/data-contracts/case-data/data-contracts';
 import { Attachment, CreateAttachmentDto } from '@/interfaces/attachment.interface';
 import { fileUploadOptions } from '@/utils/fileUploadOptions';
@@ -20,7 +21,7 @@ interface ResponseData {
 @Controller()
 export class CaseDataAttachmentController {
   private apiService = new ApiService();
-  SERVICE = `case-data/11.0`;
+  SERVICE = apiServiceName('case-data');
 
   @Post('/casedata/:municipalityId/errands/:errandId/attachments')
   @HttpCode(201)
@@ -37,7 +38,6 @@ export class CaseDataAttachmentController {
     const baseURL = apiURL(this.SERVICE);
 
     const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/attachments`;
-    console.log('files:', files);
     const data: CreateAttachmentDto = {
       file: files[0].buffer.toString('base64'),
       category: attachmentData.category,
@@ -164,37 +164,5 @@ export class CaseDataAttachmentController {
       throw e;
     });
     return { data: response.data, message: `Attachment ${attachmentId} removed` };
-  }
-
-  @Get('/casedata/:municipalityId/errand/:errandId/messages/:messageId/attachments/:attachmentId')
-  @OpenAPI({ summary: 'Return attachment for a message by errand id and message id' })
-  @UseBefore(authMiddleware)
-  async messageAttachments(
-    @Req() req: RequestWithUser,
-    @Param('errandId') errandId: number,
-    @Param('messageId') messageId: string,
-    @Param('attachmentId') attachmentId: string,
-    @Param('municipalityId') municipalityId: string,
-    @Res() response: any,
-  ): Promise<ResponseData> {
-    if (!errandId) {
-      throw Error('ErrandId not found');
-    }
-    if (!attachmentId) {
-      throw Error('AttachmentId not found');
-    }
-
-    const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/messages/${messageId}/attachments/${attachmentId}`;
-    const baseURL = apiURL(this.SERVICE);
-    const res = await this.apiService.get<ArrayBuffer>({ url, baseURL, responseType: 'arraybuffer' }, req.user).catch(e => {
-      logger.error('Something went wrong when fetching attachment');
-      logger.error(e);
-      throw e;
-    });
-
-    const binaryString = Array.from(new Uint8Array(res.data), v => String.fromCharCode(v)).join('');
-    const b64 = Buffer.from(binaryString, 'binary').toString('base64');
-
-    return { data: b64, message: 'good' };
   }
 }

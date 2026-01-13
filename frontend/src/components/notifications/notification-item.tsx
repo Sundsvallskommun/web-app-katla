@@ -2,24 +2,93 @@ import { acknowledgeCasedataNotification, getCasedataNotifications } from '@serv
 import { Notification } from '@interfaces/notification';
 import { prettyTime } from '@services/helper-service';
 import LucideIcon from '@sk-web-gui/lucide-icon';
-import { cx, useSnackbar } from '@sk-web-gui/react';
+import { Avatar, cx, useSnackbar } from '@sk-web-gui/react';
 import NextLink from 'next/link';
 import { useContext } from 'react';
 import { AppContext } from '@contexts/app-context-interface';
+import { labelBySubType } from './notification-utils';
+
+const iconConfig = {
+  'Meddelande mottaget': { icon: 'message-circle', defaultColor: 'gronsta' },
+  'Parkering av ärendet har upphört': { icon: 'bell-ring', defaultColor: 'juniskar' },
+  'Ärende uppdaterat': { icon: 'bell-ring', defaultColor: 'juniskar' },
+  'En bilaga har lagts till i ärendet.': { icon: 'file', defaultColor: 'vattjom' },
+  'Notering skapad': { avatar: true, defaultColor: 'juniskar' },
+  default: { icon: 'bell', defaultColor: 'vattjom' },
+};
+
+const senderFallback = (name?: string): string => {
+  if (!name || name.toUpperCase() === 'UNKNOWN') return 'Okänd';
+  return name;
+};
+
+const surfaceColor: Record<string, string> = {
+  juniskar: 'bg-juniskar-surface-accent',
+  gronsta: 'bg-gronsta-surface-accent',
+  vattjom: 'bg-vattjom-surface-accent',
+  bjornstigen: 'bg-bjornstigen-surface-accent',
+};
+
+const renderIcon = (notification: Notification) => {
+  const config = iconConfig[notification.description as keyof typeof iconConfig] ?? iconConfig.default;
+  const color = notification.acknowledged ? 'primary' : config.defaultColor;
+
+  if ('avatar' in config && config.avatar) {
+    return (
+      <div className={cx(`w-[4rem] h-[4rem] rounded-12 flex items-center justify-center`, surfaceColor[color])}>
+        <Avatar
+          data-cy="avatar-aside"
+          className="flex-none"
+          size="md"
+          initials={`${notification.createdByFullName?.split(' ')[1]?.charAt(0).toUpperCase()}${notification.createdByFullName?.split(' ')[0]?.charAt(0).toUpperCase()}`}
+          color={color}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cx(
+        `w-[4rem] h-[4rem] rounded-12 flex items-center justify-center ${
+          notification.acknowledged ? 'bg-tertiary-surface' : surfaceColor[color]
+        }`
+      )}
+    >
+      {'icon' in config && (
+        <LucideIcon
+          name={config.icon as 'message-circle' | 'bell-ring' | 'file' | 'bell'}
+          color={
+            color as
+              | 'gronsta'
+              | 'juniskar'
+              | 'vattjom'
+              | 'primary'
+              | 'error'
+              | 'info'
+              | 'success'
+              | 'warning'
+              | 'bjornstigen'
+              | 'tertiary'
+          }
+          size="2.4rem"
+        />
+      )}
+    </div>
+  );
+};
 
 export const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
   const { municipalityId, setNotifications } = useContext(AppContext);
   const toastMessage = useSnackbar();
+  const subTypeLabel = notification.subType?.toUpperCase() && labelBySubType[notification.subType?.toUpperCase()];
 
-  const color = notification.acknowledged ? 'tertiary' : 'info';
   return (
     <div className="p-16 flex gap-12 items-start justify-between text-small">
-      <div className="flex items-center my-xs">
-        <LucideIcon.Padded name="message-circle" color={color} inverted size="4rem" />
-      </div>
+      <div className="flex items-center my-xs">{renderIcon(notification)}</div>
       <div className="flex-grow">
         <div>
-          {notification.description}{' '}
+          <strong>{notification.description + ' › '}</strong>
           <NextLink
             href={`/arende/${municipalityId}/${notification.errandNumber}`}
             target="_blank"
@@ -47,7 +116,10 @@ export const NotificationItem: React.FC<{ notification: Notification }> = ({ not
             {notification.errandNumber || 'Till ärendet'}
           </NextLink>
         </div>
-        <div>Från {notification.createdByFullName || notification.createdBy || '(okänt)'}</div>
+        <div>Från: {senderFallback(notification.createdByFullName || notification.createdBy)}</div>
+        {subTypeLabel ?
+          <div>Händelse: {subTypeLabel}</div>
+        : null}
       </div>
       <span className="whitespace-nowrap">{prettyTime(notification.created)}</span>
       {!notification.acknowledged ?

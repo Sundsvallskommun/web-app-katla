@@ -1,6 +1,6 @@
+import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
 import { ApiResponse, apiService, Data } from '@services/api-service';
 import { formatOrgNr, luhnCheck, OrgNumberFormat } from '@services/helper-service';
-import { CLegalEntity2WithId } from 'src/data-contracts/backend/data-contracts';
 
 export interface CitizenAddressData extends Data {
   personId: string;
@@ -17,6 +17,7 @@ export interface CitizenAddressData extends Data {
     postalCode: string;
     city: string;
     country: string;
+    municipality: string;
   }[];
 }
 
@@ -29,85 +30,16 @@ export interface AddressResult {
   careof: string;
   zip: string;
   city: string;
-  phone?: string;
-  email?: string;
-  workPhone?: string;
-  error?: string;
   loginName: string;
   company: string;
   administrationCode: string;
   administrationName: string;
+  municipality?: string;
+  phone?: string;
+  email?: string;
+  workPhone?: string;
+  error?: string;
 }
-
-// const emptyaddress: AddressResult = {
-//   personId: '',
-//   firstName: '',
-//   lastName: '',
-//   organizationName: '',
-//   street: '',
-//   careof: '',
-//   zip: '',
-//   city: '',
-//   loginName: '',
-//   company: '',
-//   administrationCode: '',
-//   administrationName: '',
-// };
-
-// interface OrgInfo extends Data {
-//   errorInformation?: {
-//     hasErrors: boolean;
-//     errorDescription?: {
-//       '-1': string;
-//     };
-//   };
-//   companyName: string;
-//   legalForm: {
-//     legalFormDescription: string;
-//     legalFormCode: string;
-//   };
-//   address: {
-//     city: string;
-//     street: string;
-//     postcode?: string;
-//     careOf: string;
-//   };
-//   phoneNumber: string;
-//   municipality: {
-//     municipalityName: string;
-//     municipalityCode: string;
-//   };
-//   county: {
-//     countyName: string;
-//     countyCode: string;
-//   };
-//   fiscalYear: {
-//     fromDay: number;
-//     fromMonth: number;
-//     toDay: number;
-//     toMonth: number;
-//   };
-//   companyForm: {
-//     companyFormCode: string;
-//     companyFormDescription: string;
-//   };
-//   companyRegistrationTime: string;
-//   companyLocation?: {
-//     address: {
-//       city: string;
-//       street: string;
-//       postcode: string;
-//     };
-//   };
-//   businessSignatory: string;
-//   companyDescription: string;
-//   sharesInformation: {
-//     shareTypes: string[];
-//     numberOfShares: number;
-//     shareCapital: number;
-//     shareCurrency: string;
-//   };
-// }
 
 interface EmployedPersonData {
   domain: string;
@@ -124,7 +56,7 @@ export const isValidOrgNumber: (ssn: string) => boolean = (ssn) => {
   return passingLuhn && passingDigitTest;
 };
 
-export const searchPerson: (ssn: string) => Promise<AddressResult> = async (ssn: string) => {
+export const searchPerson: (ssn: string) => Promise<Partial<CasedataOwnerOrContact>> = async (ssn: string) => {
   ssn = ssn.replace(/\D/g, '');
   if (!isValidPersonalNumber(ssn)) {
     throw new Error('Invalid personal number');
@@ -142,15 +74,11 @@ export const searchPerson: (ssn: string) => Promise<AddressResult> = async (ssn:
     personId: data.personId,
     firstName: data.givenname,
     lastName: data.lastname,
-    organizationName: '',
     street: addressItem?.address || '',
     careof: addressItem?.co || '',
     zip: addressItem?.postalCode || '',
     city: addressItem?.city || '',
-    loginName: '',
-    company: '',
-    administrationCode: '',
-    administrationName: '',
+    municipality: addressItem?.municipality
   };
 };
 
@@ -173,7 +101,6 @@ export const searchADUser: (username: string, domain?: string) => Promise<Addres
   if (!domain) {
     domain = 'PERSONAL';
   }
-
   return await apiService
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .get<any>(`portalpersondata/${domain}/${username}`)
@@ -218,57 +145,6 @@ export const searchADUserByPersonNumber: (personalNumber: string) => Promise<Add
             return Promise.all(promises).then((results) => results);
           } else {
             return searchADUser(res[0].loginName, res[0].domain);
-          }
-        });
-};
-
-const isValidOrganization = (org: CLegalEntity2WithId) =>
-  org.name &&
-  ((org.address?.city && org.address?.postalCode && org.address.addressArea) ||
-    (org.address?.addressArea && org.address?.city && org.address?.postalCode));
-
-export const searchOrganization: (orgNr: string) => Promise<AddressResult> = (orgNr: string) => {
-  return !isValidOrgNumber(formatOrgNr(orgNr)) ?
-      Promise.resolve({
-        personId: '',
-        firstName: '',
-        lastName: '',
-        organizationName: '',
-        street: '',
-        careof: '',
-        zip: '',
-        city: '',
-        loginName: '',
-        company: '',
-        administrationCode: '',
-        administrationName: '',
-      })
-    : apiService
-        .post<ApiResponse<CLegalEntity2WithId>, { orgNr: string }>('organization', {
-          orgNr: formatOrgNr(orgNr, OrgNumberFormat.NODASH),
-        })
-        .then((res) => res.data.data)
-        .then((res) => {
-          if (!isValidOrganization(res)) {
-            console.error('Invalid address data for organization');
-            throw 'Address not found';
-          } else {
-            const addressItem = {
-              city: res.address.city,
-              postcode: res.address.postalCode,
-              street: res.address.addressArea,
-            };
-            return {
-              personId: '',
-              firstName: '',
-              lastName: '',
-              organizationName: res.name,
-              street: addressItem.street,
-              careof: '',
-              zip: addressItem.postcode,
-              city: addressItem.city,
-              phone: res.phoneNumber || '',
-            } as AddressResult;
           }
         });
 };
