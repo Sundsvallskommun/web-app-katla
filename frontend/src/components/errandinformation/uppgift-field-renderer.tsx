@@ -89,7 +89,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const baseRequired = isOptional ? false : isRequired || isTypeRequiredByDefault;
   const isRequiredField = baseRequired || hasConditionalRequirement;
 
-  const formFieldClassName = 'flex flex-col w-full pt-8';
+  const formFieldClassName = 'flex flex-col w-full';
   const fieldDescriptionClassName = 'pt-8 w-full flex flex-col text-md leading-[1.8rem] font-normal font-[Arial]';
 
   const ErrorMessage = ({ error }: { error?: string }) =>
@@ -161,7 +161,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   };
 
   return (
-    <FormControl disabled={isErrandReadOnly(errand)} className="flex flex-col gap-2 items-start justify-start w-full">
+    <FormControl disabled={isErrandReadOnly(errand)} className="flex flex-col items-start justify-start w-full">
       <FormLabel className="self-stretch justify-center text-dark-primary text-md leading-24 ">
         {field.label}
         {isRequiredField && <span className="text-error ml-4">*</span>}
