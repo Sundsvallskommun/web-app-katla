@@ -153,7 +153,7 @@ export const notification_UppgiftFieldTemplate: UppgiftField[] = [
   {
     field: 'personal.maxWalkingDistance',
     value: '',
-    label: 'Hur långt klarar den sökande att gå på plan mark i meter?',
+    label: 'Hur långt klarar den sökande att gå på plan mark? Ange i antalet meter.',
     description: '',
     formField: {
       type: 'textarea',
@@ -204,29 +204,7 @@ export const notification_UppgiftFieldTemplate: UppgiftField[] = [
     ],
     section: 'Yttre omständigheter',
   },
-  {
-    field: 'external.mobilityAids.additional',
-    value: [],
-    label: 'Hur långt klarar den sökande att gå på plan mark? Ange i antalet meter',
-    formField: {
-      type: 'textarea',
-    },
-    section: 'Yttre omständigheter',
-    dependsOnLogic: 'OR',
-    dependsOn: [
-      {
-        field: 'external.mobilityAids',
-        value: ['WALKER', 'CRUTCH_CANE_POLES'],
-        validationMessage: 'Vänligen beskriv hur långt den sökande kan gå på plan mark i meter.',
-      },
-      {
-        field: 'external.mobilityAid.boolean',
-        value: 'NO',
-        validationMessage: 'Vänligen beskriv hur långt den sökande kan gå på plan mark i meter.',
-      },
-    ],
-  },
-  {
+    {
     field: 'external.assistanceDuringTravel',
     value: '',
     label: 'Behöver den sökande aktiv hjälp under själva resan? (T.ex. hjälp med betalning eller kommunicering)',
