@@ -18,7 +18,7 @@ export const RegisterErrandButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toastMessage = useSnackbar();
   const router = useRouter();
-  const { municipalityId, setErrand, isLoading, setIsLoading } = useContext(AppContext);
+  const { setErrand, isLoading, setIsLoading } = useContext(AppContext);
 
   const { getValues, trigger, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
 
@@ -96,7 +96,7 @@ export const RegisterErrandButton: React.FC = () => {
 
           setErrand(e.errand);
           reset(e.errand);
-          router.push(`/arende/${municipalityId}/${e.errand.errandNumber}`);
+          router.push(`/arende/${e.errand.errandNumber}`);
         }
         toastMessage({
           position: 'bottom',

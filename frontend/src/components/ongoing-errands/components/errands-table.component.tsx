@@ -14,7 +14,7 @@ import { StatusLabelComponent } from './casedata-status-label.component';
 
 export const ErrandsTable: React.FC = () => {
   const { watch, setValue, register } = useFormContext<TableForm>();
-  const { municipalityId, errands: data } = useContext(AppContext);
+  const { errands: data } = useContext(AppContext);
   const [rowHeight, setRowHeight] = useState<string>('normal');
   const sortOrder = watch('sortOrder');
   const sortColumn = watch('sortColumn');
@@ -56,7 +56,7 @@ export const ErrandsTable: React.FC = () => {
         `${getOwnerStakeholder(errand)?.firstName} ${getOwnerStakeholder(errand)?.lastName}`
       : '(Saknas)';
 
-    const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${municipalityId}/${errand.errandNumber}`;
+    const url = `${process.env.NEXT_PUBLIC_BASE_PATH}/arende/${errand.errandNumber}`;
     return (
       <Table.Row
         key={`row-${index}`}

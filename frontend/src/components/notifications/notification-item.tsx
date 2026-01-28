@@ -79,7 +79,7 @@ const renderIcon = (notification: Notification) => {
 };
 
 export const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
-  const { municipalityId, setNotifications } = useContext(AppContext);
+  const { setNotifications } = useContext(AppContext);
   const toastMessage = useSnackbar();
   const subTypeLabel = notification.subType?.toUpperCase() && labelBySubType[notification.subType?.toUpperCase()];
 
@@ -90,7 +90,7 @@ export const NotificationItem: React.FC<{ notification: Notification }> = ({ not
         <div>
           <strong>{notification.description + ' › '}</strong>
           <NextLink
-            href={`/arende/${municipalityId}/${notification.errandNumber}`}
+            href={`/arende/${notification.errandNumber}`}
             target="_blank"
             onClick={async () => {
               try {
