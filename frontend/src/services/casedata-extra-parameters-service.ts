@@ -1,6 +1,8 @@
 import { notification_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification';
 import { notificationBusCard_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-bus-card';
+import { notificationChange_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-change';
 import { notificationNational_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-national';
+import { notificationReassessment_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-reassessment';
 import { notificationRenewal_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-renewal';
 import { notificationRiak_UppgiftFieldTemplate } from '@components/errandinformation/extraparameter-templates/paratransit-notification-riak';
 import { FTCaseType } from '@interfaces/case-type';
@@ -30,7 +32,8 @@ export interface UppgiftField {
     | { type: 'radio'; options: OptionBase[]; inline?: boolean }
     | { type: 'radioPlus'; options: OptionBase[]; ownOption: string }
     | { type: 'checkbox'; options: OptionBase[] }
-    | { type: 'repeatableGroup' };
+    | { type: 'repeatableGroup' }
+    | { type: 'info' };
   section: string;
   dependsOnLogic?: 'AND' | 'OR';
   dependsOn?: {
@@ -77,6 +80,8 @@ const template: ExtraParametersObject = {
   PARATRANSIT_NOTIFICATION_RENEWAL: notificationRenewal_UppgiftFieldTemplate,
   PARATRANSIT_NOTIFICATION_NATIONAL: notificationNational_UppgiftFieldTemplate,
   PARATRANSIT_NOTIFICATION_RIAK: notificationRiak_UppgiftFieldTemplate,
+  PARATRANSIT_NOTIFICATION_CHANGE: notificationChange_UppgiftFieldTemplate,
+  PARATRANSIT_NOTIFICATION_REASSESSMENT: notificationReassessment_UppgiftFieldTemplate,
   PARATRANSIT_NOTIFICATION_BUS_CARD: notificationBusCard_UppgiftFieldTemplate,
 };
 

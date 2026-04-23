@@ -311,6 +311,12 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
           <ErrorMessage error={error} />
         </div>
       )}
+
+      {field.formField.type === 'info' && (
+        <div className={formFieldClassName}>
+          {field.description && <span>{field.description}</span>}
+        </div>
+      )}
     </FormControl>
   );
 };

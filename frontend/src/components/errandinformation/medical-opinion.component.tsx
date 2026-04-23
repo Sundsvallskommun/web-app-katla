@@ -86,12 +86,14 @@ export const MedicalOpinion: React.FC = () => {
     [fields]
   );
 
+  if (fields.length === 0) {
+    return null;
+  }
+
   return (
     <ErrandDisclosure header="Medicinskt utlåtande" lucideIconName="clipboard-signature" errandInformationSection>
       <div className="mt-24">
-        {fields.length > 0 ?
-          <div className="flex flex-col gap-32">{renderable}</div>
-        : <p>Inga fält att visa.</p>}
+        <div className="flex flex-col gap-32">{renderable}</div>
       </div>
     </ErrandDisclosure>
   );
