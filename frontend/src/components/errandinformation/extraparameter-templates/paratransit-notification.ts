@@ -235,7 +235,7 @@ export const notification_UppgiftFieldTemplate: UppgiftField[] = [
   {
     field: 'medical.diagnoses',
     value: [],
-    label: 'Ange medicinska diagnoser',
+    label: 'Typ av funktionsnedsättning/funktionsnedsättningar',
     formField: {
       type: 'combobox',
       options: [
