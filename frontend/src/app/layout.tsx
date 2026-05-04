@@ -6,7 +6,6 @@ import { headers } from 'next/headers';
 
 interface RootLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: string }>;
 }
 
 export const generateStaticParams = () => i18nConfig.locales.map((locale) => ({ locale }));
