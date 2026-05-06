@@ -44,6 +44,10 @@ export interface UppgiftField {
   description?: string;
   required?: boolean;
   pairWith?: string;
+  disabledBy?: {
+    field: string;
+    value: string;
+  };
 }
 
 export interface RepeatableGroupConfig {

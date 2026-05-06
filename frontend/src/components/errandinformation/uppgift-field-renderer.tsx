@@ -32,6 +32,15 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   // eslint-disable-next-line  react-hooks/rules-of-hooks
   const dependencyValues = dependencyNames.length > 0 ? useWatch({ control, name: dependencyNames }) : undefined;
 
+  const disabledByName = field.disabledBy?.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
+  // eslint-disable-next-line  react-hooks/rules-of-hooks
+  const disabledByValue = disabledByName ? useWatch({ control, name: disabledByName }) : undefined;
+  const isDisabledByField = field.disabledBy
+    ? Array.isArray(disabledByValue)
+      ? disabledByValue.includes(field.disabledBy.value)
+      : disabledByValue === field.disabledBy.value
+    : false;
+
   const error = get(errors, name)?.message;
   const { isMaxMediumDevice } = useThemeQueries();
   const { errand } = useContext(AppContext);
@@ -164,7 +173,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
     <FormControl disabled={isErrandReadOnly(errand)} className="flex flex-col items-start justify-start w-full">
       <FormLabel className="self-stretch justify-center text-dark-primary text-md leading-24 ">
         {field.label}
-        {isRequiredField && <span className="text-error ml-4">*</span>}
+        {isRequiredField && field.label !== '' && <span className="text-error ml-4">*</span>}
       </FormLabel>
 
       {field.formField.type === 'text' && (
@@ -299,12 +308,13 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
             type="date"
             data-cy={`uppgift-field-${field.field}`}
             {...register(name)}
+            disabled={isDisabledByField}
             onChange={(e) => {
               const selectedDate = e.target?.value ?? '';
               setValue(name, selectedDate, { shouldDirty: true });
               validateAndSetError(setError, clearErrors, name, selectedDate);
             }}
-            className="w-full"
+            className={field.label === "Datum då beslut upphör" ? "w-[25rem]" : "w-full"}
             aria-label={field.label}
           />
           {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
@@ -315,6 +325,10 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
       {field.formField.type === 'info' && (
         <div className={formFieldClassName}>
           {field.description && <span>{field.description}</span>}
+          {field.dependsOn?.some((dep) => dep.validationMessage) && (
+            <input type="hidden" {...register(name, validationRules)} />
+          )}
+          <ErrorMessage error={error} />
         </div>
       )}
     </FormControl>
