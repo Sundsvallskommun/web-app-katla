@@ -20,7 +20,7 @@ export const notificationBusCard_UppgiftFieldTemplate: UppgiftField[] = [
     value: '',
     label: '',
     description:
-      'Det behöver finnas ett utfärdat färdtjänstbeslut för att få ansöka om busskort',
+      'Det behöver finnas ett utfärdat färdtjänstbeslut för att få ansöka om busskort. En anmälan om färdtjänst måste skickas in och behandlas först.',
     formField: {
       type: 'info',
     },
@@ -29,7 +29,8 @@ export const notificationBusCard_UppgiftFieldTemplate: UppgiftField[] = [
       {
         field: 'personal.hasParatransitDecision',
         value: 'NO',
-        validationMessage: '',
+        validationMessage:
+          'Det behöver finnas ett utfärdat färdtjänstbeslut för att få anmäla om busskort.',
       },
     ],
   },
