@@ -1,6 +1,7 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { EXTRAPARAMETER_SEPARATOR, OptionBase, UppgiftField } from '@services/casedata-extra-parameters-service';
 import {
+  Alert,
   Checkbox,
   Combobox,
   DatePicker,
@@ -13,7 +14,7 @@ import {
   useThemeQueries,
 } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { get, useFormContext, useWatch } from 'react-hook-form';
 
 export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field }) => {
@@ -40,6 +41,13 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
       ? disabledByValue.includes(field.disabledBy.value)
       : disabledByValue === field.disabledBy.value
     : false;
+
+  useEffect(() => {
+    if (isDisabledByField) {
+      setValue(name, '', { shouldDirty: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDisabledByField]);
 
   const error = get(errors, name)?.message;
   const { isMaxMediumDevice } = useThemeQueries();
@@ -170,7 +178,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   };
 
   return (
-    <FormControl disabled={isErrandReadOnly(errand)} className="flex flex-col items-start justify-start w-full">
+    <FormControl disabled={isErrandReadOnly(errand)} className={`flex flex-col items-start justify-start w-full ${field.label === "Datum då beslutet upphör" || field.label === "" ? "-mt-20" : ""}`}>
       <FormLabel className="self-stretch justify-center text-dark-primary text-md leading-24 ">
         {field.label}
         {isRequiredField && field.label !== '' && <span className="text-error ml-4">*</span>}
@@ -314,7 +322,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
               setValue(name, selectedDate, { shouldDirty: true });
               validateAndSetError(setError, clearErrors, name, selectedDate);
             }}
-            className={field.label === "Datum då beslut upphör" ? "w-[25rem]" : "w-full"}
+            className={field.label === "Datum då beslutet upphör" ? "w-[25rem]" : "w-full"}
             aria-label={field.label}
           />
           {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
@@ -324,7 +332,14 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
 
       {field.formField.type === 'info' && (
         <div className={formFieldClassName}>
-          {field.description && <span>{field.description}</span>}
+          {field.description && (
+            <Alert type={field.formField.alertType ?? 'info'}>
+              <Alert.Icon />
+              <Alert.Content>
+                <Alert.Content.Description>{field.description}</Alert.Content.Description>
+              </Alert.Content>
+            </Alert>
+          )}
           {field.dependsOn?.some((dep) => dep.validationMessage) && (
             <input type="hidden" {...register(name, validationRules)} />
           )}
