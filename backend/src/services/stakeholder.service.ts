@@ -1,4 +1,4 @@
-import { CASEDATA_NAMESPACE } from '@/config';
+import { CASEDATA_NAMESPACE, MUNICIPALITY_ID } from '@/config';
 import { Errand as ErrandDTO, Stakeholder as StakeholderDTO } from '@/data-contracts/case-data/data-contracts';
 import { User } from '@/interfaces/users.interface';
 import { latestBy } from '@/utils/util';
@@ -17,14 +17,13 @@ export const getOwnerStakeholderEmail: (e: ErrandDTO) => string = e => {
   return owner.contactInformation.find(c => c.contactType === 'EMAIL')?.value;
 };
 
-export const getStakeholderById: (municipalityId: string, errandId: number, stakeholderId: string, user: User) => Promise<StakeholderDTO> = async (
-  municipalityId,
+export const getStakeholderById: (errandId: number, stakeholderId: string, user: User) => Promise<StakeholderDTO> = async (
   errandId,
   stakeholderId,
   user,
 ) => {
   const apiService = new ApiService();
-  const url = `${SERVICE}/${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/stakeholders/${stakeholderId}`;
+  const url = `${SERVICE}/${MUNICIPALITY_ID}/${CASEDATA_NAMESPACE}/errands/${errandId}/stakeholders/${stakeholderId}`;
   const res = await apiService.get<StakeholderDTO>({ url }, user);
   return res.data;
 };

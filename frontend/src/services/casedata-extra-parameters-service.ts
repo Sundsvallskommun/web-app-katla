@@ -207,7 +207,7 @@ export const extraParametersToUppgiftMapper = (
   return obj;
 };
 
-export const saveExtraParameters = (municipalityId: string, data: ExtraParameter[], errand: IErrand) => {
+export const saveExtraParameters = (data: ExtraParameter[], errand: IErrand) => {
   const sanitizedData: ExtraParameter[] = data.map((param) => ({
     ...param,
     values: (param.values ?? [])
@@ -241,7 +241,7 @@ export const saveExtraParameters = (municipalityId: string, data: ExtraParameter
     .concat(sanitizedData);
 
   return apiService.patch<unknown, { id: string; extraParameters: ExtraParameter[] }>(
-    `casedata/${municipalityId}/errands/${errand.id}`,
+    `casedata/errands/${errand.id}`,
     {
       id: errand.id.toString(),
       extraParameters: mergedExtraParameters,

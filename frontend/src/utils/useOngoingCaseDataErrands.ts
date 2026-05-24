@@ -36,7 +36,6 @@ export const useOngoingCaseDataErrands = () => {
   const { sortOrder, sortColumn, pageSize, page } = watchTable();
 
   const {
-    municipalityId,
     administrators,
     selectedErrandStatuses,
     setSelectedErrandStatuses,
@@ -65,7 +64,7 @@ export const useOngoingCaseDataErrands = () => {
 
   const [shouldFetchErrands, setShouldFetchErrands] = useState(true);
 
-  const errandsData = useErrands(municipalityId, page, pageSize, filterObject, sortObject);
+  const errandsData = useErrands(page, pageSize, filterObject, sortObject);
 
   useEffect(() => {
     if (errandsData) {

@@ -3,9 +3,9 @@ import { IErrand } from '@interfaces/errand';
 import { Notification } from '@interfaces/notification';
 import { apiService } from '@services/api-service';
 
-export const getCasedataNotifications: (municipalityId: string) => Promise<Notification[]> = (municipalityId) => {
+export const getCasedataNotifications: () => Promise<Notification[]> = () => {
   return apiService
-    .get<Notification[]>(`casedatanotifications/${municipalityId}`)
+    .get<Notification[]>(`casedatanotifications`)
     .then((res) => {
       return res.data;
     })
@@ -16,9 +16,8 @@ export const getCasedataNotifications: (municipalityId: string) => Promise<Notif
 };
 
 export const acknowledgeCasedataNotification: (
-  municipalityId: string,
   notification: Notification
-) => Promise<boolean> = (municipalityId, notification) => {
+) => Promise<boolean> = (notification) => {
   if (!notification.id) {
     return Promise.reject('Missing id on notification');
   }
@@ -33,7 +32,7 @@ export const acknowledgeCasedataNotification: (
     acknowledged: true,
   };
   return apiService
-    .patch<boolean, PatchNotificationDto>(`casedatanotifications/${municipalityId}`, data)
+    .patch<boolean, PatchNotificationDto>(`casedatanotifications`, data)
     .then(() => {
       return true;
     })
@@ -43,15 +42,14 @@ export const acknowledgeCasedataNotification: (
     });
 };
 
-export const globalAcknowledgeCasedataNotification: (errand: IErrand, municipalityId: string) => Promise<boolean> = (
-  errand,
-  municipalityId
+export const globalAcknowledgeCasedataNotification: (errand: IErrand) => Promise<boolean> = (
+  errand
 ) => {
   if (!errand.id) {
     return Promise.reject('Missing id on notification');
   }
   return apiService
-    .put(`casedatanotifications/${municipalityId}/${errand.id}/global-acknowledged`, {})
+    .put(`casedatanotifications/${errand.id}/global-acknowledged`, {})
     .then(() => {
       return true;
     })

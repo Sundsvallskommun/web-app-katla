@@ -12,7 +12,7 @@ const FileUploadComponent: React.FC = () => {
   const removeConfirm = useConfirm();
   const toastMessage = useSnackbar();
 
-  const { municipalityId, errand } = useContext(AppContext);
+  const { errand } = useContext(AppContext);
 
   const files: UploadFile[] = watch('attachments') || [];
 
@@ -43,7 +43,7 @@ const FileUploadComponent: React.FC = () => {
     );
     if (!confirmed) return;
 
-    await deleteAttachment(municipalityId, errandIdNum, file);
+    await deleteAttachment(errandIdNum, file);
     setValue('attachments', updatedFiles);
   };
 
@@ -108,8 +108,7 @@ const FileUploadComponent: React.FC = () => {
                       return;
                     }
                     editAttachment(
-                      municipalityId,
-                      errand.id,
+                      Number(errand.id),
                       file.id,
                       `${file.meta.name}.${file.meta.ending}`,
                       file.meta.category as string

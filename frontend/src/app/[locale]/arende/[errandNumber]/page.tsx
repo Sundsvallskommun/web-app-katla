@@ -25,19 +25,19 @@ const Arende: React.FC = () => {
 
   const pathName = usePathname();
   const { isMaxMediumDevice } = useThemeQueries();
-  const errandNumber = pathName.split('/')[3];
+  const errandNumber = pathName.split('/')[2];
   useEffect(() => {
     const initializeData = async () => {
       try {
         setIsLoading(true);
 
-        const municipality = process.env.NEXT_PUBLIC_MUNICIPALITY_ID || pathName.split('/')[2];
+        const municipality = process.env.NEXT_PUBLIC_MUNICIPALITY_ID || '';
         setMunicipalityId(municipality);
 
         const user = await getMe();
         setUser(user);
 
-        const res = await getErrandByErrandNumber(municipality, errandNumber);
+        const res = await getErrandByErrandNumber(errandNumber);
 
         if (res.error) {
           setForbidden(true);

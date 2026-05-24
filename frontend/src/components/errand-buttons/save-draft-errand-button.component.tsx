@@ -13,7 +13,7 @@ import { useFormContext, UseFormReturn } from 'react-hook-form';
 export const DraftErrandButton: React.FC = () => {
   const toastMessage = useSnackbar();
   const router = useRouter();
-  const { municipalityId, setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
+  const { setErrand, isLoading, setIsLoading, errand } = useContext(AppContext);
   const { getValues, reset }: UseFormReturn<IErrand, unknown, undefined> = useFormContext();
   const handleRemoveDeletedStakeholders = useRemoveDeletedStakeholders();
 
@@ -27,17 +27,16 @@ export const DraftErrandButton: React.FC = () => {
     try {
       await handleRemoveDeletedStakeholders(data);
 
-      const res = await saveErrand(data, municipalityId);
+      const res = await saveErrand(data);
       if (!res.errandSuccessful) {
         throw new Error('Errand could not be registered');
       }
 
       if (res.errandId) {
-        const e = await getErrand(municipalityId, res.errandId);
+        const e = await getErrand(res.errandId);
         if (e.errand && e.errand.errandNumber) {
           if (newAttachments.length > 0) {
             await sendAttachments(
-              municipalityId,
               e.errand.id,
               e.errand.errandNumber,
               newAttachments
@@ -55,13 +54,7 @@ export const DraftErrandButton: React.FC = () => {
             await Promise.all(
               existingAttachments.map(async (attachment) => {
                 if (e.errand && attachment.id && attachment.meta.name && attachment.meta.category) {
-                  await editAttachment(
-                    municipalityId,
-                    e.errand.id,
-                    attachment.id,
-                    attachment.meta.name,
-                    attachment.meta.category
-                  );
+                  await editAttachment(e.errand.id, attachment.id, attachment.meta.name, attachment.meta.category);
                 }
               })
             );
@@ -69,7 +62,7 @@ export const DraftErrandButton: React.FC = () => {
 
           setErrand(e.errand);
           reset(e.errand);
-          router.push(`/arende/${municipalityId}/${e.errand.errandNumber}`);
+          router.push(`/arende/${e.errand.errandNumber}`);
         }
         toastMessage({
           position: 'bottom',
@@ -94,7 +87,7 @@ export const DraftErrandButton: React.FC = () => {
   return (
     <Button
       data-cy="save-draft-errand-button"
-      variant={errand.created === undefined ? "primary" : "secondary"}
+      variant={errand.created === undefined ? 'primary' : 'secondary'}
       onClick={onSubmit}
       disabled={isLoading}
       rightIcon={isLoading ? <Spinner size={2} /> : undefined}

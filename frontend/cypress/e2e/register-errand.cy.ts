@@ -237,7 +237,7 @@ describe('Skicka in ärende-sida', () => {
   });
 
   it('save draft', () => {
-    cy.intercept('POST', '**/api/casedata/2281/errands', mockErrands_FT_draft).as('saveDraft');
+    cy.intercept('POST', '**/api/casedata/errands', mockErrands_FT_draft).as('saveDraft');
     cy.intercept('GET', '**/attachments', {
       statusCode: 200,
       body: {
@@ -245,10 +245,10 @@ describe('Skicka in ärende-sida', () => {
         message: 'success',
       },
     }).as('getAttachments');
-    cy.intercept('GET', '**/api/casedata/2281/errand/2557', mockErrands_FT_draft).as('getErrand');
-    cy.intercept('GET', '**/api/casedata/2281/errand/errandNumber/**', mockErrands_FT_draft).as('getByNumber');
+    cy.intercept('GET', '**/api/casedata/errand/2557', mockErrands_FT_draft).as('getErrand');
+    cy.intercept('GET', '**/api/casedata/errand/errandNumber/**', mockErrands_FT_draft).as('getByNumber');
 
-    cy.intercept('PATCH', '**/api/casedata/2281/errands/2557', {
+    cy.intercept('PATCH', '**/api/casedata/errands/2557', {
       statusCode: 200,
       body: {
         message: 'success',
@@ -264,7 +264,7 @@ describe('Skicka in ärende-sida', () => {
     cy.wait('@saveDraft');
     cy.wait('@getErrand');
 
-    cy.url().should('include', `/arende/2281/${mockErrands_FT_draft.data.errandNumber}`);
+    cy.url().should('include', `/arende/${mockErrands_FT_draft.data.errandNumber}`);
     cy.contains('Ärendet sparades som utkast').should('exist');
 
     cy.get('[data-cy="errand-casetype-select"]').should('not.be.disabled');

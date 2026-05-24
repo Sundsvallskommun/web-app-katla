@@ -1,6 +1,7 @@
 import { Conversation, Message, PageMessage } from '@/data-contracts/case-data/data-contracts';
 import { PortalPersonData } from '@/data-contracts/employee/data-contracts';
 import { apiURL } from '@/utils/util';
+import { MUNICIPALITY_ID } from '@/config';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import authMiddleware from '@middlewares/auth.middleware';
 import ApiService from '@services/api.service';
@@ -20,41 +21,37 @@ export class CaseDataConversationController {
   SERVICE = apiServiceName('case-data');
   CITIZEN_SERVICE = apiServiceName('citizen');
   EMPLOYEE_SERVICE = apiServiceName('employee');
+  private readonly municipalityId = MUNICIPALITY_ID;
 
-  @Get('/casedata/:municipalityId/namespace/errands/:errandId/communication/conversations')
+  @Get('/casedata/namespace/errands/:errandId/communication/conversations')
   @OpenAPI({ summary: 'Return all conversations by errandId' })
   @UseBefore(authMiddleware)
-  async returnAllConversations(
-    @Req() req: RequestWithUser,
-    @Param('errandId') errandId: string,
-    @Param('municipalityId') municipalityId: string,
-  ): Promise<ResponseData> {
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations`;
+  async returnAllConversations(@Req() req: RequestWithUser, @Param('errandId') errandId: string): Promise<ResponseData> {
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations`;
     const baseURL = apiURL(this.SERVICE);
     const res = await this.apiService.get<Conversation[]>({ url, baseURL }, req.user);
 
-    const katlaConversations = res.data.filter((c) => c.type === 'INTERNAL' && c.relationIds.length === 0)
+    const katlaConversations = res.data.filter(c => c.type === 'INTERNAL' && c.relationIds.length === 0);
 
     return { data: katlaConversations, message: 'success' } as ResponseData;
   }
 
-  @Get('/casedata/:municipalityId/namespace/errands/:errandId/communication/conversations/:conversationId/messages')
+  @Get('/casedata/namespace/errands/:errandId/communication/conversations/:conversationId/messages')
   @OpenAPI({ summary: 'Return all messages by conversationId' })
   @UseBefore(authMiddleware)
   async returnAllMessages(
     @Req() req: RequestWithUser,
     @Param('errandId') errandId: string,
-    @Param('municipalityId') municipalityId: string,
     @Param('conversationId') conversationId: string,
   ): Promise<ResponseData> {
     const baseURL = apiURL(this.SERVICE);
-    let url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations`;
+    let url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations`;
     const resConversation = await this.apiService.get<Conversation[]>({ url, baseURL }, req.user);
 
     const conversation = resConversation.data.find((c: any) => c.id === conversationId);
     const topic = conversation ? conversation.topic : undefined;
 
-    url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations/${conversationId}/messages`;
+    url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations/${conversationId}/messages`;
     const resPageMessage = await this.apiService.get<PageMessage>({ url, baseURL }, req.user);
 
     const mappedMessages = await Promise.all(
@@ -76,7 +73,7 @@ export class CaseDataConversationController {
             lastName = req.user.lastName;
             direction = 'OUTBOUND';
           } else {
-            const adAccountUrl = `${this.EMPLOYEE_SERVICE}/${municipalityId}/portalpersondata/PERSONAL/${msg?.createdBy?.value}`;
+            const adAccountUrl = `${this.EMPLOYEE_SERVICE}/${this.municipalityId}/portalpersondata/PERSONAL/${msg?.createdBy?.value}`;
             const res = await this.apiService.get<PortalPersonData>({ url: adAccountUrl }, req.user);
             firstName = res.data.givenname;
             lastName = res.data.lastname;
@@ -85,7 +82,7 @@ export class CaseDataConversationController {
         }
 
         if (msg?.createdBy?.type === 'PARTY_ID') {
-          const adAccountUrl = `${this.CITIZEN_SERVICE}/${municipalityId}/${msg?.createdBy?.value}`;
+          const adAccountUrl = `${this.CITIZEN_SERVICE}/${this.municipalityId}/${msg?.createdBy?.value}`;
           const res = await this.apiService.get<any>({ url: adAccountUrl }, req.user);
           firstName = res.data.givenname;
           lastName = res.data.lastname;
@@ -117,16 +114,15 @@ export class CaseDataConversationController {
     return { data: mappedMessages, message: 'success' } as ResponseData;
   }
 
-  @Post('/:municipalityId/namespace/errand/:errandId/communication/conversations')
+  @Post('/casedata/namespace/errand/:errandId/communication/conversations')
   @OpenAPI({ summary: 'Create new conversation' })
   @UseBefore(authMiddleware)
   async createConversation(
     @Req() req: RequestWithUser,
     @Param('errandId') errandId: string,
-    @Param('municipalityId') municipalityId: string,
     @Body() conversation: Conversation,
   ): Promise<{ data: any; message: string }> {
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations`;
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations`;
     const baseURL = apiURL(this.SERVICE);
     const response = await this.apiService.post<any, any>({ url, baseURL, data: conversation }, req.user).catch(e => {
       console.log('Something went wrong when creating conversation: ' + e);
@@ -135,13 +131,12 @@ export class CaseDataConversationController {
     return { data: response.data, message: `Conversation created` };
   }
 
-  @Post('/:municipalityId/namespace/errand/:errandId/communication/conversations/:conversationId/messages')
+  @Post('/casedata/namespace/errand/:errandId/communication/conversations/:conversationId/messages')
   @OpenAPI({ summary: 'Create new message' })
   @UseBefore(authMiddleware)
   async sendInternalMessage(
     @Req() req: RequestWithUser,
     @Param('errandId') errandId: string,
-    @Param('municipalityId') municipalityId: string,
     @Param('conversationId') conversationId: string,
     @UploadedFiles('attachments', { options: fileUploadOptions, required: false }) files: Express.Multer.File[],
     @Body() body: any,
@@ -162,7 +157,7 @@ export class CaseDataConversationController {
       attachments: attachments,
     };
 
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations/${conversationId}/messages`;
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations/${conversationId}/messages`;
     const baseURL = apiURL(this.SERVICE);
 
     const response = await this.apiService
@@ -172,20 +167,17 @@ export class CaseDataConversationController {
     return { data: { response, attachments }, message: 'Message created' };
   }
 
-  @Get(
-    '/casedata/:municipalityId/namespace/errands/:errandId/communication/conversations/:conversationId/messages/:messageId/attachments/:attachmentId',
-  )
+  @Get('/casedata/namespace/errands/:errandId/communication/conversations/:conversationId/messages/:messageId/attachments/:attachmentId')
   @OpenAPI({ summary: 'Get an attachment' })
   @UseBefore(authMiddleware)
   async getAttachment(
     @Req() req: RequestWithUser,
     @Param('errandId') errandId: string,
-    @Param('municipalityId') municipalityId: string,
     @Param('conversationId') conversationId: string,
     @Param('messageId') messageId: string,
     @Param('attachmentId') attachmentId: string,
   ): Promise<{ data: any; message: string }> {
-    const url = `${municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
+    const url = `${this.municipalityId}/${process.env.CASEDATA_NAMESPACE}/errands/${errandId}/communication/conversations/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
     const baseURL = apiURL(this.SERVICE);
     const response = await this.apiService.get<any>({ url, baseURL, responseType: 'arraybuffer' }, req.user).catch(e => {
       console.log('Something went wrong when getting conversation attachment: ' + e);
