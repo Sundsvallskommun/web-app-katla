@@ -1,10 +1,9 @@
-import { IErrand } from "@interfaces/errand";
-import { MessageNode } from "@interfaces/message";
-import { getOwnerStakeholder } from "@services/casedata-stakeholder-service";
-import sanitized from "@services/sanitizer-service";
+import { IErrand } from '@interfaces/errand';
+import { MessageNode } from '@interfaces/message';
+import { getOwnerStakeholder } from '@services/casedata-stakeholder-service';
+import sanitized from '@services/sanitizer-service';
 
-
-const getMessageSourceLabel = (message: MessageNode, errand: IErrand): string =>  {
+const getMessageSourceLabel = (message: MessageNode, errand: IErrand): string => {
   if (!message) return '';
 
   if (message.messageType === 'MINASIDOR' && message.direction === 'OUTBOUND') {
