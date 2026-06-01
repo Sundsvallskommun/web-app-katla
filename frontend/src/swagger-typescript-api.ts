@@ -30,13 +30,13 @@ const main = async () => {
 
   const { stdout, stderr } = await execFileAsync('npx', [
     'swagger-typescript-api',
-    '--modular',
-    '-p',
+    'generate',
+    '--path',
     specPath,
     '-o',
     `${PATH_TO_OUTPUT_DIR}/backend`,
+    '--modular',
     '--no-client',
-    '--clean-output',
     '--extract-enums',
   ]);
 

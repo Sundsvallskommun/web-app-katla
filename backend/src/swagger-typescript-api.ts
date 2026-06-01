@@ -20,7 +20,8 @@ type Api = { name: string; version: string };
  * Download the OpenAPI spec for a single API and generate its data contracts.
  * Download and generation are sequenced so the generator never reads a
  * half-written (truncated) spec. Specs are stored as YAML because some upstream
- * APIs return YAML even from their `/api-docs` endpoint.
+ * APIs return YAML even from their `/api-docs` endpoint, and the downloaded spec
+ * is deleted afterwards so it never lingers next to the generated contracts.
  */
 const generateForApi = async ({ name, version }: Api): Promise<void> => {
   const outputDir = `${PATH_TO_OUTPUT_DIR}/${name}`;
@@ -29,9 +30,9 @@ const generateForApi = async ({ name, version }: Api): Promise<void> => {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  try {
-    const specPath = `${outputDir}/swagger.yaml`;
+  const specPath = `${outputDir}/swagger.yaml`;
 
+  try {
     // `--fail` makes curl exit non-zero on HTTP errors instead of writing an
     // error page to disk and having the generator choke on it later.
     await execFileAsync('curl', [
@@ -60,6 +61,10 @@ const generateForApi = async ({ name, version }: Api): Promise<void> => {
     if (stderr) console.log(`stderr: ${stderr}`);
   } catch (error) {
     console.log(`error (${name} ${version}): ${error.message}`);
+  } finally {
+    // Remove the downloaded spec so it doesn't pollute the tree (no tsc
+    // excludes or gitignore entries needed) — runs even if generation failed.
+    fs.rmSync(specPath, { force: true });
   }
 };
 
