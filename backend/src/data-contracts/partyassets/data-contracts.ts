@@ -1,0 +1,219 @@
+/* eslint-disable */
+/* tslint:disable */
+// @ts-nocheck
+/*
+ * ---------------------------------------------------------------
+ * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
+ * ##                                                           ##
+ * ## AUTHOR: acacode                                           ##
+ * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
+ * ---------------------------------------------------------------
+ */
+
+/** Status model */
+export enum Status {
+  ACTIVE = "ACTIVE",
+  DRAFT = "DRAFT",
+  EXPIRED = "EXPIRED",
+  BLOCKED = "BLOCKED",
+  TEMPORARY = "TEMPORARY",
+  REPLACED = "REPLACED",
+}
+
+export interface Problem {
+  /** @format uri */
+  instance?: string;
+  /** @format uri */
+  type?: string;
+  title?: string;
+  detail?: string;
+  /** @format int32 */
+  status?: number;
+}
+
+export interface ConstraintViolationProblem {
+  /** @format uri */
+  type?: string;
+  /** @format int32 */
+  status?: number;
+  violations?: Violation[];
+  title?: string;
+  /** @format uri */
+  instance?: string;
+  detail?: string;
+  causeAsProblem?: ThrowableProblem;
+}
+
+export interface ThrowableProblem {
+  /** @format uri */
+  type?: string;
+  title?: string;
+  /** @format int32 */
+  status?: number;
+  detail?: string;
+  /** @format uri */
+  instance?: string;
+  causeAsProblem?: any;
+}
+
+export interface Violation {
+  field?: string;
+  message?: string;
+}
+
+export interface AssetCreateRequest {
+  /** External asset id (e.g. PRH-123456789) used as an identifier by external systems */
+  assetId?: string;
+  /** Source of origin for the asset */
+  origin?: string;
+  /** PartyId */
+  partyId: string;
+  /**
+   * Asset type
+   * @minLength 1
+   */
+  type: string;
+  /**
+   * Issued date
+   * @format date
+   */
+  issued: string;
+  /**
+   * Valid to date
+   * @format date
+   */
+  validTo?: string;
+  /** Asset status */
+  status: Status;
+  /** Status reason */
+  statusReason?: string;
+  /** Asset description */
+  description?: string;
+  /** Additional parameters */
+  additionalParameters?: Record<string, string>;
+  /** JSON parameters */
+  jsonParameters?: AssetJsonParameter[];
+}
+
+export interface AssetJsonParameter {
+  /**
+   * Parameter key
+   * @minLength 1
+   */
+  key: string;
+  /**
+   * Parameter value with the JSON structure
+   * @example {"firstName":"Joe","lastName":"Doe"}
+   */
+  value: JsonNode;
+  /**
+   * Schema ID
+   * @minLength 1
+   */
+  schemaId: string;
+}
+
+export interface JsonNode {
+  empty?: boolean;
+  array?: boolean;
+  null?: boolean;
+  object?: boolean;
+  float?: boolean;
+  binary?: boolean;
+  floatingPointNumber?: boolean;
+  short?: boolean;
+  int?: boolean;
+  long?: boolean;
+  double?: boolean;
+  bigDecimal?: boolean;
+  bigInteger?: boolean;
+  /** @deprecated */
+  textual?: boolean;
+  nodeType?: JsonNodeNodeTypeEnum;
+  valueNode?: boolean;
+  container?: boolean;
+  missingNode?: boolean;
+  pojo?: boolean;
+  integralNumber?: boolean;
+  string?: boolean;
+  boolean?: boolean;
+  number?: boolean;
+  embeddedValue?: boolean;
+}
+
+export interface AssetUpdateRequest {
+  /** Asset status */
+  status?: Status;
+  /** Status reason */
+  statusReason?: string;
+}
+
+export interface DraftAssetUpdateRequest {
+  /**
+   * Issued date
+   * @format date
+   */
+  issued?: string;
+  /**
+   * Valid to date
+   * @format date
+   */
+  validTo?: string;
+  /** If true, validTo will be cleared (asset becomes indefinite). Takes precedence over validTo when both are supplied. */
+  indefinitely?: boolean;
+  /** Asset status */
+  status?: Status;
+  /** Status reason */
+  statusReason?: string;
+  /** Additional parameters */
+  additionalParameters?: Record<string, string>;
+  /** JSON parameters */
+  jsonParameters?: AssetJsonParameter[];
+}
+
+export interface Asset {
+  /** Unique id of asset */
+  id?: string;
+  /** External asset id (e.g. PRH-123456789) used as an identifier by external systems */
+  assetId?: string;
+  /** Source of origin for the asset */
+  origin?: string;
+  /** PartyId */
+  partyId?: string;
+  /** Asset type */
+  type?: string;
+  /**
+   * Issued date
+   * @format date
+   */
+  issued?: string;
+  /**
+   * Valid to date
+   * @format date
+   */
+  validTo?: string;
+  /** Asset status */
+  status?: Status;
+  /** Status reason */
+  statusReason?: string;
+  /** Asset description */
+  description?: string;
+  /** Additional parameters */
+  additionalParameters?: Record<string, string>;
+  /** JSON parameters */
+  jsonParameters?: AssetJsonParameter[];
+  /** Id of the asset this asset replaces */
+  replacesId?: string;
+}
+
+export enum JsonNodeNodeTypeEnum {
+  ARRAY = "ARRAY",
+  BINARY = "BINARY",
+  BOOLEAN = "BOOLEAN",
+  MISSING = "MISSING",
+  NULL = "NULL",
+  NUMBER = "NUMBER",
+  OBJECT = "OBJECT",
+  POJO = "POJO",
+  STRING = "STRING",
+}
