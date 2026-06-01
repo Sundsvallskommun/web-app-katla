@@ -17,7 +17,8 @@ type Api = { name: string; version: string };
 /**
  * Download the OpenAPI spec for a single API and generate its data contracts.
  * Download and generation are sequenced so the generator never reads a
- * half-written (truncated) swagger.json. Failures are isolated per API.
+ * half-written (truncated) spec. Specs are stored as YAML because some upstream
+ * APIs return YAML even from their `/api-docs` endpoint.
  */
 const generateForApi = async ({ name, version }: Api): Promise<void> => {
   const outputDir = `${PATH_TO_OUTPUT_DIR}/${name}`;
@@ -27,13 +28,15 @@ const generateForApi = async ({ name, version }: Api): Promise<void> => {
   }
 
   try {
+    const specPath = `${outputDir}/swagger.yaml`;
+
     // `--fail` makes curl exit non-zero on HTTP errors instead of writing an
     // error page to disk and having the generator choke on it later.
-    await execAsync(`curl --fail --silent --show-error -o ${outputDir}/swagger.json ${API_BASE_URL}/${name}/${version}/api-docs`);
+    await execAsync(`curl --fail --silent --show-error -o ${specPath} ${API_BASE_URL}/${name}/${version}/api-docs`);
     console.log(`- ${name} ${version}`);
 
     const { stdout, stderr } = await execAsync(
-      `npx swagger-typescript-api generate --path ${outputDir}/swagger.json -o ${outputDir} --modular --no-client --extract-enums`,
+      `npx swagger-typescript-api generate --path ${specPath} -o ${outputDir} --modular --no-client --extract-enums`,
     );
 
     if (stdout) console.log(`Data-contract-generator: ${stdout}`);
