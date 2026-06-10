@@ -1,6 +1,6 @@
 import { CASEDATA_NAMESPACE } from '@/config';
 import { apiServiceName } from '@/config/api-config';
-import { Errand as ErrandDTO } from '@/data-contracts/case-data/data-contracts';
+import { AttachmentChannelEnum, Errand as ErrandDTO } from '@/data-contracts/case-data/data-contracts';
 import { Attachment, CreateAttachmentDto } from '@/interfaces/attachment.interface';
 import { fileUploadOptions } from '@/utils/fileUploadOptions';
 import { logger } from '@/utils/logger';
@@ -43,9 +43,10 @@ export class CaseDataAttachmentController {
       category: attachmentData.category,
       extension: attachmentData.extension,
       mimeType: attachmentData.mimeType,
-      name: attachmentData.name,
+      name: attachmentData.name + "." + attachmentData.extension,
       note: attachmentData.note,
       errandNumber: attachmentData.errandNumber,
+      channel: AttachmentChannelEnum.ESERVICE,
     };
     const response = await this.apiService.post<ErrandDTO, CreateAttachmentDto>({ url, baseURL, data }, req.user).catch(e => {
       logger.error('Attachment post error:', e);
