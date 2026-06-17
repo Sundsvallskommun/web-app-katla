@@ -1,6 +1,7 @@
 import { ErrandDisclosure } from '@components/errand-disclosures/errand-disclosure.component';
 import { buildRenderableFields } from '@components/field-rendering/renderable-fields';
 import { AppContext } from '@contexts/app-context-interface';
+import { Channels } from '@interfaces/channels';
 import { IErrand } from '@interfaces/errand';
 import { Priority } from '@interfaces/priority';
 import {
@@ -86,7 +87,12 @@ export const MedicalOpinion: React.FC = () => {
     [fields]
   );
 
-  if (fields.length === 0) {
+  // Visa "Medicinskt utlåtande" som egen sektion endast när ärendet kommit in via
+  // katla-färdtjänsten. För övriga kanaler visas fälten i stället under "Yttre omständigheter".
+  // Hooks ovan körs fortfarande (default-värden + palliativ prioritetslogik) oavsett kanal.
+  const isKatlaChannel = errand?.channel === Channels.ESERVICE_KATLA;
+
+  if (fields.length === 0 || !isKatlaChannel) {
     return null;
   }
 

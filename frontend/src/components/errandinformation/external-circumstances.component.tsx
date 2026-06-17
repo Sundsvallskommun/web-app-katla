@@ -1,6 +1,7 @@
 import { ErrandDisclosure } from '@components/errand-disclosures/errand-disclosure.component';
 import { buildRenderableFields } from '@components/field-rendering/renderable-fields';
 import { AppContext } from '@contexts/app-context-interface';
+import { Channels } from '@interfaces/channels';
 import { IErrand } from '@interfaces/errand';
 import {
   EXTRAPARAMETER_SEPARATOR,
@@ -23,7 +24,12 @@ export const ExternalCircumstances: React.FC = () => {
       caseType: caseType || '',
       extraParameters: errand?.extraParameters ?? [],
     });
-    const f = caseType ? (uppgifter[caseType] ?? []).filter((f) => f.section === 'Yttre omständigheter') : [];
+    // För andra kanaler än katla-färdtjänsten lever även "Medicinskt utlåtande"-fälten
+    // under "Yttre omständigheter" (den egna medicinska sektionen visas då inte).
+    const isKatlaChannel = errand?.channel === Channels.ESERVICE_KATLA;
+    const sectionsToShow =
+      isKatlaChannel ? ['Yttre omständigheter'] : ['Yttre omständigheter', 'Medicinskt utlåtande'];
+    const f = caseType ? (uppgifter[caseType] ?? []).filter((f) => sectionsToShow.includes(f.section)) : [];
     setFields(f);
 
     f?.forEach((f) => {
