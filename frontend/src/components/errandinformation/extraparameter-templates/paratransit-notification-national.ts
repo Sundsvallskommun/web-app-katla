@@ -128,6 +128,17 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
     repeatableGroup: journeyFieldsGroup,
   },
   {
+    field: 'personal.maxWalkingDistance',
+    value: '',
+    label: 'Hur långt klarar den sökande att gå på plan mark? Ange i antalet meter.',
+    description: '',
+    formField: {
+      type: 'textarea',
+    },
+    section: 'Yttre omständigheter',
+    required: true,
+  },
+  {
     field: 'personal.mobilityAidNeeded',
     value: '',
     label: 'Behöver den sökande förflyttningshjälpmedel?',
@@ -143,7 +154,7 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
   {
     field: 'personal.mobilityAids',
     value: [],
-    label: 'Ange ett eller flera förflyttningshjälpmedel som den sökande är beroende av för att kunna genomföra resan',
+    label: 'Välj förflyttningshjälpmedel som den sökande är beroende av under själva resan',
     formField: {
       type: 'combobox',
       options: [
@@ -153,6 +164,9 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
         { label: 'Komfortrullstol eller motsvarande', value: 'COMFORT_WHEELCHAIR', name: 'mobilityAids' },
         { label: 'Elrullstol', value: 'ELECTRIC_WHEELCHAIR', name: 'mobilityAids' },
         { label: 'Ledarhund', value: 'GUIDE_DOG', name: 'mobilityAids' },
+        { label: 'Vagn', value: 'TROLLEY', name: 'mobilityAids' },
+        { label: 'Syrgas', value: 'OXYGEN', name: 'mobilityAids' },
+        { label: 'Bälteskudde', value: 'BELT_PILLOW', name: 'mobilityAids' },
       ],
     },
     section: 'Yttre omständigheter',
@@ -166,24 +180,21 @@ export const notificationNational_UppgiftFieldTemplate: UppgiftFieldExtended[] =
     ],
   },
   {
-    field: 'personal.walkingDistance',
+    field: 'personal.wheelchairDimensions',
     value: '',
-    label: 'Hur långt klarar den sökande att gå på plan mark? Ange i antalet meter',
+    label: 'Ange information om rullstolens yttermått, längd och bredd, samt totalvikten när personen sitter i rullstolen',
     formField: {
       type: 'textarea',
     },
     section: 'Yttre omständigheter',
-    dependsOnLogic: 'OR',
     dependsOn: [
       {
-        field: 'personal.mobilityAids',
-        value: ['WALKER', 'CRUTCH_CANE_POLES'],
-        validationMessage: 'Vänligen ange hur långt du kan gå på plan mark i meter (minst 4 tecken).',
+        field: 'personal.mobilityAidNeeded',
+        value: 'YES',
       },
       {
-        field: 'personal.mobilityAidNeeded',
-        value: 'NO',
-        validationMessage: 'Vänligen ange hur långt du kan gå på plan mark i meter (minst 4 tecken).',
+        field: 'personal.mobilityAids',
+        value: ['COMFORT_WHEELCHAIR', 'ELECTRIC_WHEELCHAIR'],
       },
     ],
   },

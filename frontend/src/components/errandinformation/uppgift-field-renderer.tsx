@@ -1,6 +1,7 @@
 import { AppContext } from '@contexts/app-context-interface';
 import { EXTRAPARAMETER_SEPARATOR, OptionBase, UppgiftField } from '@services/casedata-extra-parameters-service';
 import {
+  Alert,
   Checkbox,
   Combobox,
   DatePicker,
@@ -13,7 +14,7 @@ import {
   useThemeQueries,
 } from '@sk-web-gui/react';
 import { isErrandReadOnly } from '@utils/errand-utils';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { get, useFormContext, useWatch } from 'react-hook-form';
 
 export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field }) => {
@@ -31,6 +32,22 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const dependencyNames = (field.dependsOn ?? []).map((d) => d.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR));
   // eslint-disable-next-line  react-hooks/rules-of-hooks
   const dependencyValues = dependencyNames.length > 0 ? useWatch({ control, name: dependencyNames }) : undefined;
+
+  const disabledByName = field.disabledBy?.field.replaceAll('.', EXTRAPARAMETER_SEPARATOR);
+  // eslint-disable-next-line  react-hooks/rules-of-hooks
+  const disabledByValue = disabledByName ? useWatch({ control, name: disabledByName }) : undefined;
+  const isDisabledByField = field.disabledBy
+    ? Array.isArray(disabledByValue)
+      ? disabledByValue.includes(field.disabledBy.value)
+      : disabledByValue === field.disabledBy.value
+    : false;
+
+  useEffect(() => {
+    if (isDisabledByField) {
+      setValue(name, '', { shouldDirty: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDisabledByField]);
 
   const error = get(errors, name)?.message;
   const { isMaxMediumDevice } = useThemeQueries();
@@ -89,7 +106,7 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   const baseRequired = isOptional ? false : isRequired || isTypeRequiredByDefault;
   const isRequiredField = baseRequired || hasConditionalRequirement;
 
-  const formFieldClassName = 'flex flex-col w-full pt-8';
+  const formFieldClassName = 'flex flex-col w-full';
   const fieldDescriptionClassName = 'pt-8 w-full flex flex-col text-md leading-[1.8rem] font-normal font-[Arial]';
 
   const ErrorMessage = ({ error }: { error?: string }) =>
@@ -161,10 +178,10 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
   };
 
   return (
-    <FormControl disabled={isErrandReadOnly(errand)} className="flex flex-col gap-2 items-start justify-start w-full">
+    <FormControl disabled={isErrandReadOnly(errand)} className={`flex flex-col items-start justify-start w-full ${field.label === "Datum då beslutet upphör" || field.label === "" ? "-mt-20" : ""}`}>
       <FormLabel className="self-stretch justify-center text-dark-primary text-md leading-24 ">
         {field.label}
-        {isRequiredField && <span className="text-error ml-4">*</span>}
+        {isRequiredField && field.label !== '' && <span className="text-error ml-4">*</span>}
       </FormLabel>
 
       {field.formField.type === 'text' && (
@@ -299,15 +316,33 @@ export const UppgiftFieldRenderer: React.FC<{ field: UppgiftField }> = ({ field 
             type="date"
             data-cy={`uppgift-field-${field.field}`}
             {...register(name)}
+            disabled={isDisabledByField}
             onChange={(e) => {
               const selectedDate = e.target?.value ?? '';
               setValue(name, selectedDate, { shouldDirty: true });
               validateAndSetError(setError, clearErrors, name, selectedDate);
             }}
-            className="w-full"
+            className={field.label === "Datum då beslutet upphör" ? "w-[25rem]" : "w-full"}
             aria-label={field.label}
           />
           {field.description && <p className={fieldDescriptionClassName}>{field.description}</p>}
+          <ErrorMessage error={error} />
+        </div>
+      )}
+
+      {field.formField.type === 'info' && (
+        <div className={formFieldClassName}>
+          {field.description && (
+            <Alert type={field.formField.alertType ?? 'info'}>
+              <Alert.Icon />
+              <Alert.Content>
+                <Alert.Content.Description>{field.description}</Alert.Content.Description>
+              </Alert.Content>
+            </Alert>
+          )}
+          {field.dependsOn?.some((dep) => dep.validationMessage) && (
+            <input type="hidden" {...register(name, validationRules)} />
+          )}
           <ErrorMessage error={error} />
         </div>
       )}

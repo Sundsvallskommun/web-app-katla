@@ -4,6 +4,8 @@ import validateEnv from '@utils/validateEnv';
 import { UserController } from './controllers/user.controller';
 import { HealthController } from './controllers/health.controller';
 import { AddressController } from './controllers/address.controller';
+import { PartyAssetsController } from './controllers/partyassets.controller';
+import { SchemaController } from './controllers/schema.controller';
 import { CaseDataAttachmentController } from './controllers/casedata/casedata-attachment.controller';
 import { CaseDataDecisionsController } from './controllers/casedata/casedata-decision.controller';
 import { CaseDataErrandController } from './controllers/casedata/casedata-errand.controller';
@@ -20,6 +22,8 @@ const app = new App([
   UserController,
   HealthController,
   AddressController,
+  PartyAssetsController,
+  SchemaController,
   CaseDataAttachmentController,
   CaseDataDecisionsController,
   CaseDataErrandController,

@@ -7,6 +7,7 @@ import { isErrandReadOnly } from '@utils/errand-utils';
 import { useContext, useState } from 'react';
 import { StakeholderFormModal } from './stakeholder-form.component';
 import { CasedataOwnerOrContact } from '@interfaces/stakeholder';
+import { PartyAssetsSection } from './partyassets/partyassets-section.component';
 
 export const DisplayCard: React.FC<{
   person: CasedataOwnerOrContact;
@@ -53,6 +54,13 @@ export const DisplayCard: React.FC<{
             </div>
           </div>
         </div>
+
+        {person.roles.includes(Role.APPLICANT) && person.personId && (
+          <PartyAssetsSection
+            partyId={person.personId}
+            name={`${person.firstName ?? ''} ${person.lastName ?? ''}`.trim()}
+          />
+        )}
 
         {isEditable && !isErrandReadOnly(errand) && (
           <div className="flex flex-col sm:flex-row gap-[1rem] mb-10">

@@ -54,8 +54,9 @@ export const NotificationsWrapper: React.FC<NotificationsWrapperProps> = ({
     <>
       {show && !isMaxMediumDevice && (
         <div
+          onClick={() => setShow(false)}
           className={cx(
-            'fixed top-0 bottom-0 h-full bg-primitives-overlay-darken-6 transition-opacity duration-150 z-[10]',
+            'fixed top-0 bottom-0 h-full bg-primitives-overlay-darken-6 transition-opacity duration-150 z-[10] cursor-pointer',
             overlayClass
           )}
         />
