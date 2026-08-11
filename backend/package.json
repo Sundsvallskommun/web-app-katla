@@ -31,6 +31,7 @@
     "envalid": "^8.0.0",
     "express": "^4.18.2",
     "express-session": "^1.18.2",
+    "form-data": "^4.0.5",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.2",

@@ -1,9 +1,10 @@
-import { execFile } from 'child_process';
-import { promisify } from 'node:util';
-import path from 'path';
 import fs from 'node:fs';
+import { promisify } from 'node:util';
 
-import { APIS, API_BASE_URL } from './config/index';
+import { execFile } from 'child_process';
+import path from 'path';
+
+import { API_BASE_URL, APIS } from './config/index';
 
 // `execFile` is callback-based and returns a (non-thenable) ChildProcess, so
 // awaiting it directly does NOT wait for completion. Promisify it so the curl
@@ -17,10 +18,35 @@ const PATH_TO_OUTPUT_DIR = path.resolve(process.cwd(), './src/data-contracts');
 type Api = { name: string; version: string };
 
 /**
+ * Resolve the absolute path to the swagger-typescript-api CLI entrypoint by
+ * reading the package's `bin` field, so we never depend on a specific CLI
+ * filename that can change between versions.
+ *
+ * The package's `exports` map forbids importing `./package.json` directly, so
+ * we resolve its main entry, walk up to the package root, and read
+ * `package.json` from disk (a plain `fs` read isn't subject to `exports`).
+ */
+const resolveGeneratorCli = (): string => {
+  const mainEntry = require.resolve('swagger-typescript-api');
+
+  let packageDir = path.dirname(mainEntry);
+  while (!fs.existsSync(path.join(packageDir, 'package.json'))) {
+    const parentDir = path.dirname(packageDir);
+    if (parentDir === packageDir) {
+      throw new Error('Could not locate the swagger-typescript-api package root');
+    }
+    packageDir = parentDir;
+  }
+
+  const pkg = JSON.parse(fs.readFileSync(path.join(packageDir, 'package.json'), 'utf8')) as { bin: Record<string, string> };
+  return path.resolve(packageDir, pkg.bin['swagger-typescript-api']);
+};
+
+/**
  * Download the OpenAPI spec for a single API and generate its data contracts.
  * Download and generation are sequenced so the generator never reads a
- * half-written (truncated) spec. Specs are stored as YAML because some upstream
- * APIs return YAML even from their `/api-docs` endpoint.
+ * half-written (truncated) spec. The downloaded spec is deleted afterwards so
+ * it never lingers next to the generated contracts.
  */
 const generateForApi = async ({ name, version }: Api): Promise<void> => {
   const outputDir = `${PATH_TO_OUTPUT_DIR}/${name}`;
@@ -29,23 +55,28 @@ const generateForApi = async ({ name, version }: Api): Promise<void> => {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  try {
-    const specPath = `${outputDir}/swagger.yaml`;
+  const specPath = `${outputDir}/swagger.json`;
 
+  try {
     // `--fail` makes curl exit non-zero on HTTP errors instead of writing an
     // error page to disk and having the generator choke on it later.
-    await execFileAsync('curl', [
-      '--fail',
-      '--silent',
-      '--show-error',
-      '-o',
-      specPath,
-      `${API_BASE_URL}/${name}/${version}/api-docs`,
-    ]);
+    await execFileAsync('curl', ['--fail', '--silent', '--show-error', '-o', specPath, `${API_BASE_URL}/${name}/${version}/api-docs`]);
     console.log(`- ${name} ${version}`);
 
-    const { stdout, stderr } = await execFileAsync('npx', [
-      'swagger-typescript-api',
+    // Run the generator's JS entrypoint directly with the current Node binary
+    // instead of going through `npx`. On Windows `npx` is a `.cmd` shim that
+    // `execFile` can't spawn without a shell, and recent Node refuses to spawn
+    // `.cmd`/`.bat` without `shell: true` for security. Invoking the CLI script
+    // via `process.execPath` is fully cross-platform and keeps `shell: false`.
+    //
+    // Resolve the CLI path from the package's `bin` field rather than
+    // hardcoding a filename: the generator has shipped its entrypoint under
+    // different names across versions (`cli.js`/`cli.mjs`/`cli.cjs`), so a
+    // hardcoded path breaks on version bumps.
+    const generatorCli = resolveGeneratorCli();
+
+    const { stdout, stderr } = await execFileAsync(process.execPath, [
+      generatorCli,
       'generate',
       '--path',
       specPath,
@@ -59,7 +90,12 @@ const generateForApi = async ({ name, version }: Api): Promise<void> => {
     if (stdout) console.log(`Data-contract-generator: ${stdout}`);
     if (stderr) console.log(`stderr: ${stderr}`);
   } catch (error) {
-    console.log(`error (${name} ${version}): ${error.message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`error (${name} ${version}): ${message}`);
+  } finally {
+    // Remove the downloaded spec so it doesn't pollute the tree (it would
+    // otherwise be picked up by tsc) — runs even if generation failed.
+    fs.rmSync(specPath, { force: true });
   }
 };
 
