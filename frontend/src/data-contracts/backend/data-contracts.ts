@@ -45,6 +45,7 @@ export interface Attachment {
   extension: string;
   mimeType: string;
   file?: string;
+  hash?: string;
   version?: number;
   created?: string;
   updated?: string;

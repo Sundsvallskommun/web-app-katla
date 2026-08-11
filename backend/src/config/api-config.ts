@@ -10,7 +10,7 @@ export const APIS = [
   },
   {
     name: 'case-data',
-    version: '12.4',
+    version: '13.0',
   },
   {
     name: 'employee',

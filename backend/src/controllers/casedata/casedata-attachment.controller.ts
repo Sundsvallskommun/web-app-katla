@@ -9,8 +9,9 @@ import { validateRequestBody } from '@/utils/validate';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import authMiddleware from '@middlewares/auth.middleware';
 import ApiService from '@services/api.service';
+import FormData from 'form-data';
 
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Req, Res, UploadedFiles, UseBefore } from 'routing-controllers';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req, Res, UploadedFiles, UseBefore } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 
 interface ResponseData {
@@ -37,21 +38,43 @@ export class CaseDataAttachmentController {
     await validateRequestBody(CreateAttachmentDto, attachmentData);
     const baseURL = apiURL(this.SERVICE);
 
+    if (!files || files.length === 0) {
+      throw 'No file found. Cannot create attachment without a file.';
+    }
+
     const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/attachments`;
-    const data: CreateAttachmentDto = {
-      file: files[0].buffer.toString('base64'),
+
+    // Casedata v13 stores attachments as binary, so the attachment is now created
+    // with multipart/form-data: a JSON `attachment` part holding the metadata and a
+    // binary `file` part holding the raw content (previously a base64 `file` field
+    // on a JSON body).
+    const fileName = `${attachmentData.name}.${attachmentData.extension}`;
+    const metadata = {
       category: attachmentData.category,
+      name: fileName,
+      note: attachmentData.note,
       extension: attachmentData.extension,
       mimeType: attachmentData.mimeType,
-      name: attachmentData.name + "." + attachmentData.extension,
-      note: attachmentData.note,
       errandNumber: attachmentData.errandNumber,
       channel: AttachmentChannelEnum.ESERVICE,
     };
-    const response = await this.apiService.post<ErrandDTO, CreateAttachmentDto>({ url, baseURL, data }, req.user).catch(e => {
-      logger.error('Attachment post error:', e);
-      throw e;
-    });
+
+    const form = new FormData();
+    form.append('file', files[0].buffer, { filename: fileName, contentType: attachmentData.mimeType });
+    form.append('attachment', JSON.stringify(metadata), { contentType: 'application/json' });
+
+    // Set the multipart Content-Type (including the boundary) under the capitalized
+    // `Content-Type` key: ApiService's request interceptor merges its default
+    // `Content-Type: application/json` by that exact key, so using form.getHeaders()'s
+    // lowercase `content-type` would leave the JSON default in place and drop the
+    // boundary. Setting the capitalized key makes the multipart type win.
+    const contentType = form.getHeaders()['content-type'];
+    const response = await this.apiService
+      .post<ErrandDTO, FormData>({ url, baseURL, data: form, headers: { 'Content-Type': contentType } }, req.user)
+      .catch(e => {
+        logger.error('Attachment post error:', e);
+        throw e;
+      });
     return { data: response.data, message: `Attachment created on errand ${attachmentData.errandNumber}` };
   }
 
@@ -74,40 +97,8 @@ export class CaseDataAttachmentController {
     return { data: 'ok', message: 'success' } as ResponseData;
   }
 
-  @Put('/casedata/:municipalityId/errands/:errandId/attachments/:id')
-  @OpenAPI({ summary: 'Save a modified existing attachment' })
-  @UseBefore(authMiddleware)
-  async putAttachment(
-    @Req() req: RequestWithUser,
-    @Param('errandId') errandId: number,
-    @Param('municipalityId') municipalityId: string,
-    @Param('id') attachmentId: number,
-    @UploadedFiles('files', { options: fileUploadOptions, required: false }) files: Express.Multer.File[],
-    @Body() attachmentData: Attachment,
-  ): Promise<ResponseData> {
-    await validateRequestBody(Attachment, attachmentData);
-    if (!attachmentId) {
-      throw 'Id not found. Cannot replace attachment without id.';
-    }
-
-    const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/attachments/${attachmentId}`;
-    const baseURL = apiURL(this.SERVICE);
-    const data: Attachment = {
-      id: attachmentId,
-      file: files[0].buffer.toString('base64'),
-      extraParameters: {},
-      category: attachmentData.category,
-      extension: attachmentData.extension,
-      mimeType: attachmentData.mimeType,
-      name: attachmentData.name,
-      note: attachmentData.note,
-    };
-    const res = await this.apiService.put<any, Attachment>({ url, baseURL, data }, req.user);
-    return { data: 'ok', message: 'success' } as ResponseData;
-  }
-
   @Get('/casedata/:municipalityId/errands/:errandId/attachments/:id')
-  @OpenAPI({ summary: 'Return an attachment by id' })
+  @OpenAPI({ summary: 'Return an attachment file content by id' })
   @UseBefore(authMiddleware)
   async attachment(
     @Req() req: RequestWithUser,
@@ -118,8 +109,12 @@ export class CaseDataAttachmentController {
   ): Promise<ResponseData> {
     const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/attachments/${id}`;
     const baseURL = apiURL(this.SERVICE);
-    const res = await this.apiService.get<Attachment[]>({ url, baseURL }, req.user);
-    return { data: res.data, message: 'success' } as ResponseData;
+    // Casedata v13 streams the raw binary content from this endpoint (the metadata
+    // list no longer carries a base64 `file`). Fetch it as an arraybuffer and hand
+    // the client a base64 string, mirroring the conversation-attachment download.
+    const res = await this.apiService.get<ArrayBuffer>({ url, baseURL, responseType: 'arraybuffer' }, req.user);
+    const b64 = Buffer.from(res.data).toString('base64');
+    return { data: b64, message: 'success' } as ResponseData;
   }
 
   @Get('/casedata/:municipalityId/errand/:errandId/attachments')

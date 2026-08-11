@@ -9,7 +9,10 @@ export interface Attachment {
   category: string;
   note: string;
   extension: string;
-  file: string;
+  /** Only set locally for new uploads; Casedata v13 no longer returns file content on fetched attachments. */
+  file?: string;
+  /** SHA-256 hash (hex encoded) of the attachment's raw content, returned by Casedata v13. */
+  hash?: string;
   extraParameters?: GenericExtraParameters;
   mimeType: string;
 }
