@@ -119,7 +119,12 @@ export interface JsonNode {
   null?: boolean;
   object?: boolean;
   float?: boolean;
-  binary?: boolean;
+  valueNode?: boolean;
+  container?: boolean;
+  missingNode?: boolean;
+  nodeType?: JsonNodeNodeTypeEnum;
+  integralNumber?: boolean;
+  pojo?: boolean;
   floatingPointNumber?: boolean;
   short?: boolean;
   int?: boolean;
@@ -129,12 +134,7 @@ export interface JsonNode {
   bigInteger?: boolean;
   /** @deprecated */
   textual?: boolean;
-  nodeType?: JsonNodeNodeTypeEnum;
-  valueNode?: boolean;
-  container?: boolean;
-  missingNode?: boolean;
-  pojo?: boolean;
-  integralNumber?: boolean;
+  binary?: boolean;
   string?: boolean;
   boolean?: boolean;
   number?: boolean;

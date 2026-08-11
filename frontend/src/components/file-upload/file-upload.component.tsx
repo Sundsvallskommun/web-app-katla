@@ -1,6 +1,12 @@
 import { AppContext } from '@contexts/app-context-interface';
-import { deleteAttachment, editAttachment, FTAttachmentLabels } from '@services/casedata-attachment-service';
-import { CustomOnChangeEventUploadFile, FileUpload, UploadFile, useConfirm, useSnackbar } from '@sk-web-gui/react';
+import {
+  deleteAttachment,
+  downloadAttachment,
+  editAttachment,
+  FTAttachmentLabels,
+} from '@services/casedata-attachment-service';
+import LucideIcon from '@sk-web-gui/lucide-icon';
+import { Button, CustomOnChangeEventUploadFile, FileUpload, UploadFile, useConfirm, useSnackbar } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import { useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -47,6 +53,22 @@ const FileUploadComponent: React.FC = () => {
     setValue('attachments', updatedFiles);
   };
 
+  const handleDownloadFile = async (file: UploadFile) => {
+    if (!file.id) return;
+    const errandIdNum = typeof errand.id === 'string' ? Number(errand.id) : errand.id;
+    const fileName = `${file.meta.name}.${file.meta.ending}`;
+    try {
+      await downloadAttachment(municipalityId, errandIdNum, file.id, fileName, file.file?.type);
+    } catch {
+      toastMessage({
+        position: 'bottom',
+        closeable: false,
+        message: 'Kunde inte hämta bilagan',
+        status: 'error',
+      });
+    }
+  };
+
   const handleOnChangeName = (file: UploadFile) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFiles = files.map((f) => (f === file ? { ...f, meta: { ...f.meta, name: e.target.value } } : f));
     setValue('attachments', updatedFiles);
@@ -70,7 +92,7 @@ const FileUploadComponent: React.FC = () => {
           </div>
         </div>
         <div className="py-[1rem]">
-          <FileUpload.List>
+          <FileUpload.List iconProps={{ showPreview: false }}>
             {files.map((file, i) => (
               <FileUpload.ListItem
                 file={file}
@@ -90,6 +112,18 @@ const FileUploadComponent: React.FC = () => {
                   },
                 }}
                 actionsProps={{
+                  extraActions:
+                    file.id && editIndex !== i ?
+                      <Button
+                        iconButton
+                        variant="tertiary"
+                        size="sm"
+                        aria-label="Ladda ner bilaga"
+                        onClick={() => handleDownloadFile(file)}
+                      >
+                        <LucideIcon name="download" />
+                      </Button>
+                    : undefined,
                   showEdit: true,
                   showEditSave: editIndex === i,
                   showEditCancel: editIndex === i,

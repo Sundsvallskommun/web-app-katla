@@ -1,7 +1,6 @@
 import { Attachment } from '@interfaces/attachment';
 import { ApiResponse, apiService } from '@services/api-service';
 import { UploadFile } from '@sk-web-gui/react';
-import { toBase64 } from '@utils/toBase64';
 
 export const MAX_FILE_SIZE_MB = 50;
 
@@ -71,14 +70,11 @@ export const getAttachmentLabel = (attachment: Attachment) =>
 
 export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFile[] => {
   return attachments.map((attachment) => {
-    const binaryData = atob(attachment.file);
-    const byteArray = new Uint8Array(binaryData.length);
-    for (let i = 0; i < binaryData.length; i++) {
-      byteArray[i] = binaryData.charCodeAt(i);
-    }
-    const blob = new Blob([byteArray], { type: attachment.mimeType });
-
-    const file = new File([blob], attachment.name + '.' + (attachment.extension || ''), { type: attachment.mimeType });
+    // Casedata v13 no longer returns the file content in the attachment list (only
+    // metadata + a SHA-256 hash). The list widget only needs metadata, so we build an
+    // empty File that carries the name/type. The raw bytes are fetched on demand via
+    // downloadAttachment when the user opens/downloads a specific attachment.
+    const file = new File([], attachment.name + '.' + (attachment.extension || ''), { type: attachment.mimeType });
 
     const nameWithoutExtension = attachment.name.replace(/\.[^/.]+$/, '');
 
@@ -90,6 +86,7 @@ export const mapAttachmentsToUploadFiles = (attachments: Attachment[]): UploadFi
         ending: attachment.extension,
         category: attachment.category,
         note: attachment.note,
+        created: attachment.created,
         ...attachment.extraParameters,
       },
     };
@@ -148,31 +145,21 @@ export const sendAttachments = (
       throw new Error('TYPE_MISSING');
     }
 
-    const fileData = await toBase64(fileItem);
-
     const extension = fileItem.name.split('.').pop() || '';
     const nameWithoutExtension =
       attachment.attachmentName ?
         attachment.attachmentName.replace(/\.[^/.]+$/, '')
       : fileItem.name.replace(/\.[^/.]+$/, '');
+    const mimeType = extension === 'msg' ? 'application/vnd.ms-outlook' : fileItem.type;
 
-    const obj: Attachment = {
-      category: attachment.type,
-      name: nameWithoutExtension,
-      note: '',
-      extension: extension,
-      mimeType: extension === 'msg' ? 'application/vnd.ms-outlook' : fileItem.type,
-      file: fileData,
-    };
-    const buf = Buffer.from(obj.file, 'base64');
-    const blob = new Blob([buf], { type: obj.mimeType });
-
+    // Send the raw file directly as multipart; the backend forwards it to Casedata v13
+    // as binary. No base64 round-trip is needed.
     const formData = new FormData();
-    formData.append('files', blob, fileItem.name);
-    formData.append('category', obj.category);
-    formData.append('mimeType', obj.mimeType);
-    formData.append('extension', obj.extension);
-    formData.append('name', obj.name);
+    formData.append('files', fileItem, fileItem.name);
+    formData.append('category', attachment.type);
+    formData.append('mimeType', mimeType);
+    formData.append('extension', extension);
+    formData.append('name', nameWithoutExtension);
     formData.append('note', '');
     formData.append('errandNumber', errandNumber);
 
@@ -183,7 +170,7 @@ export const sendAttachments = (
         })
         .then((res) => res)
         .catch((e) => {
-          console.error('Something went wrong when creating attachment ', obj.category);
+          console.error('Something went wrong when creating attachment ', attachment.type);
           throw e;
         });
 
@@ -211,23 +198,50 @@ export const deleteAttachment = (municipalityId: string, errandId: number, attac
     });
 };
 
+// Fetches the raw file content of a single attachment. Casedata v13 streams the
+// binary content, which the backend re-encodes to a base64 string, so `data` holds
+// the base64-encoded file content (not attachment metadata).
 export const fetchAttachment: (
   municipalityId: string,
   errandId: number,
   attachmentId: string
-) => Promise<ApiResponse<Attachment>> = (municipalityId, errandId, attachmentId) => {
+) => Promise<ApiResponse<string>> = (municipalityId, errandId, attachmentId) => {
   if (!attachmentId) {
     console.error('No attachment id found, cannot fetch. Returning.');
   }
 
   const url = `casedata/${municipalityId}/errands/${errandId}/attachments/${attachmentId}`;
   return apiService
-    .get<ApiResponse<Attachment>>(url)
+    .get<ApiResponse<string>>(url)
     .then((res) => res.data)
     .catch((e) => {
       console.error('Something went wrong when fetching attachment: ', attachmentId);
       throw e;
     });
+};
+
+// Downloads a single attachment's content on demand: fetches the base64 content and
+// triggers a browser download via a data: URI (mirrors the conversation-attachment
+// download in rendered-message.component.tsx).
+export const downloadAttachment = async (
+  municipalityId: string,
+  errandId: number,
+  attachmentId: string,
+  fileName: string,
+  mimeType: string
+): Promise<void> => {
+  const res = await fetchAttachment(municipalityId, errandId, attachmentId);
+  const base64 = res.data;
+  if (!base64) {
+    throw new Error('Attachment content is empty');
+  }
+  const uri = `data:${mimeType || 'application/octet-stream'};base64,${base64}`;
+  const link = document.createElement('a');
+  link.href = uri;
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 export const fetchErrandAttachments: (
