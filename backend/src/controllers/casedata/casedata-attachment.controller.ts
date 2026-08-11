@@ -1,6 +1,7 @@
 import { CASEDATA_NAMESPACE } from '@/config';
 import { apiServiceName } from '@/config/api-config';
 import { AttachmentChannelEnum, Errand as ErrandDTO } from '@/data-contracts/case-data/data-contracts';
+import { HttpException } from '@/exceptions/HttpException';
 import { Attachment, CreateAttachmentDto } from '@/interfaces/attachment.interface';
 import { fileUploadOptions } from '@/utils/fileUploadOptions';
 import { logger } from '@/utils/logger';
@@ -39,7 +40,7 @@ export class CaseDataAttachmentController {
     const baseURL = apiURL(this.SERVICE);
 
     if (!files || files.length === 0) {
-      throw 'No file found. Cannot create attachment without a file.';
+      throw new HttpException(400, 'No file found. Cannot create attachment without a file.');
     }
 
     const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/attachments`;
@@ -89,7 +90,7 @@ export class CaseDataAttachmentController {
     @Body() attachmentData: Partial<Attachment>,
   ): Promise<ResponseData> {
     if (!attachmentId) {
-      throw 'Id not found. Cannot patch attachment without id.';
+      throw new HttpException(400, 'Id not found. Cannot patch attachment without id.');
     }
     const url = `${municipalityId}/${CASEDATA_NAMESPACE}/errands/${errandId}/attachments/${attachmentId}`;
     const baseURL = apiURL(this.SERVICE);
