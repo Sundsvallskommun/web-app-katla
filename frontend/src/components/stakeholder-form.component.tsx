@@ -34,6 +34,7 @@ export const StakeholderFormModal: React.FC<{
       zip: '',
       city: '',
       roles: [roles[0]],
+      newRole: roles[0],
     },
   });
 
@@ -45,6 +46,7 @@ export const StakeholderFormModal: React.FC<{
 
   const selectedRole = watch('roles')?.[0];
   const isOwner = selectedRole === Role.APPLICANT;
+  const isApplicantForm = roles.length === 1 && roles[0] === Role.APPLICANT;
 
   return (
     <Modal
@@ -134,31 +136,33 @@ export const StakeholderFormModal: React.FC<{
           </div>
         </div>
 
-        <FormControl className="w-full" required>
-          <FormLabel>Roll</FormLabel>
-          <Select
-            data-cy="modal-stakeholder-role-select"
-            className="w-full"
-            invalid={!!errors.roles}
-            value={watch('roles')?.[0] ?? ''}
-            onChange={(e) => {
-              const value = e.target.value as Role;
-              setValue('roles', value ? [value] : [], {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-              setValue('newRole', value);
-            }}
-          >
-            {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
-            {roles.map((role) => (
-              <Select.Option key={role} value={role}>
-                {RoleDisplayNames[role]}
-              </Select.Option>
-            ))}
-          </Select>
-          {errors.roles && <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>}
-        </FormControl>
+        {!isApplicantForm && (
+          <FormControl className="w-full" required>
+            <FormLabel>Roll</FormLabel>
+            <Select
+              data-cy="modal-stakeholder-role-select"
+              className="w-full"
+              invalid={!!errors.roles}
+              value={watch('roles')?.[0] ?? ''}
+              onChange={(e) => {
+                const value = e.target.value as Role;
+                setValue('roles', value ? [value] : [], {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                setValue('newRole', value);
+              }}
+            >
+              {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
+              {roles.map((role) => (
+                <Select.Option key={role} value={role}>
+                  {RoleDisplayNames[role]}
+                </Select.Option>
+              ))}
+            </Select>
+            {errors.roles && <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>}
+          </FormControl>
+        )}
       </Modal.Content>
 
       <Modal.Footer>
