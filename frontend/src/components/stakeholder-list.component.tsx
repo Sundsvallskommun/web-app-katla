@@ -72,7 +72,8 @@ export const StakeholderList: React.FC<{
             const normalizedData = {
               personalNumber,
               ...res,
-              roles: roles.length === 1 ? [roles[0]] : [],
+              roles: isApplicantList ? [Role.APPLICANT] : [],
+              newRole: isApplicantList ? Role.APPLICANT : undefined,
               stakeholderType: 'PERSON' as StakeholderType,
             };
             reset(normalizedData);
@@ -204,38 +205,40 @@ export const StakeholderList: React.FC<{
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-8">
-                    <div className="flex flex-col">
-                      <FormLabel>Personens roll*</FormLabel>
-                      <Select
-                        data-cy="stakeholder-role-select"
-                        className="w-full"
-                        value={watch('roles')?.[0] ?? ''}
-                        onChange={(e) => {
-                          const selected = e.target.value;
-                          if (selected) {
-                            setValue('roles', [selected as Role], { shouldDirty: true });
-                            setValue('newRole', selected as Role);
-                          } else {
-                            setValue('roles', [], { shouldDirty: true });
-                          }
-                        }}
-                      >
-                        {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
-                        {roles
-                          .sort((a, b) => RoleDisplayNames[a].localeCompare(RoleDisplayNames[b]))
-                          .map((role) => (
-                            <Select.Option key={role} value={role}>
-                              {RoleDisplayNames[role]}
-                            </Select.Option>
-                          ))}
-                      </Select>
+                  {!isApplicantList && (
+                    <div className="flex flex-col gap-8">
+                      <div className="flex flex-col">
+                        <FormLabel>Personens roll*</FormLabel>
+                        <Select
+                          data-cy="stakeholder-role-select"
+                          className="w-full"
+                          value={watch('roles')?.[0] ?? ''}
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            if (selected) {
+                              setValue('roles', [selected as Role], { shouldDirty: true });
+                              setValue('newRole', selected as Role);
+                            } else {
+                              setValue('roles', [], { shouldDirty: true });
+                            }
+                          }}
+                        >
+                          {roles.length > 1 && <Select.Option value="">Välj roll</Select.Option>}
+                          {roles
+                            .sort((a, b) => RoleDisplayNames[a].localeCompare(RoleDisplayNames[b]))
+                            .map((role) => (
+                              <Select.Option key={role} value={role}>
+                                {RoleDisplayNames[role]}
+                              </Select.Option>
+                            ))}
+                        </Select>
 
-                      {errors.roles && (
-                        <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>
-                      )}
+                        {errors.roles && (
+                          <FormErrorMessage className="text-error">{errors.roles.message}</FormErrorMessage>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="py-10">
                     <Button
                       data-cy="add-stakeholder-button"
